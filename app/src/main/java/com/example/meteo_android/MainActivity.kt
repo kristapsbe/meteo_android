@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
+import java.util.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,21 +34,26 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting(name = "Sam", from = "Emma")
+                    Greeting(bday = this.greet(), name = "Sam", from = "Emma")
                 }
             }
         }
     }
+
+    private fun greet(): String {
+        val firstWord = if (Random().nextBoolean()) "Birthday" else "Bday"
+        return firstWord
+    }
 }
 
 @Composable
-fun Greeting(name: String, from: String, modifier: Modifier = Modifier) {
+fun Greeting(bday: String, name: String, from: String, modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Center,
         modifier = modifier.padding(8.dp)
     ) {
         Text(
-            text = "Happy Birthday $name!",
+            text = "Happy $bday $name!",
             fontSize = 100.sp,
             lineHeight = 116.sp,
             textAlign = TextAlign.Center
@@ -64,6 +70,6 @@ fun Greeting(name: String, from: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     Meteo_androidTheme {
-        Greeting("Joe", "Chris")
+        Greeting("Birthday", "Joe", "Chris")
     }
 }
