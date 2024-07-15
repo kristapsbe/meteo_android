@@ -1,6 +1,7 @@
 package com.example.meteo_android
 
 import android.os.Bundle
+import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -34,14 +35,33 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting(bday = this.greet(), name = "Sam", from = "Emma")
+                    Greeting(bday = "Cheeseday", name = "Clam", from = "Emma")
                 }
             }
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        setContent {
+            Meteo_androidTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Greeting(bday = this.greet(), name = this.name(), from = "Emma")
+                }
+            }
+        }
+        return super.onTouchEvent(event)
+    }
+
     private fun greet(): String {
         val firstWord = if (Random().nextBoolean()) "Birthday" else "Bday"
+        return firstWord
+    }
+
+    private fun name(): String {
+        val firstWord = if (Random().nextBoolean()) "Sam" else "Bam"
         return firstWord
     }
 }
