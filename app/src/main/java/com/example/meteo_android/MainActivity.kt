@@ -1,6 +1,7 @@
 package com.example.meteo_android
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,6 +29,7 @@ import java.util.Random
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContent {
             Meteo_androidTheme {
@@ -41,18 +43,36 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+
         setContent {
             Meteo_androidTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting(bday = this.greet(), name = this.name(), from = "Emma")
+                    val greet = greet();
+                    Greeting(bday = "OUE $greet", name = this.name(), from = "Emma")
                 }
             }
         }
-        return super.onTouchEvent(event)
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val ote = super.onTouchEvent(event)
+
+        setContent {
+            Meteo_androidTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Greeting(bday = this.greet(), name = this.name(), from = "Emma $ote")
+                }
+            }
+        }
+        return ote
     }
 
     private fun greet(): String {
