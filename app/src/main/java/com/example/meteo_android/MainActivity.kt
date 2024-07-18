@@ -8,6 +8,7 @@ import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -105,13 +107,17 @@ class MainActivity : ComponentActivity() {
 fun Greeting(bday: String, name: String, from: String, modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Center,
-        modifier = modifier.padding(8.dp)
+        modifier = modifier
+            .padding(8.dp)
+            .background(Color.Red)
     ) {
         Text(
             text = "Happy $bday $name!",
             fontSize = 100.sp,
             lineHeight = 116.sp,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .background(Color.Green)
         )
         Text(
             text = "from $from",
@@ -119,6 +125,7 @@ fun Greeting(bday: String, name: String, from: String, modifier: Modifier = Modi
             modifier = Modifier
                 .padding(16.dp)
                 .align(alignment = Alignment.End)
+                .background(Color.Yellow)
         )
     }
 }
