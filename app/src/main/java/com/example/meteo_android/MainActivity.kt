@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -111,22 +112,92 @@ fun Greeting(bday: String, name: String, from: String, modifier: Modifier = Modi
             .padding(8.dp)
             .background(Color.Red)
     ) {
-        Text(
-            text = "Happy $bday $name!",
-            fontSize = 100.sp,
-            lineHeight = 116.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .background(Color.Green)
-        )
-        Text(
-            text = "from $from",
-            fontSize = 36.sp,
-            modifier = Modifier
-                .padding(16.dp)
-                .align(alignment = Alignment.End)
-                .background(Color.Yellow)
-        )
+        Row {
+            Text(
+                text = "Happy $bday $name!",
+                fontSize = 100.sp,
+                lineHeight = 116.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .background(Color.Green)
+            )
+        }
+        Row {
+            Column {
+                Text(
+                    text = "1c from $from",
+                    fontSize = 36.sp,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(Color.Yellow)
+                )
+            }
+            Column {
+                Text(
+                    text = "2c from $from",
+                    fontSize = 36.sp,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(Color.Yellow)
+                )
+            }
+            Column {
+                Text(
+                    text = "3c from $from",
+                    fontSize = 36.sp,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(Color.Yellow)
+                )
+            }
+        }
+        Row {
+            Row {
+                Text(
+                    text = "1r from $from",
+                    fontSize = 36.sp,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(Color.Yellow)
+                )
+            }
+            Row {
+                Text(
+                    text = "2r from $from",
+                    fontSize = 36.sp,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(Color.Yellow)
+                )
+            }
+            Row {
+                Text(
+                    text = "3r from $from",
+                    fontSize = 36.sp,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(Color.Yellow)
+                )
+            }
+            Row {
+                Text(
+                    text = "4r from $from",
+                    fontSize = 36.sp,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(Color.Yellow)
+                )
+            }
+            Row {
+                Text(
+                    text = "5r from $from",
+                    fontSize = 36.sp,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(Color.Yellow)
+                )
+            }
+        }
     }
 }
 
