@@ -1,3 +1,5 @@
+consume data from https://github.com/kristapsbe/meteo_server
+
 https://stackoverflow.com/questions/5806220/how-to-connect-to-my-http-localhost-web-server-from-android-emulator
 
 basic android use
