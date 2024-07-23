@@ -1,6 +1,5 @@
 package com.example.meteo_android
 
-import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
@@ -9,16 +8,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -45,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting(bday = "Cheeseday", name = "Clam", from = "Emma")
+                    Greeting("Cheeseday")
                 }
             }
         }
@@ -61,7 +59,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val greet = greet();
-                    Greeting(bday = "OUE $greet", name = this.name(), from = "Emma")
+                    Greeting("OUE $greet")
                 }
             }
         }
@@ -86,7 +84,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting(bday = this.greet(), name = this.name(), from = "Emma $apiResponse")
+                    Greeting(apiResponse)
                 }
             }
         }
@@ -97,103 +95,120 @@ class MainActivity : ComponentActivity() {
         val firstWord = if (Random().nextBoolean()) "Birthday" else "Bday"
         return firstWord
     }
-
-    private fun name(): String {
-        val firstWord = if (Random().nextBoolean()) "Sam" else "Bam"
-        return firstWord
-    }
 }
 
 @Composable
-fun Greeting(bday: String, name: String, from: String, modifier: Modifier = Modifier) {
+fun Greeting(text: String, modifier: Modifier = Modifier) {
     Column(
-        verticalArrangement = Arrangement.Center,
         modifier = modifier
             .padding(8.dp)
             .background(Color.Red)
     ) {
-        Row {
+        Row(
+            modifier = modifier
+                .padding(8.dp)
+                .background(Color.Magenta)
+        ) {
             Text(
-                text = "Happy $bday $name!",
-                fontSize = 100.sp,
-                lineHeight = 116.sp,
+                text = "19°",
+                fontSize = 150.sp,
+                lineHeight = 300.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
+                    .fillMaxWidth(1.0f)
                     .background(Color.Green)
             )
         }
         Row {
-            Column {
-                Text(
-                    text = "1c from $from",
-                    fontSize = 36.sp,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .background(Color.Yellow)
-                )
-            }
-            Column {
-                Text(
-                    text = "2c from $from",
-                    fontSize = 36.sp,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .background(Color.Yellow)
-                )
-            }
-            Column {
-                Text(
-                    text = "3c from $from",
-                    fontSize = 36.sp,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .background(Color.Yellow)
-                )
-            }
+            Text(
+                text = "24h weather graph",
+                fontSize = 60.sp,
+                lineHeight = 120.sp,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(1.0f)
+                    .background(Color.Yellow)
+            )
         }
-        Row {
+        Column (
+            modifier = modifier
+                .padding(8.dp)
+                .background(Color.Cyan)
+        ) {
             Row {
                 Text(
-                    text = "1r from $from",
-                    fontSize = 36.sp,
+                    text = "1r from $text",
+                    fontSize = 40.sp,
+                    lineHeight = 80.sp,
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(8.dp)
+                        .fillMaxWidth(1.0f)
                         .background(Color.Yellow)
                 )
             }
             Row {
                 Text(
-                    text = "2r from $from",
-                    fontSize = 36.sp,
+                    text = "2r from $text",
+                    fontSize = 40.sp,
+                    lineHeight = 80.sp,
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(8.dp)
+                        .fillMaxWidth(1.0f)
                         .background(Color.Yellow)
                 )
             }
             Row {
                 Text(
-                    text = "3r from $from",
-                    fontSize = 36.sp,
+                    text = "3r from $text",
+                    fontSize = 40.sp,
+                    lineHeight = 80.sp,
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(8.dp)
+                        .fillMaxWidth(1.0f)
                         .background(Color.Yellow)
                 )
             }
             Row {
                 Text(
-                    text = "4r from $from",
-                    fontSize = 36.sp,
+                    text = "4r from $text",
+                    fontSize = 40.sp,
+                    lineHeight = 80.sp,
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(8.dp)
+                        .fillMaxWidth(1.0f)
                         .background(Color.Yellow)
                 )
             }
             Row {
                 Text(
-                    text = "5r from $from",
-                    fontSize = 36.sp,
+                    text = "5r from $text",
+                    fontSize = 40.sp,
+                    lineHeight = 80.sp,
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(8.dp)
+                        .fillMaxWidth(1.0f)
+                        .background(Color.Yellow)
+                )
+            }
+            Row {
+                Text(
+                    text = "6r from $text",
+                    fontSize = 40.sp,
+                    lineHeight = 80.sp,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(1.0f)
+                        .background(Color.Yellow)
+                )
+            }
+            Row {
+                Text(
+                    text = "7r from $text",
+                    fontSize = 40.sp,
+                    lineHeight = 80.sp,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(1.0f)
                         .background(Color.Yellow)
                 )
             }
@@ -205,6 +220,6 @@ fun Greeting(bday: String, name: String, from: String, modifier: Modifier = Modi
 @Composable
 fun GreetingPreview() {
     Meteo_androidTheme {
-        Greeting("Birthday", "Joe", "Chris")
+        Greeting("Birthday")
     }
 }
