@@ -10,8 +10,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -99,7 +101,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(text: String, modifier: Modifier = Modifier) {
-    Column(
+    Column( // TODO: how does scrolling work? - looks like this caps me to a single screen (?)
         modifier = modifier
             .padding(8.dp)
             .background(Color.Red)
