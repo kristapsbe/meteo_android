@@ -26,17 +26,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import java.net.InetAddress
 import java.net.URL
 import java.util.Random
 
 
 class MainActivity : ComponentActivity() {
+    private var apiResponse: String = "NODATA";
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // TODO: this is very bad - adding it as a stopgap while learning
-        val gfgPolicy = ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(gfgPolicy)
 
         enableEdgeToEdge()
         setContent {
@@ -46,6 +48,30 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Greeting("Cheeseday")
+                }
+            }
+        }
+    }
+
+    private suspend fun fetchData() {
+        withContext(Dispatchers.IO) {
+            try {
+                apiResponse = URL("http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10").readText()
+            } catch (e: Exception) {
+                // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
+                println(e)
+                println(e.message)
+                apiResponse = "API ERROR"
+            } finally { }
+        }
+
+        setContent {
+            Meteo_androidTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Greeting(apiResponse)
                 }
             }
         }
@@ -69,26 +95,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         val ote = super.onTouchEvent(event)
-        var apiResponse = "NODATA"
-        try {
-            apiResponse = URL("http://10.0.2.2:8000/api/v1/forecast/cities").readText()
-        } catch (e: Exception) {
-            // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
-            println(e)
-            println(e.message)
-        } finally {
-            // optional finally block
-        }
-
-        setContent {
-            Meteo_androidTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting(apiResponse)
-                }
-            }
+        runBlocking {
+            fetchData()
         }
         return ote
     }
