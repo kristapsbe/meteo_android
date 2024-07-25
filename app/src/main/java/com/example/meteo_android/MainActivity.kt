@@ -29,6 +29,11 @@ import java.net.URL
 import java.util.Random
 
 
+// TODO: look up how to add action for a drag from top 
+// (and if there's a default spinny loading thing)
+// TODO: store both the time of last succesfull download
+// and time of last attempt (probably show last attempt, and have
+// thing that can be clicked to see last success)
 class MainActivity : ComponentActivity() {
     private var apiResponse: String = "NODATA";
 
