@@ -26,7 +26,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.net.URL
-import java.util.Random
 
 
 // TODO: look up how to add action for a drag from top 
@@ -86,8 +85,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val greet = greet();
-                    Greeting("OUE $greet")
+                    Greeting("OUE Bday")
                 }
             }
         }
@@ -99,11 +97,6 @@ class MainActivity : ComponentActivity() {
             fetchData()
         }
         return ote
-    }
-
-    private fun greet(): String {
-        val firstWord = if (Random().nextBoolean()) "Birthday" else "Bday"
-        return firstWord
     }
 }
 
