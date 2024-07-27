@@ -25,10 +25,22 @@ import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.net.URL
 
 
-// TODO: look up how to add action for a drag from top 
+@Serializable
+data class Forecast(
+    val hourly_params: List<List<String>>,
+    val daily_params: List<List<String>>,
+    val cities: List<List<String>>,
+    val hourly_forecast: List<List<String>>,
+    val daily_forecast: List<List<String>>,
+    val last_updated: String
+)
+
+// TODO: look up how to add action for a drag from top
 // (and if there's a default spinny loading thing)
 // TODO: store both the time of last succesfull download
 // and time of last attempt (probably show last attempt, and have
@@ -56,6 +68,9 @@ class MainActivity : ComponentActivity() {
         withContext(Dispatchers.IO) {
             try {
                 apiResponse = URL("http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10").readText()
+
+                val tmp = Json.decodeFromString<Forecast>(apiResponse)
+                println(tmp)
             } catch (e: Exception) {
                 // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                 println(e)
