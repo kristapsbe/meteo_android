@@ -9,3 +9,6 @@ options for charting libs
 https://github.com/AAChartModel/AAChartCore-Kotlin
 https://github.com/Kotlin/kandy
 https://github.com/JetBrains/lets-plot-kotlin
+
+icons
+https://m2.material.io/design/iconography/system-icons.html#design-principles
