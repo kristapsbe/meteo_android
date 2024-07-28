@@ -60,7 +60,7 @@ data class CityForecast(
 // and time of last attempt (probably show last attempt, and have
 // thing that can be clicked to see last success)
 class MainActivity : ComponentActivity() {
-    private var apiResponse: String = "NODATA";
+    private var cityForecast: CityForecast? = null;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Cheeseday")
+                    Greeting(cityForecast)
                 }
             }
         }
@@ -81,15 +81,13 @@ class MainActivity : ComponentActivity() {
     private suspend fun fetchData() {
         withContext(Dispatchers.IO) {
             try {
-                apiResponse = URL("http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10").readText()
-
-                val tmp = Json.decodeFromString<CityForecast>(apiResponse)
-                println(tmp)
+                val response = URL("http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10").readText()
+                cityForecast = Json.decodeFromString<CityForecast>(response)
             } catch (e: Exception) {
                 // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                 println(e)
                 println(e.message)
-                apiResponse = "API ERROR"
+                cityForecast = null
             } finally { }
         }
 
@@ -99,7 +97,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting(apiResponse)
+                    Greeting(cityForecast)
                 }
             }
         }
@@ -114,7 +112,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("OUE Bday")
+                    Greeting(cityForecast)
                 }
             }
         }
@@ -130,7 +128,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(text: String, modifier: Modifier = Modifier) {
+fun Greeting(data: CityForecast?, modifier: Modifier = Modifier) {
+    val cTemp: Double = data?.hourly_forecast?.get(0)?.vals?.get(1) ?: -999.0
+    val dData: List<Forecast> = data?.daily_forecast ?: emptyList()
+
     Column( // TODO: how does scrolling work? - looks like this caps me to a single screen (?)
         modifier = modifier
             .padding(8.dp)
@@ -142,7 +143,7 @@ fun Greeting(text: String, modifier: Modifier = Modifier) {
                 .background(Color.Magenta)
         ) {
             Text(
-                text = "19°",
+                text = "$cTemp°",
                 fontSize = 150.sp,
                 lineHeight = 300.sp,
                 textAlign = TextAlign.Center,
@@ -167,82 +168,21 @@ fun Greeting(text: String, modifier: Modifier = Modifier) {
                 .padding(8.dp)
                 .background(Color.Cyan)
         ) {
-            Row {
-                Text(
-                    text = "1r from $text",
-                    fontSize = 40.sp,
-                    lineHeight = 80.sp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Yellow)
-                )
-            }
-            Row {
-                Text(
-                    text = "2r from $text",
-                    fontSize = 40.sp,
-                    lineHeight = 80.sp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Yellow)
-                )
-            }
-            Row {
-                Text(
-                    text = "3r from $text",
-                    fontSize = 40.sp,
-                    lineHeight = 80.sp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Yellow)
-                )
-            }
-            Row {
-                Text(
-                    text = "4r from $text",
-                    fontSize = 40.sp,
-                    lineHeight = 80.sp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Yellow)
-                )
-            }
-            Row {
-                Text(
-                    text = "5r from $text",
-                    fontSize = 40.sp,
-                    lineHeight = 80.sp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Yellow)
-                )
-            }
-            Row {
-                Text(
-                    text = "6r from $text",
-                    fontSize = 40.sp,
-                    lineHeight = 80.sp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Yellow)
-                )
-            }
-            Row {
-                Text(
-                    text = "7r from $text",
-                    fontSize = 40.sp,
-                    lineHeight = 80.sp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Yellow)
-                )
+            for (d in dData) {
+                val minTemp: Double = d.vals[3]
+                val maxTemp: Double = d.vals[2]
+
+                Row {
+                    Text(
+                        text = "$minTemp° - $maxTemp°",
+                        fontSize = 40.sp,
+                        lineHeight = 80.sp,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth(1.0f)
+                            .background(Color.Yellow)
+                    )
+                }
             }
         }
     }
@@ -252,6 +192,6 @@ fun Greeting(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     Meteo_androidTheme {
-        Greeting("Birthday")
+        Greeting(null)
     }
 }
