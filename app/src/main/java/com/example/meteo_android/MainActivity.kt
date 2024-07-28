@@ -31,12 +31,26 @@ import java.net.URL
 
 
 @Serializable
-data class Forecast(
+data class Forecast(val id: String, val time: String, val vals: List<Double>)
+
+@Serializable
+data class Coord(val lat: Double, val lon: Double)
+
+@Serializable
+data class City(
+    val id: String,
+    val name: String,
+    val type: String,
+    val coords: Coord
+)
+
+@Serializable
+data class CityForecast(
     val hourly_params: List<List<String>>,
     val daily_params: List<List<String>>,
-    val cities: List<List<String>>,
-    val hourly_forecast: List<List<String>>,
-    val daily_forecast: List<List<String>>,
+    val cities: List<City>,
+    val hourly_forecast: List<Forecast>,
+    val daily_forecast: List<Forecast>,
     val last_updated: String
 )
 
@@ -69,7 +83,7 @@ class MainActivity : ComponentActivity() {
             try {
                 apiResponse = URL("http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10").readText()
 
-                val tmp = Json.decodeFromString<Forecast>(apiResponse)
+                val tmp = Json.decodeFromString<CityForecast>(apiResponse)
                 println(tmp)
             } catch (e: Exception) {
                 // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
