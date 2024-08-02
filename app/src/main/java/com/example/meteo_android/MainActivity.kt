@@ -31,18 +31,21 @@ import java.net.URL
 
 
 @Serializable
-data class Forecast(val id: String, val time: String, val vals: List<Double>)
-
-@Serializable
-data class Coord(val lat: Double, val lon: Double)
+data class Coordinate(val lat: Double, val lon: Double)
 
 @Serializable
 data class City(
     val id: String,
     val name: String,
     val type: String,
-    val coords: Coord
+    val coords: Coordinate
 )
+
+@Serializable
+data class Forecast(val id: String, val time: Long, val vals: List<Double>)
+
+@Serializable
+data class Warning(val intensity: List<String>, val regions: List<String>, val type: List<String>)
 
 @Serializable
 data class CityForecast(
@@ -51,6 +54,7 @@ data class CityForecast(
     val cities: List<City>,
     val hourly_forecast: List<Forecast>,
     val daily_forecast: List<Forecast>,
+    val warnings: List<Warning>,
     val last_updated: String
 )
 
@@ -129,7 +133,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(data: CityForecast?, modifier: Modifier = Modifier) {
-    val cTemp: Double = data?.hourly_forecast?.get(0)?.vals?.get(1) ?: -999.0
+    var cTemp: Double = -999.0
+    if ((data?.hourly_forecast?.size ?: 0) > 0) {
+        cTemp = data?.hourly_forecast?.get(0)?.vals?.get(1) ?: -999.0
+    }
     val dData: List<Forecast> = data?.daily_forecast ?: emptyList()
 
     Column( // TODO: how does scrolling work? - looks like this caps me to a single screen (?)
