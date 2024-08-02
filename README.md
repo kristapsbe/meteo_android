@@ -12,3 +12,5 @@ https://github.com/JetBrains/lets-plot-kotlin
 
 icons
 https://m2.material.io/design/iconography/system-icons.html#design-principles
+jetpack compose - helpful docs
+https://developer.android.com/develop/ui/compose/mental-model
