@@ -1,6 +1,7 @@
 package com.example.meteo_android
 
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -66,22 +69,6 @@ data class CityForecast(
 class MainActivity : ComponentActivity() {
     private var cityForecast: CityForecast? = null;
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enableEdgeToEdge()
-        setContent {
-            Meteo_androidTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting(cityForecast)
-                }
-            }
-        }
-    }
-
     private suspend fun fetchData() {
         withContext(Dispatchers.IO) {
             try {
@@ -94,40 +81,24 @@ class MainActivity : ComponentActivity() {
                 cityForecast = null
             } finally { }
         }
-
-        setContent {
-            Meteo_androidTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting(cityForecast)
-                }
-            }
-        }
     }
 
-    override fun onUserInteraction() {
-        super.onUserInteraction()
-
-        setContent {
-            Meteo_androidTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting(cityForecast)
-                }
-            }
-        }
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        val ote = super.onTouchEvent(event)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         runBlocking {
             fetchData()
         }
-        return ote
+        enableEdgeToEdge()
+        setContent {
+            Meteo_androidTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Greeting(cityForecast)
+                }
+            }
+        }
     }
 }
 
@@ -143,6 +114,7 @@ fun Greeting(data: CityForecast?, modifier: Modifier = Modifier) {
         modifier = modifier
             .padding(8.dp)
             .background(Color.Red)
+            .verticalScroll(rememberScrollState())
     ) {
         Row(
             modifier = modifier
@@ -151,7 +123,7 @@ fun Greeting(data: CityForecast?, modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = "$cTemp°",
-                fontSize = 150.sp,
+                fontSize = 100.sp,
                 lineHeight = 300.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -161,7 +133,7 @@ fun Greeting(data: CityForecast?, modifier: Modifier = Modifier) {
         }
         Row {
             Text(
-                text = "24h weather graph",
+                text = "24h weather",
                 fontSize = 60.sp,
                 lineHeight = 120.sp,
                 modifier = Modifier
