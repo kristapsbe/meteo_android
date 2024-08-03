@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting(cityForecast)
+                    AllForecasts(cityForecast)
                 }
             }
         }
@@ -103,13 +103,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(data: CityForecast?, modifier: Modifier = Modifier) {
-    var cTemp: Double = -999.0
-    if ((data?.hourly_forecast?.size ?: 0) > 0) {
-        cTemp = data?.hourly_forecast?.get(0)?.vals?.get(1) ?: -999.0
-    }
-    val dData: List<Forecast> = data?.daily_forecast ?: emptyList()
-
+fun AllForecasts(data: CityForecast?, modifier: Modifier = Modifier) {
     Column( // TODO: how does scrolling work? - looks like this caps me to a single screen (?)
         modifier = modifier
             .padding(8.dp)
@@ -121,15 +115,7 @@ fun Greeting(data: CityForecast?, modifier: Modifier = Modifier) {
                 .padding(8.dp)
                 .background(Color.Magenta)
         ) {
-            Text(
-                text = "$cTemp°",
-                fontSize = 100.sp,
-                lineHeight = 300.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth(1.0f)
-                    .background(Color.Green)
-            )
+            CurrentTemp(data)
         }
         Row {
             Text(
@@ -147,30 +133,47 @@ fun Greeting(data: CityForecast?, modifier: Modifier = Modifier) {
                 .padding(8.dp)
                 .background(Color.Cyan)
         ) {
-            for (d in dData) {
-                val minTemp: Double = d.vals[3]
-                val maxTemp: Double = d.vals[2]
-
-                Row {
-                    Text(
-                        text = "$minTemp° - $maxTemp°",
-                        fontSize = 40.sp,
-                        lineHeight = 80.sp,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(1.0f)
-                            .background(Color.Yellow)
-                    )
-                }
-            }
+            DailyForecasts(data)
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    Meteo_androidTheme {
-        Greeting(null)
+fun CurrentTemp(data: CityForecast?) {
+    var cTemp: Double = -999.0
+    if ((data?.hourly_forecast?.size ?: 0) > 0) {
+        cTemp = data?.hourly_forecast?.get(0)?.vals?.get(1) ?: -999.0
+    }
+
+    Text(
+        text = "$cTemp°",
+        fontSize = 100.sp,
+        lineHeight = 300.sp,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth(1.0f)
+            .background(Color.Green)
+    )
+}
+
+@Composable
+fun DailyForecasts(data: CityForecast?) {
+    val dData: List<Forecast> = data?.daily_forecast ?: emptyList()
+
+    for (d in dData) {
+        val minTemp: Double = d.vals[3]
+        val maxTemp: Double = d.vals[2]
+
+        Row {
+            Text(
+                text = "$minTemp° - $maxTemp°",
+                fontSize = 40.sp,
+                lineHeight = 80.sp,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(1.0f)
+                    .background(Color.Yellow)
+            )
+        }
     }
 }
