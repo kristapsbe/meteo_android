@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
@@ -142,7 +141,7 @@ fun AllForecasts(data: CityForecast?, modifier: Modifier = Modifier) {
 fun CurrentTemp(data: CityForecast?) {
     var cTemp: Double = -999.0
     if ((data?.hourly_forecast?.size ?: 0) > 0) {
-        cTemp = data?.hourly_forecast?.get(0)?.vals?.get(1) ?: -999.0
+        cTemp = data?.hourly_forecast?.get(0)?.vals?.get(1) ?: cTemp
     }
 
     Text(
