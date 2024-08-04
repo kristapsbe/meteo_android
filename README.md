@@ -17,3 +17,6 @@ https://developer.android.com/develop/ui/compose/mental-model
 
 periodic work
 https://developer.android.com/topic/libraries/architecture/workmanager
+
+resources
+https://developer.android.com/guide/topics/resources/providing-resources

@@ -6,13 +6,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,11 +25,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
@@ -105,9 +112,11 @@ class MainActivity : ComponentActivity() {
             withContext(Dispatchers.IO) {
                 try {
                     val randTemp = String.format("%.1f", Random.nextInt(60)-30+Random.nextDouble())
-                    val response =
-                    //    URL("http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10").readText()
-                        URL("http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp").readText()
+
+                    var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
+                    //urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10"
+
+                    val response = URL(urlString).readText()
                     cityForecast = Json.decodeFromString<CityForecastData>(response)
 
                     var tVal: Double = currentTemp.value.temp
@@ -218,32 +227,41 @@ class MainActivity : ComponentActivity() {
     fun CurrentTemp(modifier: Modifier) {
         val cTemp by currentTemp
 
-        Column(
-            modifier = modifier
-                .background(Color.Magenta)
+        Row(
+            modifier = modifier.height(335.dp)
         ) {
-            Row {
-                Text(
-                    text = "${cTemp.temp}°",
-                    fontSize = 100.sp,
-                    lineHeight = 300.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = modifier
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Green)
-                )
-            }
-            Row {
-                Text(
-                    text = "${cTemp.time.dayOfWeek}, ${formatDateTime(cTemp.time)} (${cTemp.city})",
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Right,
-                    modifier = modifier
-                        .fillMaxWidth(1.0f)
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                        .background(Color.Blue)
-                )
+            Box(
+                modifier = with (modifier) {
+                    fillMaxSize().paint(
+                        // Replace with your image id
+                        painterResource(id = R.drawable.blue_skies_cumulus_clouds),
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
+            ) {
+                Column {
+                    Text(
+                        text = "${cTemp.temp}°",
+                        fontSize = 100.sp,
+                        lineHeight = 300.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = modifier
+                            .fillMaxWidth(1.0f)
+                            .alpha(0.5f)
+                            .background(Color.Green)
+                    )
+                    Text(
+                        text = "${cTemp.time.dayOfWeek}, ${formatDateTime(cTemp.time)} (${cTemp.city})",
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Right,
+                        modifier = modifier
+                            .fillMaxWidth(1.0f)
+                            .alpha(0.5f)
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                            .background(Color.Blue)
+                    )
+                }
             }
         }
     }
