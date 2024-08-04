@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.meteo_android"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -69,4 +69,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime)
 }

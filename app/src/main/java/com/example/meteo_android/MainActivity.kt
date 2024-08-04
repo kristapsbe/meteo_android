@@ -35,6 +35,8 @@ import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Month
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.URL
@@ -218,7 +220,7 @@ class MainActivity : ComponentActivity() {
             }
             Row {
                 Text(
-                    text = cTemp.city,
+                    text = "${LocalDate(2024, Month.APRIL, 16).dayOfWeek} (${cTemp.city})",
                     fontSize = 20.sp,
                     color = Color.White,
                     textAlign = TextAlign.Right,
