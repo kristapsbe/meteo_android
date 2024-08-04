@@ -42,32 +42,35 @@ import kotlin.random.Random
 
 
 @Serializable
-data class Coordinate(val lat: Double, val lon: Double)
+data class CoordinateData(val lat: Double, val lon: Double)
 
 @Serializable
-data class City(
+data class CityData(
     val id: String,
     val name: String,
     val type: String,
-    val coords: Coordinate
+    val coords: CoordinateData
 )
 
 @Serializable
-data class Forecast(val id: String, val time: Long, val vals: List<Double>)
+data class ForecastData(val id: String, val time: Long, val vals: List<Double>)
 
 @Serializable
-data class Warning(val intensity: List<String>, val regions: List<String>, val type: List<String>)
+data class WarningData(val intensity: List<String>, val regions: List<String>, val type: List<String>)
 
 @Serializable
-data class CityForecast(
+data class CityForecastData(
     val hourly_params: List<List<String>>,
     val daily_params: List<List<String>>,
-    val cities: List<City>,
-    val hourly_forecast: List<Forecast>,
-    val daily_forecast: List<Forecast>,
-    val warnings: List<Warning>,
+    val cities: List<CityData>,
+    val hourly_forecast: List<ForecastData>,
+    val daily_forecast: List<ForecastData>,
+    val warnings: List<WarningData>,
     val last_updated: String
 )
+
+
+data class CurrentTemp(val temp: Double, val city: String)
 
 // TODO: look up how to add action for a drag from top
 // (and if there's a default spinny loading thing)
@@ -75,11 +78,11 @@ data class CityForecast(
 // and time of last attempt (probably show last attempt, and have
 // thing that can be clicked to see last success)
 class MainActivity : ComponentActivity() {
-    private var cityForecast: CityForecast? = null
+    private var cityForecast: CityForecastData? = null
     private var isLoading: Boolean = false
-    private var wasLastNegative: Int = 0
+    private var wasLastNegative: Boolean = false
 
-    private val currentTemp = mutableStateOf(-999.0)
+    private val currentTemp = mutableStateOf(CurrentTemp(-999.0, "Temp"))
 
     private suspend fun fetchData() {
         if (!isLoading) {
@@ -90,13 +93,23 @@ class MainActivity : ComponentActivity() {
                     val response =
                     //    URL("http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10").readText()
                         URL("http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp").readText()
-                    cityForecast = Json.decodeFromString<CityForecast>(response)
+                    cityForecast = Json.decodeFromString<CityForecastData>(response)
 
-                    var tVal: Double = currentTemp.value
+                    var tVal: Double = currentTemp.value.temp
                     if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
                         tVal = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: tVal
                     }
-                    currentTemp.value = tVal
+                    var cName: String = currentTemp.value.city
+                    if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
+                        val cId = cityForecast?.hourly_forecast?.get(0)?.id ?: ""
+                        for (c in cityForecast?.cities ?: emptyList()) {
+                            if (c.id == cId) {
+                                cName = c.name
+                                break
+                            }
+                        }
+                    }
+                    currentTemp.value = com.example.meteo_android.CurrentTemp(tVal, cName)
                 } catch (e: Exception) {
                     // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                     println(e)
@@ -129,23 +142,17 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun AllForecasts(data: CityForecast?, modifier: Modifier = Modifier) {
-        var offset by remember {
-            mutableStateOf(0f)
-        }
-
+    fun AllForecasts(data: CityForecastData?, modifier: Modifier = Modifier) {
         val scrollState = rememberScrollState()
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    val delay = 10
-                    if ((offset - available.y) < 0 && wasLastNegative < delay) {
-                        if (wasLastNegative >= (delay-1)) {
-                            runBlocking {
-                                fetchData()
-                            }
+                    Log.d("DEBUG", "$available.y ($wasLastNegative)")
+                    if (available.y > 0 && !wasLastNegative) {
+                        runBlocking {
+                            fetchData()
                         }
-                        wasLastNegative++
+                        wasLastNegative = true
                     }
                     return super.onPreScroll(available, source)
                 }
@@ -154,7 +161,7 @@ class MainActivity : ComponentActivity() {
                     consumed: Velocity,
                     available: Velocity
                 ): Velocity {
-                    wasLastNegative = 0
+                    wasLastNegative = false
                     return super.onPostFling(consumed, available)
                 }
             }
@@ -168,13 +175,7 @@ class MainActivity : ComponentActivity() {
                 .background(Color.Red)
                 .verticalScroll(state = scrollState)
         ) {
-            Row(
-                modifier = modifier
-                    .padding(8.dp)
-                    .background(Color.Magenta)
-            ) {
-                CurrentTemp()
-            }
+            CurrentTemp(modifier)
             Row {
                 Text(
                     text = "24h weather",
@@ -197,22 +198,42 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun CurrentTemp() {
+    fun CurrentTemp(modifier: Modifier) {
         val cTemp by currentTemp
-        Text(
-            text = "$cTemp°",
-            fontSize = 100.sp,
-            lineHeight = 300.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth(1.0f)
-                .background(Color.Green)
-        )
+
+        Column(
+            modifier = modifier
+                .background(Color.Magenta)
+        ) {
+            Row {
+                Text(
+                    text = "${cTemp.temp}°",
+                    fontSize = 100.sp,
+                    lineHeight = 300.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = modifier
+                        .fillMaxWidth(1.0f)
+                        .background(Color.Green)
+                )
+            }
+            Row {
+                Text(
+                    text = cTemp.city,
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Right,
+                    modifier = modifier
+                        .fillMaxWidth(1.0f)
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                        .background(Color.Blue)
+                )
+            }
+        }
     }
 
     @Composable
-    fun DailyForecasts(data: CityForecast?) {
-        val dData: List<Forecast> = data?.daily_forecast ?: emptyList()
+    fun DailyForecasts(data: CityForecastData?) {
+        val dData: List<ForecastData> = data?.daily_forecast ?: emptyList()
 
         for (d in dData) {
             val minTemp: Double = d.vals[3]
