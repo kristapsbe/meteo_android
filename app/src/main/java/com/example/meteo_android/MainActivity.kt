@@ -35,8 +35,13 @@ import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.byUnicodePattern
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.URL
@@ -72,7 +77,11 @@ data class CityForecastData(
 )
 
 
-data class CurrentTemp(val temp: Double, val city: String)
+data class CurrentTemp(
+    val temp: Double,
+    val city: String,
+    val time: LocalDateTime
+)
 
 // TODO: look up how to add action for a drag from top
 // (and if there's a default spinny loading thing)
@@ -84,7 +93,11 @@ class MainActivity : ComponentActivity() {
     private var isLoading: Boolean = false
     private var wasLastNegative: Boolean = false
 
-    private val currentTemp = mutableStateOf(CurrentTemp(-999.0, "Temp"))
+    private val currentTemp = mutableStateOf(CurrentTemp(
+        -999.0,
+        "Temp",
+        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    ))
 
     private suspend fun fetchData() {
         if (!isLoading) {
@@ -98,8 +111,17 @@ class MainActivity : ComponentActivity() {
                     cityForecast = Json.decodeFromString<CityForecastData>(response)
 
                     var tVal: Double = currentTemp.value.temp
+                    var time: LocalDateTime = currentTemp.value.time
                     if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
                         tVal = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: tVal
+                        val tmp: String = cityForecast?.hourly_forecast?.get(0)?.time.toString()
+                        time = LocalDateTime(
+                            tmp.substring(0, 4).toInt(),
+                            tmp.substring(4, 6).toInt(),
+                            tmp.substring(6, 8).toInt(),
+                            tmp.substring(8, 10).toInt(),
+                            0, 0, 0
+                        )
                     }
                     var cName: String = currentTemp.value.city
                     if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
@@ -111,7 +133,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
-                    currentTemp.value = com.example.meteo_android.CurrentTemp(tVal, cName)
+                    currentTemp.value = com.example.meteo_android.CurrentTemp(tVal, cName, time)
                 } catch (e: Exception) {
                     // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                     println(e)
@@ -142,6 +164,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun formatDateTime(time: LocalDateTime): String {
+        val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
+        return format.format(time)
+    }
 
     @Composable
     fun AllForecasts(data: CityForecastData?, modifier: Modifier = Modifier) {
@@ -178,17 +204,6 @@ class MainActivity : ComponentActivity() {
                 .verticalScroll(state = scrollState)
         ) {
             CurrentTemp(modifier)
-            Row {
-                Text(
-                    text = "24h weather",
-                    fontSize = 60.sp,
-                    lineHeight = 120.sp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Yellow)
-                )
-            }
             Column (
                 modifier = modifier
                     .padding(8.dp)
@@ -220,7 +235,7 @@ class MainActivity : ComponentActivity() {
             }
             Row {
                 Text(
-                    text = "${LocalDate(2024, Month.APRIL, 16).dayOfWeek} (${cTemp.city})",
+                    text = "${cTemp.time.dayOfWeek}, ${formatDateTime(cTemp.time)} (${cTemp.city})",
                     fontSize = 20.sp,
                     color = Color.White,
                     textAlign = TextAlign.Right,
