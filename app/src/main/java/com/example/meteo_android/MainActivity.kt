@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
     private var isLoading: Boolean = false
     private var wasLastNegative: Int = 0
 
-    private val cTemp = mutableStateOf(-999.0)
+    private val currentTemp = mutableStateOf(-999.0)
 
     private suspend fun fetchData() {
         if (!isLoading) {
@@ -92,11 +92,11 @@ class MainActivity : ComponentActivity() {
                         URL("http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp").readText()
                     cityForecast = Json.decodeFromString<CityForecast>(response)
 
-                    var tVal: Double = cTemp.value
+                    var tVal: Double = currentTemp.value
                     if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
                         tVal = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: tVal
                     }
-                    cTemp.value = tVal
+                    currentTemp.value = tVal
                 } catch (e: Exception) {
                     // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                     println(e)
@@ -198,9 +198,9 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun CurrentTemp() {
-        val showTemp by cTemp
+        val cTemp by currentTemp
         Text(
-            text = "$showTemp°",
+            text = "$cTemp°",
             fontSize = 100.sp,
             lineHeight = 300.sp,
             textAlign = TextAlign.Center,
