@@ -20,3 +20,5 @@ https://developer.android.com/topic/libraries/architecture/workmanager
 
 resources
 https://developer.android.com/guide/topics/resources/providing-resources
+
+https://developer.android.com/develop/ui/compose/graphics/draw/shapes ?
