@@ -2,7 +2,6 @@ package com.example.meteo_android
 
 import android.os.Bundle
 import android.util.Log
-import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,9 +19,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
@@ -69,73 +75,51 @@ data class CityForecast(
 // and time of last attempt (probably show last attempt, and have
 // thing that can be clicked to see last success)
 class MainActivity : ComponentActivity() {
-    private var cityForecast: CityForecast? = null;
+    private var cityForecast: CityForecast? = null
+    private var isLoading: Boolean = false
+    private var wasLastNegative: Int = 0
 
     private val cTemp = mutableStateOf(-999.0)
 
     private suspend fun fetchData() {
-        withContext(Dispatchers.IO) {
-            try {
-                val response = URL("http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10").readText()
-                cityForecast = Json.decodeFromString<CityForecast>(response)
+        if (!isLoading) {
+            isLoading = true
+            withContext(Dispatchers.IO) {
+                try {
+                    val randTemp = String.format("%.1f", Random.nextInt(60)-30+Random.nextDouble())
+                    val response =
+                    //    URL("http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10").readText()
+                        URL("http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp").readText()
+                    cityForecast = Json.decodeFromString<CityForecast>(response)
 
-                var tVal: Double = cTemp.value
-                if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
-                    tVal = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: tVal
+                    var tVal: Double = cTemp.value
+                    if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
+                        tVal = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: tVal
+                    }
+                    cTemp.value = tVal
+                } catch (e: Exception) {
+                    // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
+                    println(e)
+                    println(e.message)
+                    cityForecast = null
+                } finally {
+                    isLoading = false
                 }
-                cTemp.value = tVal
-            } catch (e: Exception) {
-                // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
-                println(e)
-                println(e.message)
-                cityForecast = null
-            } finally { }
-        }
-    }
-
-    private suspend fun fetchTestData() {
-        withContext(Dispatchers.IO) {
-            try {
-                val randTemp = String.format("%.1f", Random.nextInt(60)-30+Random.nextDouble())
-                val response = URL("http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp").readText()
-                cityForecast = Json.decodeFromString<CityForecast>(response)
-
-                var tVal: Double = cTemp.value
-                if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
-                    tVal = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: tVal
-                }
-                cTemp.value = tVal
-            } catch (e: Exception) {
-                // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
-                println(e)
-                println(e.message)
-                cityForecast = null
-            } finally { }
+            }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         runBlocking {
-            fetchTestData()
+            fetchData()
         }
         enableEdgeToEdge()
         setContent {
             Meteo_androidTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
-                    onClick = {
-                        runBlocking {
-                            fetchTestData()
-                        }
-
-                        var cTemp: Double = -999.0
-                        if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
-                            cTemp = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: cTemp
-                        }
-                        Log.d("DEBUG", "CLICKED ($cTemp)!")
-                    }
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     AllForecasts(cityForecast)
                 }
@@ -146,11 +130,43 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun AllForecasts(data: CityForecast?, modifier: Modifier = Modifier) {
+        var offset by remember {
+            mutableStateOf(0f)
+        }
+
+        val scrollState = rememberScrollState()
+        val nestedScrollConnection = remember {
+            object : NestedScrollConnection {
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    val delay = 10
+                    if ((offset - available.y) < 0 && wasLastNegative < delay) {
+                        if (wasLastNegative >= (delay-1)) {
+                            runBlocking {
+                                fetchData()
+                            }
+                        }
+                        wasLastNegative++
+                    }
+                    return super.onPreScroll(available, source)
+                }
+
+                override suspend fun onPostFling(
+                    consumed: Velocity,
+                    available: Velocity
+                ): Velocity {
+                    wasLastNegative = 0
+                    return super.onPostFling(consumed, available)
+                }
+            }
+        }
+
         Column(
-            modifier = modifier
+            modifier = Modifier
+                .nestedScroll(nestedScrollConnection)
+                .fillMaxSize()
                 .padding(8.dp)
                 .background(Color.Red)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(state = scrollState)
         ) {
             Row(
                 modifier = modifier
