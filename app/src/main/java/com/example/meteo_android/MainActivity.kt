@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     ))
 
-    private suspend fun fetchData() {
+    private suspend fun fetchData(lat: Double = 56.8750, lon: Double = 23.8658) {
         if (!isLoading) {
             isLoading = true
             withContext(Dispatchers.IO) {
@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
                     val randTemp = String.format("%.1f", Random.nextInt(60)-30+Random.nextDouble())
 
                     var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
-                    //urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=56.8750&lon=23.8658&radius=10"
+                    urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
 
                     val response = URL(urlString).readText()
                     cityForecast = Json.decodeFromString<CityForecastData>(response)
@@ -206,15 +206,16 @@ class MainActivity : ComponentActivity() {
                             val lastLocation = fusedLocationClient.getLastLocation()
                             lastLocation.addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
-                                    Log.d("DEBUG", "LAST LOCATION COMPLETED ${task.result}")
+                                    Log.d("DEBUG", "LAST LOCATION COMPLETED ${task.result.latitude}  ${task.result.longitude}")
+
+                                    runBlocking {
+                                        fetchData(task.result.latitude, task.result.longitude)
+                                    }
                                 } else {
                                     Log.d("DEBUG", "LAST LOCATION FAILED")
                                 }
                             }
                             Log.d("DEBUG", "LAST LOCATION CALLED")
-                        }
-                        runBlocking {
-                            fetchData()
                         }
                         wasLastNegative = true
                     }
