@@ -1,5 +1,7 @@
 package com.example.meteo_android
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -38,7 +40,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -100,6 +105,8 @@ class MainActivity : ComponentActivity() {
     private var isLoading: Boolean = false
     private var wasLastNegative: Boolean = false
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     private val currentTemp = mutableStateOf(CurrentTemp(
         -999.0,
         "Temp",
@@ -157,6 +164,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         runBlocking {
             fetchData()
         }
@@ -180,12 +188,31 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun AllForecasts(data: CityForecastData?, modifier: Modifier = Modifier) {
+        val self = this
         val scrollState = rememberScrollState()
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                     Log.d("DEBUG", "$available.y ($wasLastNegative)")
                     if (available.y > 0 && !wasLastNegative) {
+                        if (ActivityCompat.checkSelfPermission(
+                                self,
+                                Manifest.permission.ACCESS_FINE_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                                self,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            val lastLocation = fusedLocationClient.getLastLocation()
+                            lastLocation.addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Log.d("DEBUG", "LAST LOCATION COMPLETED ${task.result}")
+                                } else {
+                                    Log.d("DEBUG", "LAST LOCATION FAILED")
+                                }
+                            }
+                            Log.d("DEBUG", "LAST LOCATION CALLED")
+                        }
                         runBlocking {
                             fetchData()
                         }
