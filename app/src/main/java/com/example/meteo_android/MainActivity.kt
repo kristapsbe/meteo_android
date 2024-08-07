@@ -178,7 +178,7 @@ class MainActivity : ComponentActivity() {
                     val randTemp = String.format("%.1f", Random.nextInt(60)-30+Random.nextDouble())
 
                     var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
-                    //urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
+                    urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
 
                     val response = URL(urlString).readText()
                     cityForecast = Json.decodeFromString<CityForecastData>(response)
@@ -294,43 +294,77 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             ) {
-                Row {
-                    Text(
-                        text = "${cInfo.hourlyForecast?.pictogram?.getPictogram()}",
-                        fontSize = 100.sp,
-                        lineHeight = 300.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = modifier
-                            .fillMaxWidth(0.33f)
-                            .alpha(0.5f)
-                            .background(Color.Cyan)
-                    )
-                    Text(
-                        text = "${cInfo.hourlyForecast?.currTemp}",
-                        fontSize = 100.sp,
-                        lineHeight = 300.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = modifier
-                            .fillMaxWidth(.5f)
-                            .alpha(0.5f)
-                            .background(Color.Green)
-                    )
-                    Text(
-                        text = "${cInfo.hourlyForecast?.feelsLike}",
-                        fontSize = 100.sp,
-                        lineHeight = 300.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = modifier
-                            .fillMaxWidth(1.0f)
-                            .alpha(0.5f)
-                            .background(Color.Magenta)
-                    )
-                }
-                Row {
-                    Text(text = "${cInfo.dailyForecast?.tempMin}")
-                    Text(text = "${cInfo.dailyForecast?.tempMax}")
-                    Text(text = "${cInfo.dailyForecast?.rainAmount}")
-                    Text(text = "${cInfo.dailyForecast?.stormProb}")
+                Column {
+                    Row {
+                        Text(
+                            text = "${cInfo.hourlyForecast?.pictogram?.getPictogram()}",
+                            fontSize = 40.sp,
+                            lineHeight = 150.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = modifier
+                                .fillMaxWidth(0.33f)
+                                .alpha(0.5f)
+                                .background(Color.Cyan)
+                        )
+                        Text(
+                            text = "${cInfo.hourlyForecast?.currTemp}",
+                            fontSize = 40.sp,
+                            lineHeight = 150.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = modifier
+                                .fillMaxWidth(.5f)
+                                .alpha(0.5f)
+                                .background(Color.Green)
+                        )
+                        Text(
+                            text = "${cInfo.hourlyForecast?.feelsLike}",
+                            fontSize = 40.sp,
+                            lineHeight = 150.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = modifier
+                                .fillMaxWidth(1.0f)
+                                .alpha(0.5f)
+                                .background(Color.Magenta)
+                        )
+                    }
+                    Row {
+                        Text(
+                            text = "${cInfo.dailyForecast?.tempMin}",
+                            fontSize = 20.sp,
+                            lineHeight = 40.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = modifier
+                                .fillMaxWidth(.25f)
+                                .alpha(0.5f)
+                                .background(Color.Magenta)
+                        )
+                        Text(text = "${cInfo.dailyForecast?.tempMax}",
+                            fontSize = 20.sp,
+                            lineHeight = 40.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = modifier
+                                .fillMaxWidth(.3f)
+                                .alpha(0.5f)
+                                .background(Color.Gray))
+                        Text(text = "${cInfo.dailyForecast?.rainAmount}",
+                            fontSize = 20.sp,
+                            lineHeight = 40.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = modifier
+                                .fillMaxWidth(.5f)
+                                .alpha(0.5f)
+                                .background(Color.Yellow))
+                        Text(
+                            text = "${cInfo.dailyForecast?.stormProb}",
+                            fontSize = 20.sp,
+                            lineHeight = 40.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = modifier
+                                .fillMaxWidth(1.0f)
+                                .alpha(0.5f)
+                                .background(Color.Blue)
+                        )
+                    }
                 }
             }
         }
