@@ -89,11 +89,44 @@ data class CityForecastData(
 )
 
 
-data class CurrentTemp(
-    val temp: Double,
-    val city: String,
-    val time: LocalDateTime
+// classes for visualization data
+data class WeatherPictogram(
+    val code: Int
+) {
+    fun getPictogram(): Int {
+        return code
+    }
+}
+
+data class DailyForecast(
+    val day: String,
+    val rainAmount: Int,
+    val stormProb: Double,
+    val tempMin: Double,
+    val tempMax: Double,
+    val pictogramDay: WeatherPictogram,
+    val pictogramNight: WeatherPictogram
 )
+
+data class HourlyForecast(
+    val currTemp: Double,
+    val feelsLike: Double,
+    val pictogram: WeatherPictogram
+)
+
+data class CurrentInfo(
+    var hourlyForecast: HourlyForecast?,
+    var dailyForecast: DailyForecast?
+)
+
+data class DailyInfo(
+    var dailyForecasts: List<DailyForecast>
+)
+
+data class MetadataInfo(
+    var lastUpdate: LocalDateTime?
+)
+
 
 // TODO: look up how to add action for a drag from top
 // (and if there's a default spinny loading thing)
@@ -107,11 +140,35 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private val currentTemp = mutableStateOf(CurrentTemp(
-        -999.0,
-        "Temp",
-        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    ))
+    private val currentInfo = mutableStateOf(CurrentInfo(null, null))
+    private val dailyInfo = mutableStateOf(DailyInfo(emptyList()))
+    private val metadataInfo = mutableStateOf(MetadataInfo(null))
+
+    private fun getCoordsAndReload() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val lastLocation = fusedLocationClient.getLastLocation()
+            lastLocation.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("DEBUG", "LAST LOCATION COMPLETED ${task.result.latitude}  ${task.result.longitude}")
+
+                    runBlocking {
+                        fetchData()
+                        //fetchData(task.result.latitude, task.result.longitude)
+                    }
+                } else {
+                    Log.d("DEBUG", "LAST LOCATION FAILED")
+                }
+            }
+            Log.d("DEBUG", "LAST LOCATION CALLED")
+        }
+    }
 
     private suspend fun fetchData(lat: Double = 56.8750, lon: Double = 23.8658) {
         if (!isLoading) {
@@ -121,35 +178,27 @@ class MainActivity : ComponentActivity() {
                     val randTemp = String.format("%.1f", Random.nextInt(60)-30+Random.nextDouble())
 
                     var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
-                    urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
+                    //urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
 
                     val response = URL(urlString).readText()
                     cityForecast = Json.decodeFromString<CityForecastData>(response)
 
-                    var tVal: Double = currentTemp.value.temp
-                    var time: LocalDateTime = currentTemp.value.time
+                    var currTempTmp: Double = currentInfo.value.hourlyForecast?.currTemp ?: -999.0
+                    var feelsLikeTmp: Double = currentInfo.value.hourlyForecast?.feelsLike ?: -999.0
+                    var pictogramTmp: Int = currentInfo.value.hourlyForecast?.pictogram?.code ?: 0
                     if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
-                        tVal = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: tVal
-                        val tmp: String = cityForecast?.hourly_forecast?.get(0)?.time.toString()
-                        time = LocalDateTime(
-                            tmp.substring(0, 4).toInt(),
-                            tmp.substring(4, 6).toInt(),
-                            tmp.substring(6, 8).toInt(),
-                            tmp.substring(8, 10).toInt(),
-                            0, 0, 0
-                        )
+                        currTempTmp = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: currTempTmp
+                        feelsLikeTmp = cityForecast?.hourly_forecast?.get(0)?.vals?.get(2) ?: feelsLikeTmp
+                        pictogramTmp = cityForecast?.hourly_forecast?.get(0)?.vals?.get(0)?.toInt() ?: pictogramTmp
                     }
-                    var cName: String = currentTemp.value.city
-                    if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
-                        val cId = cityForecast?.hourly_forecast?.get(0)?.id ?: ""
-                        for (c in cityForecast?.cities ?: emptyList()) {
-                            if (c.id == cId) {
-                                cName = c.name
-                                break
-                            }
-                        }
-                    }
-                    currentTemp.value = com.example.meteo_android.CurrentTemp(tVal, cName, time)
+                    Log.d("DEBUG", "DLOADED --- ${currTempTmp} | ${feelsLikeTmp} | ${pictogramTmp}")
+
+                    currentInfo.value = CurrentInfo(
+                        HourlyForecast(
+                            currTempTmp, feelsLikeTmp, WeatherPictogram(pictogramTmp)
+                        ),
+                        null
+                    )
                 } catch (e: Exception) {
                     // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                     println(e)
@@ -166,7 +215,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         runBlocking {
-            fetchData()
+            getCoordsAndReload()
         }
         enableEdgeToEdge()
         setContent {
@@ -188,35 +237,13 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun AllForecasts(data: CityForecastData?, modifier: Modifier = Modifier) {
-        val self = this
         val scrollState = rememberScrollState()
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                     Log.d("DEBUG", "$available.y ($wasLastNegative)")
                     if (available.y > 0 && !wasLastNegative) {
-                        if (ActivityCompat.checkSelfPermission(
-                                self,
-                                Manifest.permission.ACCESS_FINE_LOCATION
-                            ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                                self,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-                            val lastLocation = fusedLocationClient.getLastLocation()
-                            lastLocation.addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    Log.d("DEBUG", "LAST LOCATION COMPLETED ${task.result.latitude}  ${task.result.longitude}")
-
-                                    runBlocking {
-                                        fetchData(task.result.latitude, task.result.longitude)
-                                    }
-                                } else {
-                                    Log.d("DEBUG", "LAST LOCATION FAILED")
-                                }
-                            }
-                            Log.d("DEBUG", "LAST LOCATION CALLED")
-                        }
+                        getCoordsAndReload()
                         wasLastNegative = true
                     }
                     return super.onPreScroll(available, source)
@@ -240,21 +267,21 @@ class MainActivity : ComponentActivity() {
                 .background(Color.Red)
                 .verticalScroll(state = scrollState)
         ) {
-            CurrentTemp(modifier)
+            ShowCurrentInfo(modifier)
             Column (
                 modifier = modifier
                     .padding(8.dp)
                     .background(Color.Cyan)
             ) {
-                DailyForecasts(data)
+                ShowDailyInfo()
             }
+            ShowMetadataInfo()
         }
     }
 
     @Composable
-    fun CurrentTemp(modifier: Modifier) {
-        val cTemp by currentTemp
-
+    fun ShowCurrentInfo(modifier: Modifier) {
+        val cInfo by currentInfo
         Row(
             modifier = modifier.height(335.dp)
         ) {
@@ -267,52 +294,70 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             ) {
-                Column {
+                Row {
                     Text(
-                        text = "${cTemp.temp}°",
+                        text = "${cInfo.hourlyForecast?.pictogram?.getPictogram()}",
+                        fontSize = 100.sp,
+                        lineHeight = 300.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = modifier
+                            .fillMaxWidth(0.33f)
+                            .alpha(0.5f)
+                            .background(Color.Cyan)
+                    )
+                    Text(
+                        text = "${cInfo.hourlyForecast?.currTemp}",
+                        fontSize = 100.sp,
+                        lineHeight = 300.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = modifier
+                            .fillMaxWidth(.5f)
+                            .alpha(0.5f)
+                            .background(Color.Green)
+                    )
+                    Text(
+                        text = "${cInfo.hourlyForecast?.feelsLike}",
                         fontSize = 100.sp,
                         lineHeight = 300.sp,
                         textAlign = TextAlign.Center,
                         modifier = modifier
                             .fillMaxWidth(1.0f)
                             .alpha(0.5f)
-                            .background(Color.Green)
+                            .background(Color.Magenta)
                     )
-                    Text(
-                        text = "${cTemp.time.dayOfWeek}, ${formatDateTime(cTemp.time)} (${cTemp.city})",
-                        fontSize = 20.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.Right,
-                        modifier = modifier
-                            .fillMaxWidth(1.0f)
-                            .alpha(0.5f)
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                            .background(Color.Blue)
-                    )
+                }
+                Row {
+                    Text(text = "${cInfo.dailyForecast?.tempMin}")
+                    Text(text = "${cInfo.dailyForecast?.tempMax}")
+                    Text(text = "${cInfo.dailyForecast?.rainAmount}")
+                    Text(text = "${cInfo.dailyForecast?.stormProb}")
                 }
             }
         }
     }
 
     @Composable
-    fun DailyForecasts(data: CityForecastData?) {
-        val dData: List<ForecastData> = data?.daily_forecast ?: emptyList()
-
-        for (d in dData) {
-            val minTemp: Double = d.vals[3]
-            val maxTemp: Double = d.vals[2]
-
+    fun ShowDailyInfo() {
+        val dInfo by dailyInfo
+        for (d in dInfo.dailyForecasts) {
             Row {
-                Text(
-                    text = "$minTemp° - $maxTemp°",
-                    fontSize = 40.sp,
-                    lineHeight = 80.sp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(1.0f)
-                        .background(Color.Yellow)
-                )
+                Text(text = d.day)
+                Text(text = "${d.rainAmount}")
+                Text(text = "${d.stormProb}")
+                Text(text = "${d.stormProb}")
+                Text(text = "${d.pictogramDay.getPictogram()}")
+                Text(text = "${d.pictogramNight.getPictogram()}")
+                Text(text = "${d.tempMax}")
+                Text(text = "${d.tempMin}")
             }
+        }
+    }
+
+    @Composable
+    fun ShowMetadataInfo() {
+        val mInfo by metadataInfo
+        Row {
+            Text(text = "${mInfo.lastUpdate}")
         }
     }
 }
