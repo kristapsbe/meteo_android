@@ -124,7 +124,7 @@ data class DailyInfo(
 )
 
 data class MetadataInfo(
-    var lastUpdate: LocalDateTime?
+    var lastUpdated: LocalDateTime?
 )
 
 
@@ -201,7 +201,19 @@ class MainActivity : ComponentActivity() {
                     )
 
                     dailyInfo.value = DailyInfo(emptyList())
-                    metadataInfo.value = MetadataInfo(null)
+
+                    var lastUpdatedTmp: LocalDateTime? = metadataInfo.value.lastUpdated
+                    if (cityForecast?.last_updated != null) {
+                        lastUpdatedTmp = LocalDateTime(
+                            cityForecast?.last_updated!!.substring(0, 4).toInt(),
+                            cityForecast?.last_updated!!.substring(4, 6).toInt(),
+                            cityForecast?.last_updated!!.substring(6, 8).toInt(),
+                            cityForecast?.last_updated!!.substring(8, 10).toInt(),
+                            cityForecast?.last_updated!!.substring(10, 12).toInt(),
+                            0, 0
+                        )
+                    }
+                    metadataInfo.value = MetadataInfo(lastUpdatedTmp)
                 } catch (e: Exception) {
                     // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                     println(e)
@@ -394,7 +406,7 @@ class MainActivity : ComponentActivity() {
     fun ShowMetadataInfo() {
         val mInfo by metadataInfo
         Row {
-            Text(text = "${mInfo.lastUpdate}")
+            Text(text = "${mInfo.lastUpdated}")
         }
     }
 }
