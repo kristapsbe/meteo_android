@@ -200,7 +200,22 @@ class MainActivity : ComponentActivity() {
                         null
                     )
 
-                    dailyInfo.value = DailyInfo(emptyList())
+                    var tmpDayList = dailyInfo.value.dailyForecasts
+                    if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
+                        val tmpNewList = cityForecast?.daily_forecast?.map {
+                            DailyForecast(
+                                it.time.toString(),
+                                it.vals.get(4).toInt(),
+                                it.vals.get(5),
+                                it.vals.get(3),
+                                it.vals.get(2),
+                                WeatherPictogram(it.vals.get(7).toInt()),
+                                WeatherPictogram(it.vals.get(6).toInt())
+                            )
+                        } ?: emptyList()
+                        tmpDayList = tmpNewList
+                    }
+                    dailyInfo.value = DailyInfo(tmpDayList)
 
                     var lastUpdatedTmp: LocalDateTime? = metadataInfo.value.lastUpdated
                     if (cityForecast?.last_updated != null) {
