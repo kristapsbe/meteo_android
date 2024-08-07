@@ -199,6 +199,9 @@ class MainActivity : ComponentActivity() {
                         ),
                         null
                     )
+
+                    dailyInfo.value = DailyInfo(emptyList())
+                    metadataInfo.value = MetadataInfo(null)
                 } catch (e: Exception) {
                     // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                     println(e)
