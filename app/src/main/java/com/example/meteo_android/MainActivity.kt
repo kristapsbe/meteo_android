@@ -191,13 +191,27 @@ class MainActivity : ComponentActivity() {
                         feelsLikeTmp = cityForecast?.hourly_forecast?.get(0)?.vals?.get(2) ?: feelsLikeTmp
                         pictogramTmp = cityForecast?.hourly_forecast?.get(0)?.vals?.get(0)?.toInt() ?: pictogramTmp
                     }
+                    var currDaily = currentInfo.value.dailyForecast
+                    if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
+                        val currEntry = cityForecast?.daily_forecast?.get(0)
+                        val tmpNewDaily = DailyForecast(
+                            currEntry?.time.toString(),
+                            currEntry?.vals?.get(4)?.toInt() ?: -999,
+                            currEntry?.vals?.get(5) ?: -999.0,
+                            currEntry?.vals?.get(3) ?: -999.0,
+                            currEntry?.vals?.get(2) ?: -999.0,
+                            WeatherPictogram((currEntry?.vals?.get(7) ?: -999).toInt()),
+                            WeatherPictogram((currEntry?.vals?.get(6) ?: -999).toInt())
+                        )
+                        currDaily = tmpNewDaily
+                    }
                     Log.d("DEBUG", "DLOADED --- ${currTempTmp} | ${feelsLikeTmp} | ${pictogramTmp}")
 
                     currentInfo.value = CurrentInfo(
                         HourlyForecast(
                             currTempTmp, feelsLikeTmp, WeatherPictogram(pictogramTmp)
                         ),
-                        null
+                        currDaily
                     )
 
                     var tmpDayList = dailyInfo.value.dailyForecasts
