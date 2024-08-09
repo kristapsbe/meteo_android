@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.paint
@@ -35,6 +37,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
@@ -274,9 +277,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun formatDateTime(time: LocalDateTime): String {
+    private fun formatDateTime(time: LocalDateTime?): String {
         val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
-        return format.format(time)
+        return format.format(time ?: LocalDateTime(1972,1,1,0,0,0))
     }
 
     @Composable
@@ -317,9 +320,9 @@ class MainActivity : ComponentActivity() {
                     .padding(8.dp)
                     .background(Color.Cyan)
             ) {
-                ShowDailyInfo()
+                ShowDailyInfo(modifier)
             }
-            ShowMetadataInfo()
+            ShowMetadataInfo(modifier)
         }
     }
 
@@ -340,42 +343,54 @@ class MainActivity : ComponentActivity() {
             ) {
                 Column {
                     Row {
-                        Text(
-                            text = "${cInfo.hourlyForecast?.pictogram?.getPictogram()}",
-                            fontSize = 40.sp,
-                            lineHeight = 150.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .fillMaxWidth(0.33f)
-                                .alpha(0.5f)
-                                .background(Color.Cyan)
-                        )
-                        Text(
-                            text = "${cInfo.hourlyForecast?.currTemp}",
-                            fontSize = 40.sp,
-                            lineHeight = 150.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .fillMaxWidth(.5f)
-                                .alpha(0.5f)
-                                .background(Color.Green)
-                        )
-                        Text(
-                            text = "${cInfo.hourlyForecast?.feelsLike}",
-                            fontSize = 40.sp,
-                            lineHeight = 150.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .fillMaxWidth(1.0f)
-                                .alpha(0.5f)
-                                .background(Color.Magenta)
-                        )
+                        Column(
+                            modifier = modifier.fillMaxWidth(0.5f)
+                        ) {
+                            Text(
+                                text = "${cInfo.hourlyForecast?.pictogram?.getPictogram()}",
+                                fontSize = 40.sp,
+                                lineHeight = 150.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = modifier
+                                    .alpha(0.5f)
+                                    .fillMaxWidth(1.0f)
+                                    .fillMaxHeight(0.75f)
+                                    .background(Color.Cyan)
+                            )
+                        }
+                        Column(
+                            modifier = modifier.fillMaxWidth(1.0f)
+                        ) {
+                            Text(
+                                text = "${cInfo.hourlyForecast?.currTemp}",
+                                fontSize = 40.sp,
+                                lineHeight = 150.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = modifier
+                                    .alpha(0.5f)
+                                    .fillMaxWidth(1.0f)
+                                    .background(Color.Green)
+                            )
+                            Text(
+                                text = "feels like ${cInfo.hourlyForecast?.feelsLike}",
+                                fontSize = 20.sp,
+                                lineHeight = 40.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = modifier
+                                    .alpha(0.5f)
+                                    .fillMaxWidth(1.0f)
+                                    .background(Color.Magenta)
+                            )
+                        }
                     }
-                    Row {
+                    Row(
+                        modifier = modifier
+                            .fillMaxHeight(1.0f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             text = "${cInfo.dailyForecast?.tempMin}",
                             fontSize = 20.sp,
-                            lineHeight = 40.sp,
                             textAlign = TextAlign.Center,
                             modifier = modifier
                                 .fillMaxWidth(.25f)
@@ -384,15 +399,13 @@ class MainActivity : ComponentActivity() {
                         )
                         Text(text = "${cInfo.dailyForecast?.tempMax}",
                             fontSize = 20.sp,
-                            lineHeight = 40.sp,
                             textAlign = TextAlign.Center,
                             modifier = modifier
-                                .fillMaxWidth(.3f)
+                                .fillMaxWidth(.333f)
                                 .alpha(0.5f)
                                 .background(Color.Gray))
                         Text(text = "${cInfo.dailyForecast?.rainAmount}",
                             fontSize = 20.sp,
-                            lineHeight = 40.sp,
                             textAlign = TextAlign.Center,
                             modifier = modifier
                                 .fillMaxWidth(.5f)
@@ -401,7 +414,6 @@ class MainActivity : ComponentActivity() {
                         Text(
                             text = "${cInfo.dailyForecast?.stormProb}",
                             fontSize = 20.sp,
-                            lineHeight = 40.sp,
                             textAlign = TextAlign.Center,
                             modifier = modifier
                                 .fillMaxWidth(1.0f)
@@ -415,27 +427,60 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ShowDailyInfo() {
+    fun ShowDailyInfo(modifier: Modifier) {
         val dInfo by dailyInfo
         for (d in dInfo.dailyForecasts) {
-            Row {
-                Text(text = d.day)
-                Text(text = "${d.rainAmount}")
-                Text(text = "${d.stormProb}")
-                Text(text = "${d.stormProb}")
-                Text(text = "${d.pictogramDay.getPictogram()}")
-                Text(text = "${d.pictogramNight.getPictogram()}")
-                Text(text = "${d.tempMax}")
-                Text(text = "${d.tempMin}")
+            Row(
+                modifier = modifier
+                    .fillMaxWidth(1.0f)
+                    .height(60.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = d.day,
+                    modifier = modifier.fillMaxWidth(0.125f)
+                )
+                Text(
+                    text = "${d.rainAmount}",
+                    modifier = modifier.fillMaxWidth(0.14f)
+                )
+                Text(
+                    text = "${d.stormProb}",
+                    modifier = modifier.fillMaxWidth(0.166f)
+                )
+                Text(
+                    text = "${d.stormProb}",
+                    modifier = modifier.fillMaxWidth(0.2f)
+                )
+                Text(
+                    text = "${d.pictogramDay.getPictogram()}",
+                    modifier = modifier.fillMaxWidth(0.25f)
+                )
+                Text(
+                    text = "${d.pictogramNight.getPictogram()}",
+                    modifier = modifier.fillMaxWidth(0.33f)
+                )
+                Text(
+                    text = "${d.tempMax}",
+                    modifier = modifier.fillMaxWidth(0.5f)
+                )
+                Text(
+                    text = "${d.tempMin}",
+                    modifier = modifier.fillMaxWidth(1.0f)
+                )
             }
         }
     }
 
     @Composable
-    fun ShowMetadataInfo() {
+    fun ShowMetadataInfo(modifier: Modifier) {
         val mInfo by metadataInfo
-        Row {
-            Text(text = "${mInfo.lastUpdated}")
+        Row(
+            modifier = modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = formatDateTime(mInfo.lastUpdated)
+            )
         }
     }
 }
