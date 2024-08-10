@@ -9,7 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -29,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -50,39 +48,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.byUnicodePattern
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.URL
 import kotlin.random.Random
-
-
-@Serializable
-data class CoordinateData(val lat: Double, val lon: Double)
-
-@Serializable
-data class CityData(
-    val id: String,
-    val name: String,
-    val type: String,
-    val coords: CoordinateData
-)
-
-@Serializable
-data class ForecastData(val id: String, val time: Long, val vals: List<Double>)
-
-@Serializable
-data class WarningData(val intensity: List<String>, val regions: List<String>, val type: List<String>)
-
-@Serializable
-data class CityForecastData(
-    val hourly_params: List<List<String>>,
-    val daily_params: List<List<String>>,
-    val cities: List<CityData>,
-    val hourly_forecast: List<ForecastData>,
-    val daily_forecast: List<ForecastData>,
-    val warnings: List<WarningData>,
-    val last_updated: String
-)
 
 
 // classes for visualization data
@@ -133,7 +101,7 @@ data class MetadataInfo(
 class MainActivity : ComponentActivity() {
     private var cityForecast: CityForecastData? = null
     private var isLoading: Boolean = false
-    private var wasLastNegative: Boolean = false
+    private var wasLastScrollPosNegative: Boolean = false
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -142,13 +110,9 @@ class MainActivity : ComponentActivity() {
     private val metadataInfo = mutableStateOf(MetadataInfo(null))
 
     private fun getCoordsAndReload() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+        if ( // TODO: do I have to recheck permissions every time? and what do I do if I'm not allowed access - default to Riga and let the user change cities?
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         ) {
             val lastLocation = fusedLocationClient.getLastLocation()
             lastLocation.addOnCompleteListener { task ->
@@ -286,19 +250,16 @@ class MainActivity : ComponentActivity() {
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    Log.d("DEBUG", "$available.y ($wasLastNegative)")
-                    if (available.y > 0 && !wasLastNegative) {
+                    Log.d("DEBUG", "$available.y ($wasLastScrollPosNegative)")
+                    if (available.y > 0 && !wasLastScrollPosNegative) {
+                        wasLastScrollPosNegative = true
                         getCoordsAndReload()
-                        wasLastNegative = true
                     }
                     return super.onPreScroll(available, source)
                 }
 
-                override suspend fun onPostFling(
-                    consumed: Velocity,
-                    available: Velocity
-                ): Velocity {
-                    wasLastNegative = false
+                override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                    wasLastScrollPosNegative = false
                     return super.onPostFling(consumed, available)
                 }
             }
@@ -308,18 +269,11 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier
                 .nestedScroll(nestedScrollConnection)
                 .fillMaxSize()
-                .padding(8.dp)
-                .background(Color.Red)
+                .background(Color.Cyan)
                 .verticalScroll(state = scrollState)
         ) {
             ShowCurrentInfo(modifier)
-            Column (
-                modifier = modifier
-                    .padding(8.dp)
-                    .background(Color.Cyan)
-            ) {
-                ShowDailyInfo(modifier)
-            }
+            ShowDailyInfo(modifier)
             ShowMetadataInfo(modifier)
         }
     }
@@ -327,94 +281,82 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ShowCurrentInfo(modifier: Modifier) {
         val cInfo by currentInfo
-        Row(
-            modifier = modifier.height(335.dp)
+        Column(
+            modifier = modifier
+                .height(400.dp)
+                .padding(0.dp, 50.dp)
         ) {
-            Box(
-                modifier = with (modifier) {
-                    fillMaxSize().paint(
-                        // Replace with your image id
-                        painterResource(id = R.drawable.blue_skies_cumulus_clouds),
-                        contentScale = ContentScale.FillBounds
+            Row(
+                modifier = modifier
+                    .height(260.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = modifier
+                        .fillMaxWidth(0.4f)
+                        .height(160.dp)
+                ) {
+                    Image(
+                        painterResource(cInfo.hourlyForecast?.pictogram?.getPictogram() ?: R.drawable.example_battery),
+                        contentDescription = "",
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp)
                     )
                 }
-            ) {
-                Column {
-                    Row {
-                        Column(
-                            modifier = modifier.fillMaxWidth(0.5f)
-                        ) {
-                            Image(
-                                painterResource(cInfo.hourlyForecast?.pictogram?.getPictogram() ?: R.drawable.example_battery),
-                                contentDescription = "",
-                                contentScale = ContentScale.FillBounds,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                        Column(
-                            modifier = modifier.fillMaxWidth(1.0f)
-                        ) {
-                            Text(
-                                text = "${cInfo.hourlyForecast?.currTemp}",
-                                fontSize = 40.sp,
-                                lineHeight = 150.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = modifier
-                                    .alpha(0.5f)
-                                    .fillMaxWidth(1.0f)
-                                    .background(Color.Green)
-                            )
-                            Text(
-                                text = "feels like ${cInfo.hourlyForecast?.feelsLike}",
-                                fontSize = 20.sp,
-                                lineHeight = 40.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = modifier
-                                    .alpha(0.5f)
-                                    .fillMaxWidth(1.0f)
-                                    .background(Color.Magenta)
-                            )
-                        }
-                    }
-                    Row(
+                Column(
+                    modifier = modifier
+                        .fillMaxWidth(1.0f)
+                        .padding(20.dp, 0.dp)
+                ) {
+                    Text(
+                        text = "${cInfo.hourlyForecast?.currTemp?.toInt()}°",
+                        fontSize = 100.sp,
+                        textAlign = TextAlign.Right,
                         modifier = modifier
-                            .fillMaxHeight(1.0f),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "${cInfo.dailyForecast?.tempMin}",
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .fillMaxWidth(.25f)
-                                .alpha(0.5f)
-                                .background(Color.Magenta)
-                        )
-                        Text(text = "${cInfo.dailyForecast?.tempMax}",
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .fillMaxWidth(.333f)
-                                .alpha(0.5f)
-                                .background(Color.Gray))
-                        Text(text = "${cInfo.dailyForecast?.rainAmount}",
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .fillMaxWidth(.5f)
-                                .alpha(0.5f)
-                                .background(Color.Yellow))
-                        Text(
-                            text = "${cInfo.dailyForecast?.stormProb}",
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .fillMaxWidth(1.0f)
-                                .alpha(0.5f)
-                                .background(Color.Blue)
-                        )
-                    }
+                            .fillMaxWidth(1.0f)
+                    )
+                    Text(
+                        text = "feels like ${cInfo.hourlyForecast?.feelsLike?.toInt()}°",
+                        fontSize = 20.sp,
+                        lineHeight = 40.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = modifier
+                            .fillMaxWidth(1.0f)
+                    )
                 }
+            }
+            Row(
+                modifier = modifier
+                    .fillMaxHeight(1.0f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${cInfo.dailyForecast?.tempMin}°-${cInfo.dailyForecast?.tempMax}°",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = modifier
+                        .fillMaxWidth(.333f)
+                        .alpha(0.5f)
+                        .background(Color.Magenta)
+                )
+                Text(text = "${cInfo.dailyForecast?.rainAmount}",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = modifier
+                        .fillMaxWidth(.5f)
+                        .alpha(0.5f)
+                        .background(Color.Yellow))
+                Text(
+                    text = "${cInfo.dailyForecast?.stormProb}",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = modifier
+                        .fillMaxWidth(1.0f)
+                        .alpha(0.5f)
+                        .background(Color.Blue)
+                )
             }
         }
     }
@@ -458,11 +400,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxWidth(0.33f)
                 )
                 Text(
-                    text = "${d.tempMax}",
+                    text = "${d.tempMax}°",
                     modifier = modifier.fillMaxWidth(0.5f)
                 )
                 Text(
-                    text = "${d.tempMin}",
+                    text = "${d.tempMin}°",
                     modifier = modifier.fillMaxWidth(1.0f)
                 )
             }
@@ -476,7 +418,9 @@ class MainActivity : ComponentActivity() {
             modifier = modifier.fillMaxWidth()
         ) {
             Text(
-                text = formatDateTime(mInfo.lastUpdated)
+                modifier = modifier.fillMaxWidth(),
+                text = formatDateTime(mInfo.lastUpdated),
+                textAlign = TextAlign.Right
             )
         }
     }
