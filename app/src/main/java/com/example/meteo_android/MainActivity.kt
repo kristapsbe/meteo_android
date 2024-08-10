@@ -419,7 +419,7 @@ class MainActivity : ComponentActivity() {
         Row(
             modifier = modifier.fillMaxWidth()
         ) {
-            Text(
+            Text( // TODO: this is currently the time at which LVGMC last updated their forecast - I should probably show when the server last pulled data as well (?)
                 modifier = modifier.fillMaxWidth(),
                 text = formatDateTime(mInfo.lastUpdated),
                 textAlign = TextAlign.Right
