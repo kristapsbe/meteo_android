@@ -269,7 +269,7 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier
                 .nestedScroll(nestedScrollConnection)
                 .fillMaxSize()
-                .background(Color.Cyan)
+                .background(Color(0xFF82CAFF)) // Sky Blue
                 .verticalScroll(state = scrollState)
         ) {
             ShowCurrentInfo(modifier)
