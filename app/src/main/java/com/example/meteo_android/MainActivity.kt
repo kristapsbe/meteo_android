@@ -327,7 +327,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
-            Row(
+            Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
                 modifier = modifier
                     .fillMaxHeight(1.0f),
                 verticalAlignment = Alignment.CenterVertically
@@ -336,6 +336,7 @@ class MainActivity : ComponentActivity() {
                     text = "${cInfo.dailyForecast?.tempMin}°-${cInfo.dailyForecast?.tempMax}°",
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center,
+                    color = Color.White,
                     modifier = modifier
                         .fillMaxWidth(.333f)
                         .alpha(0.5f)
@@ -352,6 +353,7 @@ class MainActivity : ComponentActivity() {
                     text = "${cInfo.dailyForecast?.stormProb}",
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center,
+                    color = Color.White,
                     modifier = modifier
                         .fillMaxWidth(1.0f)
                         .alpha(0.5f)
