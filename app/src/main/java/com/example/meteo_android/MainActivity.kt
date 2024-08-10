@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,7 +36,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
@@ -50,13 +48,8 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.Month
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.URL
@@ -97,7 +90,8 @@ data class WeatherPictogram(
     val code: Int
 ) {
     fun getPictogram(): Int {
-        return code
+        // TODO: build dynamic icon based on the code
+        return R.drawable.example_battery
     }
 }
 
@@ -236,14 +230,7 @@ class MainActivity : ComponentActivity() {
 
                     var lastUpdatedTmp: LocalDateTime? = metadataInfo.value.lastUpdated
                     if (cityForecast?.last_updated != null) {
-                        lastUpdatedTmp = LocalDateTime(
-                            cityForecast?.last_updated!!.substring(0, 4).toInt(),
-                            cityForecast?.last_updated!!.substring(4, 6).toInt(),
-                            cityForecast?.last_updated!!.substring(6, 8).toInt(),
-                            cityForecast?.last_updated!!.substring(8, 10).toInt(),
-                            cityForecast?.last_updated!!.substring(10, 12).toInt(),
-                            0, 0
-                        )
+                        lastUpdatedTmp = stringToDateTime(cityForecast?.last_updated!!)
                     }
                     metadataInfo.value = MetadataInfo(lastUpdatedTmp)
                 } catch (e: Exception) {
@@ -280,6 +267,17 @@ class MainActivity : ComponentActivity() {
     private fun formatDateTime(time: LocalDateTime?): String {
         val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
         return format.format(time ?: LocalDateTime(1972,1,1,0,0,0))
+    }
+
+    private fun stringToDateTime(dateString: String): LocalDateTime {
+        return LocalDateTime(
+            dateString.substring(0, 4).toInt(),
+            dateString.substring(4, 6).toInt(),
+            dateString.substring(6, 8).toInt(),
+            dateString.substring(8, 10).toInt(),
+            dateString.substring(10, 12).toInt(),
+            0, 0
+        )
     }
 
     @Composable
@@ -346,16 +344,11 @@ class MainActivity : ComponentActivity() {
                         Column(
                             modifier = modifier.fillMaxWidth(0.5f)
                         ) {
-                            Text(
-                                text = "${cInfo.hourlyForecast?.pictogram?.getPictogram()}",
-                                fontSize = 40.sp,
-                                lineHeight = 150.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = modifier
-                                    .alpha(0.5f)
-                                    .fillMaxWidth(1.0f)
-                                    .fillMaxHeight(0.75f)
-                                    .background(Color.Cyan)
+                            Image(
+                                painterResource(cInfo.hourlyForecast?.pictogram?.getPictogram() ?: R.drawable.example_battery),
+                                contentDescription = "",
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                         Column(
@@ -437,7 +430,7 @@ class MainActivity : ComponentActivity() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = d.day,
+                    text = "${stringToDateTime(d.day).dayOfWeek}".substring(0, 3),
                     modifier = modifier.fillMaxWidth(0.125f)
                 )
                 Text(
@@ -452,13 +445,17 @@ class MainActivity : ComponentActivity() {
                     text = "${d.stormProb}",
                     modifier = modifier.fillMaxWidth(0.2f)
                 )
-                Text(
-                    text = "${d.pictogramDay.getPictogram()}",
-                    modifier = modifier.fillMaxWidth(0.25f)
+                Image(
+                    painterResource(d.pictogramDay.getPictogram()),
+                    contentDescription = "",
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.fillMaxWidth(0.25f)
                 )
-                Text(
-                    text = "${d.pictogramNight.getPictogram()}",
-                    modifier = modifier.fillMaxWidth(0.33f)
+                Image(
+                    painterResource(d.pictogramNight.getPictogram()),
+                    contentDescription = "",
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.fillMaxWidth(0.33f)
                 )
                 Text(
                     text = "${d.tempMax}",
