@@ -366,49 +366,55 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ShowDailyInfo(modifier: Modifier) {
         val dInfo by dailyInfo
-        for (d in dInfo.dailyForecasts) {
-            Row(
-                modifier = modifier
-                    .fillMaxWidth(1.0f)
-                    .height(60.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${stringToDateTime(d.day).dayOfWeek}".substring(0, 3),
-                    modifier = modifier.fillMaxWidth(0.125f)
-                )
-                Text(
-                    text = "${d.rainAmount}",
-                    modifier = modifier.fillMaxWidth(0.14f)
-                )
-                Text(
-                    text = "${d.stormProb}",
-                    modifier = modifier.fillMaxWidth(0.166f)
-                )
-                Text(
-                    text = "${d.stormProb}",
-                    modifier = modifier.fillMaxWidth(0.2f)
-                )
-                Image(
-                    painterResource(d.pictogramDay.getPictogram()),
-                    contentDescription = "",
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.fillMaxWidth(0.25f)
-                )
-                Image(
-                    painterResource(d.pictogramNight.getPictogram()),
-                    contentDescription = "",
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.fillMaxWidth(0.33f)
-                )
-                Text(
-                    text = "${d.tempMax}°",
-                    modifier = modifier.fillMaxWidth(0.5f)
-                )
-                Text(
-                    text = "${d.tempMin}°",
-                    modifier = modifier.fillMaxWidth(1.0f)
-                )
+        Column(
+            modifier = modifier.padding(10.dp, 0.dp)
+        ) {
+            for (d in dInfo.dailyForecasts) {
+                Row(
+                    modifier = modifier
+                        .fillMaxWidth(1.0f)
+                        .height(60.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${stringToDateTime(d.day).dayOfWeek}".substring(0, 3),
+                        modifier = modifier.fillMaxWidth(0.125f)
+                    )
+                    Text(
+                        text = "${d.rainAmount}",
+                        modifier = modifier.fillMaxWidth(0.14f)
+                    )
+                    Text(
+                        text = "${d.stormProb}",
+                        modifier = modifier.fillMaxWidth(0.166f)
+                    )
+                    Text(
+                        text = "${d.stormProb}",
+                        modifier = modifier.fillMaxWidth(0.2f)
+                    )
+                    Image(
+                        painterResource(d.pictogramDay.getPictogram()),
+                        contentDescription = "",
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier.fillMaxWidth(0.25f)
+                    )
+                    Image(
+                        painterResource(d.pictogramNight.getPictogram()),
+                        contentDescription = "",
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier.fillMaxWidth(0.33f)
+                    )
+                    Text(
+                        text = "${d.tempMax}°",
+                        textAlign = TextAlign.Right,
+                        modifier = modifier.fillMaxWidth(0.5f)
+                    )
+                    Text(
+                        text = "${d.tempMin}°",
+                        textAlign = TextAlign.Right,
+                        modifier = modifier.fillMaxWidth(1.0f)
+                    )
+                }
             }
         }
     }
@@ -417,7 +423,7 @@ class MainActivity : ComponentActivity() {
     fun ShowMetadataInfo(modifier: Modifier) {
         val mInfo by metadataInfo
         Row(
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth().padding(10.dp, 0.dp)
         ) {
             Text( // TODO: this is currently the time at which LVGMC last updated their forecast - I should probably show when the server last pulled data as well (?)
                 modifier = modifier.fillMaxWidth(),
