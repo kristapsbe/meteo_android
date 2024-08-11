@@ -116,7 +116,7 @@ class MainActivity : ComponentActivity() {
         ) {
             val lastLocation = fusedLocationClient.getLastLocation()
             lastLocation.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
+                if (task.isSuccessful && task.result != null) {
                     Log.d("DEBUG", "LAST LOCATION COMPLETED ${task.result.latitude}  ${task.result.longitude}")
 
                     runBlocking {
