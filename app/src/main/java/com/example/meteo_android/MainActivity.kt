@@ -339,7 +339,7 @@ class MainActivity : ComponentActivity() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${dForecast.tempMin}°-${dForecast.tempMax}°",
+                        text = "${dForecast.tempMin}° to ${dForecast.tempMax}°",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         color = Color.White,
@@ -348,7 +348,7 @@ class MainActivity : ComponentActivity() {
                             .alpha(0.5f)
                             .background(Color.Magenta)
                     )
-                    Text(text = "${dForecast.rainAmount}",
+                    Text(text = "${dForecast.rainAmount} mm",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         modifier = modifier
@@ -356,7 +356,7 @@ class MainActivity : ComponentActivity() {
                             .alpha(0.5f)
                             .background(Color.Yellow))
                     Text(
-                        text = "${dForecast.stormProb}",
+                        text = "${dForecast.stormProb.toInt()}%",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         color = Color.White,
@@ -387,7 +387,7 @@ class MainActivity : ComponentActivity() {
                         modifier = modifier.fillMaxWidth(0.03f)
                     )
                     Text(
-                        text = "${d.rainAmount}mm",
+                        text = "${d.rainAmount} mm",
                         textAlign = TextAlign.Right,
                         modifier = modifier.fillMaxWidth(0.2f)
                     )
