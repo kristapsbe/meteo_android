@@ -215,6 +215,7 @@ class MainActivity : ComponentActivity() {
                     isLoading = false
                 }
             }
+            Toast.makeText(this, "Refreshed weather data", Toast.LENGTH_SHORT).show()
         }
     }
 
