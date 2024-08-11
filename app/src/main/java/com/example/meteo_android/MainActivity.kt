@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -99,6 +100,7 @@ data class MetadataInfo(
 // and time of last attempt (probably show last attempt, and have
 // thing that can be clicked to see last success)
 class MainActivity : ComponentActivity() {
+    private val responseFname = "response.json"
     private var cityForecast: CityForecastData? = null
     private var isLoading: Boolean = false
     private var wasLastScrollPosNegative: Boolean = false
@@ -142,6 +144,11 @@ class MainActivity : ComponentActivity() {
                     urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
 
                     val response = URL(urlString).readText()
+
+                    openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
+                        fos.write(response.toByteArray())
+                    }
+
                     cityForecast = Json.decodeFromString<CityForecastData>(response)
 
                     val currHForecast = currentInfo.value.hourlyForecast
@@ -212,6 +219,15 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        try {
+            val content = openFileInput(responseFname).bufferedReader().use { it.readText() }
+            Log.d("DEBUG", content)
+            Toast.makeText(this, "Successfully read data", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed to read data", Toast.LENGTH_SHORT).show()
+        }
+
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         runBlocking {
