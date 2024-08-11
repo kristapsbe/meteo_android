@@ -383,20 +383,22 @@ class MainActivity : ComponentActivity() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${stringToDateTime(d.day).dayOfWeek}".substring(0, 3),
-                        modifier = modifier.fillMaxWidth(0.125f)
+                        text = "${stringToDateTime(d.day).dayOfWeek}".substring(0, 1),
+                        modifier = modifier.fillMaxWidth(0.03f)
                     )
                     Text(
-                        text = "${d.rainAmount}",
-                        modifier = modifier.fillMaxWidth(0.14f)
-                    )
-                    Text(
-                        text = "${d.stormProb}",
-                        modifier = modifier.fillMaxWidth(0.166f)
-                    )
-                    Text(
-                        text = "${d.stormProb}",
+                        text = "${d.rainAmount}mm",
+                        textAlign = TextAlign.Right,
                         modifier = modifier.fillMaxWidth(0.2f)
+                    )
+                    Text(
+                        text = "${d.stormProb.toInt()}%",
+                        textAlign = TextAlign.Right,
+                        modifier = modifier.fillMaxWidth(0.2f)
+                    )
+                    Text(
+                        text = "",
+                        modifier = modifier.fillMaxWidth(0.05f)
                     )
                     Image(
                         painterResource(d.pictogramDay.getPictogram()),
@@ -410,13 +412,8 @@ class MainActivity : ComponentActivity() {
                         contentScale = ContentScale.FillBounds,
                         modifier = Modifier.fillMaxWidth(0.33f)
                     )
-                    Text(
-                        text = "${d.tempMax}°",
-                        textAlign = TextAlign.Right,
-                        modifier = modifier.fillMaxWidth(0.5f)
-                    )
-                    Text(
-                        text = "${d.tempMin}°",
+                    Text( // TODO: make width consistent
+                        text = "${d.tempMin}° to ${d.tempMax}°",
                         textAlign = TextAlign.Right,
                         modifier = modifier.fillMaxWidth(1.0f)
                     )
