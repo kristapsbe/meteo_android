@@ -133,6 +133,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // TODO: it's possible to get location in background process
+    // https://developer.android.com/develop/sensors-and-location/location/background
+    // I weather warnings are a sensible reason to ask for this
     private suspend fun fetchData(lat: Double = 56.8750, lon: Double = 23.8658) {
         if (!isLoading) {
             isLoading = true
@@ -225,7 +228,6 @@ class MainActivity : ComponentActivity() {
             Log.d("DEBUG", content)
             Toast.makeText(this, "Successfully read data", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            e.printStackTrace()
             Toast.makeText(this, "Failed to read data", Toast.LENGTH_SHORT).show()
         }
 
