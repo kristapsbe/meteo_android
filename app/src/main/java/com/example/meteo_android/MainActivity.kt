@@ -144,13 +144,15 @@ class MainActivity : ComponentActivity() {
                     val response = URL(urlString).readText()
                     cityForecast = Json.decodeFromString<CityForecastData>(response)
 
-                    var currTempTmp: Double = currentInfo.value.hourlyForecast?.currTemp ?: -999.0
-                    var feelsLikeTmp: Double = currentInfo.value.hourlyForecast?.feelsLike ?: -999.0
-                    var pictogramTmp: Int = currentInfo.value.hourlyForecast?.pictogram?.code ?: 0
+                    val currHForecast = currentInfo.value.hourlyForecast
+                    var currTempTmp: Double = currHForecast?.currTemp ?: -999.0
+                    var feelsLikeTmp: Double = currHForecast?.feelsLike ?: -999.0
+                    var pictogramTmp: Int = currHForecast?.pictogram?.code ?: 0
                     if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
-                        currTempTmp = cityForecast?.hourly_forecast?.get(0)?.vals?.get(1) ?: currTempTmp
-                        feelsLikeTmp = cityForecast?.hourly_forecast?.get(0)?.vals?.get(2) ?: feelsLikeTmp
-                        pictogramTmp = cityForecast?.hourly_forecast?.get(0)?.vals?.get(0)?.toInt() ?: pictogramTmp
+                        val currEntry = cityForecast?.hourly_forecast?.get(0)?.vals
+                        currTempTmp = currEntry?.get(1) ?: currTempTmp
+                        feelsLikeTmp = currEntry?.get(2) ?: feelsLikeTmp
+                        pictogramTmp = currEntry?.get(0)?.toInt() ?: pictogramTmp
                     }
                     var currDaily = currentInfo.value.dailyForecast
                     if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
@@ -280,96 +282,100 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun ShowCurrentInfo(modifier: Modifier) {
-        val cInfo by currentInfo
         Column(
             modifier = modifier
                 .height(400.dp)
                 .padding(0.dp, 50.dp)
         ) {
-            Row(
-                modifier = modifier
-                    .height(260.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
+            if (currentInfo.value.hourlyForecast != null) {
+                val hForecast: HourlyForecast = currentInfo.value.hourlyForecast!!
+                Row(
                     modifier = modifier
-                        .fillMaxWidth(0.4f)
-                        .height(160.dp)
+                        .height(260.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painterResource(cInfo.hourlyForecast?.pictogram?.getPictogram() ?: R.drawable.example_battery),
-                        contentDescription = "",
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp)
-                    )
-                }
-                Column(
-                    modifier = modifier
-                        .fillMaxWidth(1.0f)
-                        .padding(20.dp, 0.dp)
-                ) {
-                    Text(
-                        text = "${cInfo.hourlyForecast?.currTemp?.toInt()}°",
-                        fontSize = 100.sp,
-                        textAlign = TextAlign.Right,
+                    Column(
+                        modifier = modifier
+                            .fillMaxWidth(0.4f)
+                            .height(160.dp)
+                    ) {
+                        Image(
+                            painterResource(hForecast.pictogram.getPictogram() ?: R.drawable.example_battery),
+                            contentDescription = "",
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(10.dp)
+                        )
+                    }
+                    Column(
                         modifier = modifier
                             .fillMaxWidth(1.0f)
-                    )
-                    Text(
-                        text = "feels like ${cInfo.hourlyForecast?.feelsLike?.toInt()}°",
-                        fontSize = 20.sp,
-                        lineHeight = 40.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = modifier
-                            .fillMaxWidth(1.0f)
-                    )
+                            .padding(20.dp, 0.dp)
+                    ) {
+                        Text(
+                            text = "${hForecast.currTemp.toInt()}°",
+                            fontSize = 100.sp,
+                            textAlign = TextAlign.Right,
+                            modifier = modifier
+                                .fillMaxWidth(1.0f)
+                        )
+                        Text(
+                            text = "feels like ${hForecast.feelsLike.toInt()}°",
+                            fontSize = 20.sp,
+                            lineHeight = 40.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = modifier
+                                .fillMaxWidth(1.0f)
+                        )
+                    }
                 }
             }
-            Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
-                modifier = modifier
-                    .fillMaxHeight(1.0f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${cInfo.dailyForecast?.tempMin}°-${cInfo.dailyForecast?.tempMax}°",
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    color = Color.White,
+            if (currentInfo.value.dailyForecast != null) {
+                val dForecast: DailyForecast = currentInfo.value.dailyForecast!!
+                Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
                     modifier = modifier
-                        .fillMaxWidth(.333f)
-                        .alpha(0.5f)
-                        .background(Color.Magenta)
-                )
-                Text(text = "${cInfo.dailyForecast?.rainAmount}",
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = modifier
-                        .fillMaxWidth(.5f)
-                        .alpha(0.5f)
-                        .background(Color.Yellow))
-                Text(
-                    text = "${cInfo.dailyForecast?.stormProb}",
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    color = Color.White,
-                    modifier = modifier
-                        .fillMaxWidth(1.0f)
-                        .alpha(0.5f)
-                        .background(Color.Blue)
-                )
+                        .fillMaxHeight(1.0f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${dForecast.tempMin}°-${dForecast.tempMax}°",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                        modifier = modifier
+                            .fillMaxWidth(.333f)
+                            .alpha(0.5f)
+                            .background(Color.Magenta)
+                    )
+                    Text(text = "${dForecast.rainAmount}",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = modifier
+                            .fillMaxWidth(.5f)
+                            .alpha(0.5f)
+                            .background(Color.Yellow))
+                    Text(
+                        text = "${dForecast.stormProb}",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                        modifier = modifier
+                            .fillMaxWidth(1.0f)
+                            .alpha(0.5f)
+                            .background(Color.Blue)
+                    )
+                }
             }
         }
     }
 
     @Composable
     fun ShowDailyInfo(modifier: Modifier) {
-        val dInfo by dailyInfo
         Column(
             modifier = modifier.padding(10.dp, 0.dp)
         ) {
-            for (d in dInfo.dailyForecasts) {
+            for (d in dailyInfo.value.dailyForecasts) {
                 Row(
                     modifier = modifier
                         .fillMaxWidth(1.0f)
@@ -421,13 +427,12 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun ShowMetadataInfo(modifier: Modifier) {
-        val mInfo by metadataInfo
         Row(
             modifier = modifier.fillMaxWidth().padding(10.dp, 0.dp)
         ) {
             Text( // TODO: this is currently the time at which LVGMC last updated their forecast - I should probably show when the server last pulled data as well (?)
                 modifier = modifier.fillMaxWidth(),
-                text = formatDateTime(mInfo.lastUpdated),
+                text = formatDateTime(metadataInfo.value.lastUpdated),
                 textAlign = TextAlign.Right
             )
         }
