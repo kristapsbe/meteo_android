@@ -101,6 +101,7 @@ data class MetadataInfo(
 // thing that can be clicked to see last success)
 class MainActivity : ComponentActivity() {
     private val responseFname = "response.json"
+
     private var cityForecast: CityForecastData? = null
     private var isLoading: Boolean = false
     private var wasLastScrollPosNegative: Boolean = false
@@ -111,25 +112,69 @@ class MainActivity : ComponentActivity() {
     private val dailyInfo = mutableStateOf(DailyInfo(emptyList()))
     private val metadataInfo = mutableStateOf(MetadataInfo(null))
 
-    private fun getCoordsAndReload() {
-        if ( // TODO: do I have to recheck permissions every time? and what do I do if I'm not allowed access - default to Riga and let the user change cities?
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val lastLocation = fusedLocationClient.getLastLocation()
-            lastLocation.addOnCompleteListener { task ->
-                if (task.isSuccessful && task.result != null) {
-                    Log.d("DEBUG", "LAST LOCATION COMPLETED ${task.result.latitude}  ${task.result.longitude}")
+    private fun loadData() {
+        try {
+            val content = openFileInput(responseFname).bufferedReader().use { it.readText() }
+            cityForecast = Json.decodeFromString<CityForecastData>(content)
 
-                    runBlocking {
-                        fetchData()
-                        //fetchData(task.result.latitude, task.result.longitude)
-                    }
-                } else {
-                    Log.d("DEBUG", "LAST LOCATION FAILED")
-                }
+            val currHForecast = currentInfo.value.hourlyForecast
+            var currTempTmp: Double = currHForecast?.currTemp ?: -999.0
+            var feelsLikeTmp: Double = currHForecast?.feelsLike ?: -999.0
+            var pictogramTmp: Int = currHForecast?.pictogram?.code ?: 0
+            if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
+                val currEntry = cityForecast?.hourly_forecast?.get(0)?.vals
+                currTempTmp = currEntry?.get(1) ?: currTempTmp
+                feelsLikeTmp = currEntry?.get(2) ?: feelsLikeTmp
+                pictogramTmp = currEntry?.get(0)?.toInt() ?: pictogramTmp
             }
-            Log.d("DEBUG", "LAST LOCATION CALLED")
+            var currDaily = currentInfo.value.dailyForecast
+            if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
+                val currEntry = cityForecast?.daily_forecast?.get(0)
+                val tmpNewDaily = DailyForecast(
+                    currEntry?.time.toString(),
+                    currEntry?.vals?.get(4)?.toInt() ?: -999,
+                    currEntry?.vals?.get(5) ?: -999.0,
+                    currEntry?.vals?.get(3) ?: -999.0,
+                    currEntry?.vals?.get(2) ?: -999.0,
+                    WeatherPictogram((currEntry?.vals?.get(7) ?: -999).toInt()),
+                    WeatherPictogram((currEntry?.vals?.get(6) ?: -999).toInt())
+                )
+                currDaily = tmpNewDaily
+            }
+            Log.d("DEBUG", "DLOADED --- ${currTempTmp} | ${feelsLikeTmp} | ${pictogramTmp}")
+
+            currentInfo.value = CurrentInfo(
+                HourlyForecast(
+                    currTempTmp, feelsLikeTmp, WeatherPictogram(pictogramTmp)
+                ),
+                currDaily
+            )
+
+            var tmpDayList = dailyInfo.value.dailyForecasts
+            if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
+                val tmpNewList = cityForecast?.daily_forecast?.map {
+                    DailyForecast(
+                        it.time.toString(),
+                        it.vals.get(4).toInt(),
+                        it.vals.get(5),
+                        it.vals.get(3),
+                        it.vals.get(2),
+                        WeatherPictogram(it.vals.get(7).toInt()),
+                        WeatherPictogram(it.vals.get(6).toInt())
+                    )
+                } ?: emptyList()
+                tmpDayList = tmpNewList
+            }
+            dailyInfo.value = DailyInfo(tmpDayList)
+
+            var lastUpdatedTmp: LocalDateTime? = metadataInfo.value.lastUpdated
+            if (cityForecast?.last_updated != null) {
+                lastUpdatedTmp = stringToDateTime(cityForecast?.last_updated!!)
+            }
+            metadataInfo.value = MetadataInfo(lastUpdatedTmp)
+            Toast.makeText(this, "Successfully read data", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to read data", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -147,74 +192,17 @@ class MainActivity : ComponentActivity() {
                     urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
 
                     val response = URL(urlString).readText()
-
                     openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
                         fos.write(response.toByteArray())
                     }
-
-                    cityForecast = Json.decodeFromString<CityForecastData>(response)
-
-                    val currHForecast = currentInfo.value.hourlyForecast
-                    var currTempTmp: Double = currHForecast?.currTemp ?: -999.0
-                    var feelsLikeTmp: Double = currHForecast?.feelsLike ?: -999.0
-                    var pictogramTmp: Int = currHForecast?.pictogram?.code ?: 0
-                    if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
-                        val currEntry = cityForecast?.hourly_forecast?.get(0)?.vals
-                        currTempTmp = currEntry?.get(1) ?: currTempTmp
-                        feelsLikeTmp = currEntry?.get(2) ?: feelsLikeTmp
-                        pictogramTmp = currEntry?.get(0)?.toInt() ?: pictogramTmp
-                    }
-                    var currDaily = currentInfo.value.dailyForecast
-                    if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
-                        val currEntry = cityForecast?.daily_forecast?.get(0)
-                        val tmpNewDaily = DailyForecast(
-                            currEntry?.time.toString(),
-                            currEntry?.vals?.get(4)?.toInt() ?: -999,
-                            currEntry?.vals?.get(5) ?: -999.0,
-                            currEntry?.vals?.get(3) ?: -999.0,
-                            currEntry?.vals?.get(2) ?: -999.0,
-                            WeatherPictogram((currEntry?.vals?.get(7) ?: -999).toInt()),
-                            WeatherPictogram((currEntry?.vals?.get(6) ?: -999).toInt())
-                        )
-                        currDaily = tmpNewDaily
-                    }
-                    Log.d("DEBUG", "DLOADED --- ${currTempTmp} | ${feelsLikeTmp} | ${pictogramTmp}")
-
-                    currentInfo.value = CurrentInfo(
-                        HourlyForecast(
-                            currTempTmp, feelsLikeTmp, WeatherPictogram(pictogramTmp)
-                        ),
-                        currDaily
-                    )
-
-                    var tmpDayList = dailyInfo.value.dailyForecasts
-                    if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
-                        val tmpNewList = cityForecast?.daily_forecast?.map {
-                            DailyForecast(
-                                it.time.toString(),
-                                it.vals.get(4).toInt(),
-                                it.vals.get(5),
-                                it.vals.get(3),
-                                it.vals.get(2),
-                                WeatherPictogram(it.vals.get(7).toInt()),
-                                WeatherPictogram(it.vals.get(6).toInt())
-                            )
-                        } ?: emptyList()
-                        tmpDayList = tmpNewList
-                    }
-                    dailyInfo.value = DailyInfo(tmpDayList)
-
-                    var lastUpdatedTmp: LocalDateTime? = metadataInfo.value.lastUpdated
-                    if (cityForecast?.last_updated != null) {
-                        lastUpdatedTmp = stringToDateTime(cityForecast?.last_updated!!)
-                    }
-                    metadataInfo.value = MetadataInfo(lastUpdatedTmp)
+                    loadData()
                 } catch (e: Exception) {
                     // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                     println(e)
                     println(e.message)
                     cityForecast = null
                 } finally {
+                    Log.d("DEGUG", "FINALLY FINALLY FINALLY")
                     isLoading = false
                 }
             }
@@ -222,16 +210,30 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        try {
-            val content = openFileInput(responseFname).bufferedReader().use { it.readText() }
-            Log.d("DEBUG", content)
-            Toast.makeText(this, "Successfully read data", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "Failed to read data", Toast.LENGTH_SHORT).show()
+    private fun getCoordsAndReload() {
+        if ( // TODO: do I have to recheck permissions every time? and what do I do if I'm not allowed access - default to Riga and let the user change cities?
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationClient.lastLocation.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("DEBUG", "LAST LOCATION COMPLETED")
+                    // TODO: not getting lat lon for some reason anymore
+                    runBlocking {
+                        fetchData()
+                        //fetchData(task.result.latitude, task.result.longitude)
+                    }
+                } else {
+                    Log.d("DEBUG", "LAST LOCATION FAILED")
+                }
+            }
+            Log.d("DEBUG", "LAST LOCATION CALLED")
         }
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        loadData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         runBlocking {
             getCoordsAndReload()
