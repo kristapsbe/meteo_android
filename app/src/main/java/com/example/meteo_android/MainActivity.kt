@@ -54,46 +54,6 @@ import java.net.URL
 import kotlin.random.Random
 
 
-// classes for visualization data
-data class WeatherPictogram(
-    val code: Int
-) {
-    fun getPictogram(): Int {
-        // TODO: build dynamic icon based on the code
-        return R.drawable.example_battery
-    }
-}
-
-data class DailyForecast(
-    val day: String,
-    val rainAmount: Int,
-    val stormProb: Double,
-    val tempMin: Double,
-    val tempMax: Double,
-    val pictogramDay: WeatherPictogram,
-    val pictogramNight: WeatherPictogram
-)
-
-data class HourlyForecast(
-    val currTemp: Double,
-    val feelsLike: Double,
-    val pictogram: WeatherPictogram
-)
-
-data class CurrentInfo(
-    var hourlyForecast: HourlyForecast?,
-    var dailyForecast: DailyForecast?
-)
-
-data class DailyInfo(
-    var dailyForecasts: List<DailyForecast>
-)
-
-data class MetadataInfo(
-    var lastUpdated: LocalDateTime?
-)
-
-
 // TODO: look up how to add action for a drag from top
 // (and if there's a default spinny loading thing)
 // TODO: store both the time of last succesfull download
