@@ -68,73 +68,20 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private val currentInfo = mutableStateOf(CurrentInfo(null, null))
-    private val dailyInfo = mutableStateOf(DailyInfo(emptyList()))
-    private val metadataInfo = mutableStateOf(MetadataInfo(null))
+    private val displayInfo = mutableStateOf(DisplayInfo())
 
     private fun loadData() {
         try {
             val content = openFileInput(responseFname).bufferedReader().use { it.readText() }
             cityForecast = Json.decodeFromString<CityForecastData>(content)
-
-            val currHForecast = currentInfo.value.hourlyForecast
-            var currTempTmp: Double = currHForecast?.currTemp ?: -999.0
-            var feelsLikeTmp: Double = currHForecast?.feelsLike ?: -999.0
-            var pictogramTmp: Int = currHForecast?.pictogram?.code ?: 0
-            if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
-                val currEntry = cityForecast?.hourly_forecast?.get(0)?.vals
-                currTempTmp = currEntry?.get(1) ?: currTempTmp
-                feelsLikeTmp = currEntry?.get(2) ?: feelsLikeTmp
-                pictogramTmp = currEntry?.get(0)?.toInt() ?: pictogramTmp
+            val wasUpdated: Boolean = displayInfo.value.updateData(cityForecast)
+            if (wasUpdated) {
+                Toast.makeText(this, "Successfully read data", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Failed to read data", Toast.LENGTH_SHORT).show()
             }
-            var currDaily = currentInfo.value.dailyForecast
-            if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
-                val currEntry = cityForecast?.daily_forecast?.get(0)
-                val tmpNewDaily = DailyForecast(
-                    currEntry?.time.toString(),
-                    currEntry?.vals?.get(4)?.toInt() ?: -999,
-                    currEntry?.vals?.get(5) ?: -999.0,
-                    currEntry?.vals?.get(3) ?: -999.0,
-                    currEntry?.vals?.get(2) ?: -999.0,
-                    WeatherPictogram((currEntry?.vals?.get(7) ?: -999).toInt()),
-                    WeatherPictogram((currEntry?.vals?.get(6) ?: -999).toInt())
-                )
-                currDaily = tmpNewDaily
-            }
-            Log.d("DEBUG", "DLOADED --- ${currTempTmp} | ${feelsLikeTmp} | ${pictogramTmp}")
-
-            currentInfo.value = CurrentInfo(
-                HourlyForecast(
-                    currTempTmp, feelsLikeTmp, WeatherPictogram(pictogramTmp)
-                ),
-                currDaily
-            )
-
-            var tmpDayList = dailyInfo.value.dailyForecasts
-            if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
-                val tmpNewList = cityForecast?.daily_forecast?.map {
-                    DailyForecast(
-                        it.time.toString(),
-                        it.vals.get(4).toInt(),
-                        it.vals.get(5),
-                        it.vals.get(3),
-                        it.vals.get(2),
-                        WeatherPictogram(it.vals.get(7).toInt()),
-                        WeatherPictogram(it.vals.get(6).toInt())
-                    )
-                } ?: emptyList()
-                tmpDayList = tmpNewList
-            }
-            dailyInfo.value = DailyInfo(tmpDayList)
-
-            var lastUpdatedTmp: LocalDateTime? = metadataInfo.value.lastUpdated
-            if (cityForecast?.last_updated != null) {
-                lastUpdatedTmp = stringToDateTime(cityForecast?.last_updated!!)
-            }
-            metadataInfo.value = MetadataInfo(lastUpdatedTmp)
-            Toast.makeText(this, "Successfully read data", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Toast.makeText(this, "Failed to read data", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Failed to read data ERROR", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -211,11 +158,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun formatDateTime(time: LocalDateTime?): String {
-        val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
-        return format.format(time ?: LocalDateTime(1972,1,1,0,0,0))
-    }
-
     private fun stringToDateTime(dateString: String): LocalDateTime {
         return LocalDateTime(
             dateString.substring(0, 4).toInt(),
@@ -268,52 +210,50 @@ class MainActivity : ComponentActivity() {
                 .height(400.dp)
                 .padding(0.dp, 50.dp)
         ) {
-            if (currentInfo.value.hourlyForecast != null) {
-                val hForecast: HourlyForecast = currentInfo.value.hourlyForecast!!
-                Row(
+            val hForecast: TodayForecast = displayInfo.value.getTodayForecast()
+            Row(
+                modifier = modifier
+                    .height(260.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
                     modifier = modifier
-                        .height(260.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .fillMaxWidth(0.4f)
+                        .height(160.dp)
                 ) {
-                    Column(
-                        modifier = modifier
-                            .fillMaxWidth(0.4f)
-                            .height(160.dp)
-                    ) {
-                        Image(
-                            painterResource(hForecast.pictogram.getPictogram() ?: R.drawable.example_battery),
-                            contentDescription = "",
-                            contentScale = ContentScale.FillBounds,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(10.dp)
-                        )
-                    }
-                    Column(
+                    Image(
+                        painterResource(hForecast.pictogram.getPictogram()),
+                        contentDescription = "",
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp)
+                    )
+                }
+                Column(
+                    modifier = modifier
+                        .fillMaxWidth(1.0f)
+                        .padding(20.dp, 0.dp)
+                ) {
+                    Text(
+                        text = "${hForecast.currentTemp}°",
+                        fontSize = 100.sp,
+                        textAlign = TextAlign.Right,
                         modifier = modifier
                             .fillMaxWidth(1.0f)
-                            .padding(20.dp, 0.dp)
-                    ) {
-                        Text(
-                            text = "${hForecast.currTemp.toInt()}°",
-                            fontSize = 100.sp,
-                            textAlign = TextAlign.Right,
-                            modifier = modifier
-                                .fillMaxWidth(1.0f)
-                        )
-                        Text(
-                            text = "feels like ${hForecast.feelsLike.toInt()}°",
-                            fontSize = 20.sp,
-                            lineHeight = 40.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .fillMaxWidth(1.0f)
-                        )
-                    }
+                    )
+                    Text(
+                        text = "feels like ${hForecast.feelsLikeTemp}°",
+                        fontSize = 20.sp,
+                        lineHeight = 40.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = modifier
+                            .fillMaxWidth(1.0f)
+                    )
                 }
             }
-            if (currentInfo.value.dailyForecast != null) {
-                val dForecast: DailyForecast = currentInfo.value.dailyForecast!!
+            if (displayInfo.value.dailyForecasts.isNotEmpty()) {
+                val dForecast: DailyForecast = displayInfo.value.dailyForecasts[0]
                 Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
                     modifier = modifier
                         .fillMaxHeight(1.0f),
@@ -337,7 +277,7 @@ class MainActivity : ComponentActivity() {
                             .alpha(0.5f)
                             .background(Color.Yellow))
                     Text(
-                        text = "${dForecast.stormProb.toInt()}%",
+                        text = "${dForecast.stormProb}%",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         color = Color.White,
@@ -356,7 +296,7 @@ class MainActivity : ComponentActivity() {
         Column(
             modifier = modifier.padding(10.dp, 0.dp)
         ) {
-            for (d in dailyInfo.value.dailyForecasts) {
+            for (d in displayInfo.value.dailyForecasts) {
                 Row(
                     modifier = modifier
                         .fillMaxWidth(1.0f)
@@ -364,7 +304,7 @@ class MainActivity : ComponentActivity() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${stringToDateTime(d.day).dayOfWeek}".substring(0, 1),
+                        text = d.getDay().substring(0, 1),
                         modifier = modifier.fillMaxWidth(0.03f)
                     )
                     Text(
@@ -373,7 +313,7 @@ class MainActivity : ComponentActivity() {
                         modifier = modifier.fillMaxWidth(0.2f)
                     )
                     Text(
-                        text = "${d.stormProb.toInt()}%",
+                        text = "${d.stormProb}%",
                         textAlign = TextAlign.Right,
                         modifier = modifier.fillMaxWidth(0.2f)
                     )
@@ -410,7 +350,7 @@ class MainActivity : ComponentActivity() {
         ) {
             Text( // TODO: this is currently the time at which LVGMC last updated their forecast - I should probably show when the server last pulled data as well (?)
                 modifier = modifier.fillMaxWidth(),
-                text = formatDateTime(metadataInfo.value.lastUpdated),
+                text = displayInfo.value.getLastUpdated(),
                 textAlign = TextAlign.Right
             )
         }
