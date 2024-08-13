@@ -3,6 +3,7 @@ package com.example.meteo_android
 import android.util.Log
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.byUnicodePattern
+import kotlin.random.Random
 
 
 class WeatherPictogram(
@@ -35,7 +36,7 @@ class HourlyForecast(
 )
 
 class TodayForecast() {
-    val currentTemp: Int = 0
+    var currentTemp: Int = 0
     val feelsLikeTemp: Int = 0
     val pictogram: WeatherPictogram = WeatherPictogram(0)
 }
@@ -49,23 +50,9 @@ class DisplayInfo() {
     private val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
     var lastUpdated: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
 
-    private fun stringToDatetime(dateString: String): LocalDateTime {
-        return LocalDateTime(
-            dateString.substring(0, 4).toInt(),
-            dateString.substring(4, 6).toInt(),
-            dateString.substring(6, 8).toInt(),
-            dateString.substring(8, 10).toInt(),
-            dateString.substring(10, 12).toInt(),
-            0, 0
-        )
-    }
-
-    fun updateData(cityForecastData: CityForecastData?): Boolean {
+    constructor(cityForecastData: CityForecastData?) : this() {
         if (cityForecastData != null) {
             lastUpdated = stringToDatetime(cityForecastData.last_updated)
-            return true
-        } else {
-            return false
         }
         /*
         val currHForecast = currentInfo.value.hourlyForecast
@@ -126,9 +113,22 @@ class DisplayInfo() {
          */
     }
 
+    private fun stringToDatetime(dateString: String): LocalDateTime {
+        return LocalDateTime(
+            dateString.substring(0, 4).toInt(),
+            dateString.substring(4, 6).toInt(),
+            dateString.substring(6, 8).toInt(),
+            dateString.substring(8, 10).toInt(),
+            dateString.substring(10, 12).toInt(),
+            0, 0
+        )
+    }
+
     fun getTodayForecast(): TodayForecast {
         // TODO: fish out most recent relevant info
-        return TodayForecast()
+        val tmp = TodayForecast()
+        tmp.currentTemp = Random.nextInt(60)-30
+        return tmp
     }
 
     fun getLastUpdated(): String {

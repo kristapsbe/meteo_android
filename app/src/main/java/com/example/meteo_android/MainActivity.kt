@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -68,20 +67,15 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private val displayInfo = mutableStateOf(DisplayInfo())
+    private var displayInfo = mutableStateOf(DisplayInfo())
 
     private fun loadData() {
         try {
             val content = openFileInput(responseFname).bufferedReader().use { it.readText() }
             cityForecast = Json.decodeFromString<CityForecastData>(content)
-            val wasUpdated: Boolean = displayInfo.value.updateData(cityForecast)
-            if (wasUpdated) {
-                Toast.makeText(this, "Successfully read data", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Failed to read data", Toast.LENGTH_SHORT).show()
-            }
+            displayInfo.value = DisplayInfo(cityForecast)
         } catch (e: Exception) {
-            Toast.makeText(this, "Failed to read data ERROR", Toast.LENGTH_SHORT).show()
+            Log.d("DEBUG", "LOADDATA FAILED")
         }
     }
 
@@ -113,7 +107,6 @@ class MainActivity : ComponentActivity() {
                     isLoading = false
                 }
             }
-            Toast.makeText(this, "Refreshed weather data", Toast.LENGTH_SHORT).show()
         }
     }
 
