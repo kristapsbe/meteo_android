@@ -158,17 +158,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun stringToDateTime(dateString: String): LocalDateTime {
-        return LocalDateTime(
-            dateString.substring(0, 4).toInt(),
-            dateString.substring(4, 6).toInt(),
-            dateString.substring(6, 8).toInt(),
-            dateString.substring(8, 10).toInt(),
-            dateString.substring(10, 12).toInt(),
-            0, 0
-        )
-    }
-
     @Composable
     fun AllForecasts(data: CityForecastData?, modifier: Modifier = Modifier) {
         val scrollState = rememberScrollState()

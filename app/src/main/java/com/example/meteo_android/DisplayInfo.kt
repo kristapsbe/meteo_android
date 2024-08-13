@@ -49,8 +49,20 @@ class DisplayInfo() {
     private val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
     var lastUpdated: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
 
+    private fun stringToDatetime(dateString: String): LocalDateTime {
+        return LocalDateTime(
+            dateString.substring(0, 4).toInt(),
+            dateString.substring(4, 6).toInt(),
+            dateString.substring(6, 8).toInt(),
+            dateString.substring(8, 10).toInt(),
+            dateString.substring(10, 12).toInt(),
+            0, 0
+        )
+    }
+
     fun updateData(cityForecastData: CityForecastData?): Boolean {
         if (cityForecastData != null) {
+            lastUpdated = stringToDatetime(cityForecastData.last_updated)
             return true
         } else {
             return false
