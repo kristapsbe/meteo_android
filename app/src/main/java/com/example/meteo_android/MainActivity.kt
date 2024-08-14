@@ -192,7 +192,7 @@ class MainActivity : ComponentActivity() {
                 .height(400.dp)
                 .padding(0.dp, 50.dp)
         ) {
-            val hForecast: TodayForecast = displayInfo.value.getTodayForecast()
+            val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
             Row(
                 modifier = modifier
                     .height(260.dp),
@@ -259,7 +259,7 @@ class MainActivity : ComponentActivity() {
                             .alpha(0.5f)
                             .background(Color.Yellow))
                     Text(
-                        text = "${dForecast.stormProb}%",
+                        text = "${dForecast.rainProb}%",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         color = Color.White,
@@ -295,7 +295,7 @@ class MainActivity : ComponentActivity() {
                         modifier = modifier.fillMaxWidth(0.2f)
                     )
                     Text(
-                        text = "${d.stormProb}%",
+                        text = "${d.rainProb}%",
                         textAlign = TextAlign.Right,
                         modifier = modifier.fillMaxWidth(0.2f)
                     )

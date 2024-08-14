@@ -18,7 +18,7 @@ class WeatherPictogram(
 class DailyForecast(
     val date: LocalDateTime,
     val rainAmount: Int,
-    val stormProb: Int,
+    val rainProb: Int,
     val tempMin: Int,
     val tempMax: Int,
     val pictogramDay: WeatherPictogram,
@@ -35,12 +35,6 @@ class HourlyForecast(
     val pictogram: WeatherPictogram
 )
 
-class TodayForecast() {
-    var currentTemp: Int = 0
-    val feelsLikeTemp: Int = 0
-    val pictogram: WeatherPictogram = WeatherPictogram(0)
-}
-
 class DisplayInfo() {
     // Today
     var hourlyForecasts: List<HourlyForecast> = emptyList()
@@ -53,64 +47,26 @@ class DisplayInfo() {
     constructor(cityForecastData: CityForecastData?) : this() {
         if (cityForecastData != null) {
             lastUpdated = stringToDatetime(cityForecastData.last_updated)
-        }
-        /*
-        val currHForecast = currentInfo.value.hourlyForecast
-        var currTempTmp: Double = currHForecast?.currTemp ?: -999.0
-        var feelsLikeTmp: Double = currHForecast?.feelsLike ?: -999.0
-        var pictogramTmp: Int = currHForecast?.pictogram?.code ?: 0
-        if ((cityForecast?.hourly_forecast?.size ?: 0) > 0) {
-            val currEntry = cityForecast?.hourly_forecast?.get(0)?.vals
-            currTempTmp = currEntry?.get(1) ?: currTempTmp
-            feelsLikeTmp = currEntry?.get(2) ?: feelsLikeTmp
-            pictogramTmp = currEntry?.get(0)?.toInt() ?: pictogramTmp
-        }
-        var currDaily = currentInfo.value.dailyForecast
-        if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
-            val currEntry = cityForecast?.daily_forecast?.get(0)
-            val tmpNewDaily = DailyForecast(
-                currEntry?.time.toString(),
-                currEntry?.vals?.get(4)?.toInt() ?: -999,
-                currEntry?.vals?.get(5) ?: -999.0,
-                currEntry?.vals?.get(3) ?: -999.0,
-                currEntry?.vals?.get(2) ?: -999.0,
-                WeatherPictogram((currEntry?.vals?.get(7) ?: -999).toInt()),
-                WeatherPictogram((currEntry?.vals?.get(6) ?: -999).toInt())
-            )
-            currDaily = tmpNewDaily
-        }
-        Log.d("DEBUG", "DLOADED --- ${currTempTmp} | ${feelsLikeTmp} | ${pictogramTmp}")
-
-        currentInfo.value = CurrentInfo(
-            HourlyForecast(
-                currTempTmp, feelsLikeTmp, WeatherPictogram(pictogramTmp)
-            ),
-            currDaily
-        )
-
-        var tmpDayList = dailyInfo.value.dailyForecasts
-        if ((cityForecast?.daily_forecast?.size ?: 0) > 0) {
-            val tmpNewList = cityForecast?.daily_forecast?.map {
-                DailyForecast(
-                    it.time.toString(),
-                    it.vals.get(4).toInt(),
-                    it.vals.get(5),
-                    it.vals.get(3),
-                    it.vals.get(2),
-                    WeatherPictogram(it.vals.get(7).toInt()),
-                    WeatherPictogram(it.vals.get(6).toInt())
+            // TODO: I should get the ids dynamically
+            hourlyForecasts = cityForecastData.hourly_forecast.map { e ->
+                HourlyForecast(
+                    e.vals.get(1).toInt(),
+                    e.vals.get(2).toInt(),
+                    WeatherPictogram(e.vals.get(0).toInt())
                 )
-            } ?: emptyList()
-            tmpDayList = tmpNewList
+            }
+            dailyForecasts = cityForecastData.daily_forecast.map { e ->
+                DailyForecast(
+                    stringToDatetime(e.time.toString()),
+                    e.vals.get(4).toInt(),
+                    e.vals.get(5).toInt(),
+                    e.vals.get(3).toInt(),
+                    e.vals.get(2).toInt(),
+                    WeatherPictogram(e.vals.get(7).toInt()),
+                    WeatherPictogram(e.vals.get(6).toInt())
+                )
+            }
         }
-        dailyInfo.value = DailyInfo(tmpDayList)
-
-        var lastUpdatedTmp: LocalDateTime? = metadataInfo.value.lastUpdated
-        if (cityForecast?.last_updated != null) {
-            lastUpdatedTmp = stringToDateTime(cityForecast?.last_updated!!)
-        }
-        metadataInfo.value = MetadataInfo(lastUpdatedTmp)
-         */
     }
 
     private fun stringToDatetime(dateString: String): LocalDateTime {
@@ -124,11 +80,12 @@ class DisplayInfo() {
         )
     }
 
-    fun getTodayForecast(): TodayForecast {
+    fun getTodayForecast(): HourlyForecast {
         // TODO: fish out most recent relevant info
-        val tmp = TodayForecast()
-        tmp.currentTemp = Random.nextInt(60)-30
-        return tmp
+        if (hourlyForecasts.isNotEmpty()) {
+            return hourlyForecasts.get(0)
+        }
+        return HourlyForecast(0, 0, WeatherPictogram(0))
     }
 
     fun getLastUpdated(): String {
