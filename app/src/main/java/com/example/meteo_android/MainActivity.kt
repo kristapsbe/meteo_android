@@ -1,6 +1,11 @@
 package com.example.meteo_android
 
+import ForecastRefreshWorker
 import android.Manifest
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
+import android.content.ComponentName
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -39,6 +44,8 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -47,6 +54,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.net.URL
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 
@@ -146,6 +154,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        // https://medium.com/@arjunnarikkuni00/workmanager-using-kotlin-android-c72660afef31
+        val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.SECONDS).build()
+        WorkManager.getInstance(applicationContext).enqueue(workRequest)
     }
 
     @Composable
@@ -325,7 +336,9 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ShowMetadataInfo(modifier: Modifier) {
         Row(
-            modifier = modifier.fillMaxWidth().padding(10.dp, 0.dp)
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp)
         ) {
             Text( // TODO: this is currently the time at which LVGMC last updated their forecast - I should probably show when the server last pulled data as well (?)
                 modifier = modifier.fillMaxWidth(),
