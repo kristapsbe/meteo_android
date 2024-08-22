@@ -18,12 +18,14 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
     private var notificationBuilder: NotificationCompat.Builder? = null
 
     init {
+        Log.i("INIT", "STARTED")
         val pendingIntent = PendingIntent.getActivity(
             context, 0, Intent(
                 context,
                 MainActivity::class.java
             ),
-            PendingIntent.FLAG_UPDATE_CURRENT
+            // https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         notificationBuilder =
@@ -37,6 +39,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 .setOngoing(true)
 
         notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+        Log.i("INIT", "DONE")
     }
 
     override fun doWork(): Result {

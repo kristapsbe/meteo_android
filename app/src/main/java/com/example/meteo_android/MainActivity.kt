@@ -159,6 +159,7 @@ class MainActivity : ComponentActivity() {
         // looks like I should be able to update stuff from the worker
         // https://stackoverflow.com/questions/59762077/how-can-i-access-objects-from-my-activity-in-a-worker-to-periodically-change-a
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.SECONDS).build()
+        Log.i("INIT", "ENQUEUE")
         WorkManager.getInstance(applicationContext).enqueue(workRequest)
     }
 
