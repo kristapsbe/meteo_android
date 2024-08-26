@@ -1,9 +1,7 @@
 package com.example.meteo_android
 
-import android.util.Log
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.byUnicodePattern
-import kotlin.random.Random
 
 
 class WeatherPictogram(

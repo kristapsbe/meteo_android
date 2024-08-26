@@ -2,10 +2,6 @@ package com.example.meteo_android
 
 import ForecastRefreshWorker
 import android.Manifest
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
-import android.content.ComponentName
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -95,7 +91,7 @@ class MainActivity : ComponentActivity() {
                     val randTemp = String.format("%.1f", Random.nextInt(60)-30+Random.nextDouble())
 
                     var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
-                    //urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
+                    urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
 
                     val response = URL(urlString).readText()
                     openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
