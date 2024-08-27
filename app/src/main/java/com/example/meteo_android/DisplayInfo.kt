@@ -48,20 +48,20 @@ class DisplayInfo() {
             // TODO: I should get the ids dynamically
             hourlyForecasts = cityForecastData.hourly_forecast.map { e ->
                 HourlyForecast(
-                    e.vals.get(1).toInt(),
-                    e.vals.get(2).toInt(),
-                    WeatherPictogram(e.vals.get(0).toInt())
+                    e.vals[1].toInt(),
+                    e.vals[2].toInt(),
+                    WeatherPictogram(e.vals[0].toInt())
                 )
             }
             dailyForecasts = cityForecastData.daily_forecast.map { e ->
                 DailyForecast(
                     stringToDatetime(e.time.toString()),
-                    e.vals.get(4).toInt(),
-                    e.vals.get(5).toInt(),
-                    e.vals.get(3).toInt(),
-                    e.vals.get(2).toInt(),
-                    WeatherPictogram(e.vals.get(7).toInt()),
-                    WeatherPictogram(e.vals.get(6).toInt())
+                    e.vals[4].toInt(),
+                    e.vals[5].toInt(),
+                    e.vals[3].toInt(),
+                    e.vals[2].toInt(),
+                    WeatherPictogram(e.vals[7].toInt()),
+                    WeatherPictogram(e.vals[6].toInt())
                 )
             }
         }
@@ -81,7 +81,7 @@ class DisplayInfo() {
     fun getTodayForecast(): HourlyForecast {
         // TODO: fish out most recent relevant info
         if (hourlyForecasts.isNotEmpty()) {
-            return hourlyForecasts.get(0)
+            return hourlyForecasts[0]
         }
         return HourlyForecast(0, 0, WeatherPictogram(0))
     }

@@ -1,5 +1,7 @@
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import androidx.work.Data
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 
@@ -10,7 +12,10 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         // https://developer.android.com/develop/ui/views/notifications
     }
 
+    @SuppressLint("RestrictedApi")
     override fun doWork(): Result {
-        return Result.success()
+        Log.i("doWork", "doWork")
+        val data = Data.Builder().put("a", "b").build()
+        return Result.success(data)
     }
 }

@@ -1,7 +1,7 @@
 # TODO
 
-- [ ] Warning visuals in main view
 - [ ] Update data and propagate via notifs
+- [ ] Warning visuals in main view
 - [ ] Fix min max curr temp etc for today
 - [ ] Set up warning notifs
 - [ ] Fix weather icons (using [this](https://github.com/philanri/weather-icons), [this](https://github.com/Makin-Things/weather-icons) or [this](https://github.com/Grabstertv/WeatherNowIcons) would be cool)

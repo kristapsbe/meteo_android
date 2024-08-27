@@ -40,7 +40,10 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.core.content.PackageManagerCompat.LOG_TAG
+import androidx.lifecycle.Observer
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -154,9 +157,17 @@ class MainActivity : ComponentActivity() {
         // https://medium.com/@arjunnarikkuni00/workmanager-using-kotlin-android-c72660afef31
         // looks like I should be able to update stuff from the worker
         // https://stackoverflow.com/questions/59762077/how-can-i-access-objects-from-my-activity-in-a-worker-to-periodically-change-a
+        // Assuming WorkManager is set up in your project
+        //val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+        //val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.SECONDS).setConstraints(constraints).build()
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.SECONDS).build()
-        Log.i("INIT", "ENQUEUE")
-        WorkManager.getInstance(applicationContext).enqueue(workRequest)
+        val workManager = WorkManager.getInstance(this)
+        workManager.enqueue(workRequest)
+
+        workManager.getWorkInfoByIdLiveData(workRequest.id).observe(this, Observer {
+            // TODO: this doesn't actually work - I never get results (and I don't observe anything past the first invocation of the worker)
+            Log.i("OBS", "${it.state} | ${it.outputData}")
+        })
     }
 
     @Composable
