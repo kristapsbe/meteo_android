@@ -1,3 +1,18 @@
+# TODO
+
+- [ ] Warning visuals in main view
+- [ ] Update data and propagate via notifs
+- [ ] Fix min max curr temp etc for today
+- [ ] Set up warning notifs
+- [ ] Fix weather icons (using [this](https://github.com/philanri/weather-icons) would be cool)
+- [ ] Set up widget
+- [ ] Set up location switch in case download fails
+- [ ] Add visual to indicate update
+- [ ] Add conf view to set update freq and server
+- [ ] Add logic for working with no notifs or location
+
+# Meteo
+
 consume data from https://github.com/kristapsbe/meteo_server
 
 https://stackoverflow.com/questions/5806220/how-to-connect-to-my-http-localhost-web-server-from-android-emulator
