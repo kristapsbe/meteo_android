@@ -4,7 +4,7 @@
 - [ ] Update data and propagate via notifs
 - [ ] Fix min max curr temp etc for today
 - [ ] Set up warning notifs
-- [ ] Fix weather icons (using [this](https://github.com/philanri/weather-icons) would be cool)
+- [ ] Fix weather icons (using [this](https://github.com/philanri/weather-icons) or [this](https://github.com/Grabstertv/WeatherNowIcons) would be cool)
 - [ ] Set up widget
 - [ ] Set up location switch in case download fails
 - [ ] Add visual to indicate update
