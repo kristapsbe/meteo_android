@@ -1,6 +1,11 @@
 package com.example.meteo_android
 
+import android.app.Activity.MODE_PRIVATE
+import android.content.Context
+import android.util.Log
 import kotlinx.serialization.Serializable
+import java.net.URL
+import kotlin.random.Random
 
 
 @Serializable
@@ -31,3 +36,25 @@ data class CityForecastData(
     val all_warnings: HashMap<String, String>,
     val last_updated: String
 )
+
+
+class CityForecastDataDownloader {
+    companion object {
+        val responseFname = "response.json"
+
+        fun downloadData(src: String, ctx: Context) {
+            Log.i("DL", "downloadData - $src")
+
+            val lat: Double = 56.8750
+            val lon: Double = 23.8658
+
+            val randTemp = String.format("%.1f", Random.nextInt(60)-30+ Random.nextDouble())
+            var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
+            urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
+            val response = URL(urlString).readText()
+            ctx.openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
+                fos.write(response.toByteArray())
+            }
+        }
+    }
+}

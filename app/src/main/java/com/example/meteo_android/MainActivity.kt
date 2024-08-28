@@ -1,6 +1,5 @@
 package com.example.meteo_android
 
-import ForecastRefreshWorker
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -40,10 +39,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
-import androidx.core.content.PackageManagerCompat.LOG_TAG
-import androidx.lifecycle.Observer
 import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -52,9 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import java.net.URL
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 
 // TODO: look up how to add action for a drag from top
@@ -63,8 +57,6 @@ import kotlin.random.Random
 // and time of last attempt (probably show last attempt, and have
 // thing that can be clicked to see last success)
 class MainActivity : ComponentActivity() {
-    private val responseFname = "response.json"
-
     private var cityForecast: CityForecastData? = null
     private var isLoading: Boolean = false
     private var wasLastScrollPosNegative: Boolean = false
@@ -75,7 +67,7 @@ class MainActivity : ComponentActivity() {
 
     private fun loadData() {
         try {
-            val content = openFileInput(responseFname).bufferedReader().use { it.readText() }
+            val content = openFileInput(CityForecastDataDownloader.responseFname).bufferedReader().use { it.readText() }
             cityForecast = Json.decodeFromString<CityForecastData>(content)
             displayInfo.value = DisplayInfo(cityForecast)
         } catch (e: Exception) {
@@ -91,15 +83,7 @@ class MainActivity : ComponentActivity() {
             isLoading = true
             withContext(Dispatchers.IO) {
                 try {
-                    val randTemp = String.format("%.1f", Random.nextInt(60)-30+Random.nextDouble())
-
-                    var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
-                    urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
-
-                    val response = URL(urlString).readText()
-                    openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
-                        fos.write(response.toByteArray())
-                    }
+                    CityForecastDataDownloader.downloadData("fetchData", applicationContext)
                     loadData()
                 } catch (e: Exception) {
                     // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
@@ -159,15 +143,10 @@ class MainActivity : ComponentActivity() {
         // https://stackoverflow.com/questions/59762077/how-can-i-access-objects-from-my-activity-in-a-worker-to-periodically-change-a
         // Assuming WorkManager is set up in your project
         //val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-        //val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.SECONDS).setConstraints(constraints).build()
+        //val workRequest = PeriodicWorkRequestBuilder<com.example.meteo_android.ForecastRefreshWorker>(15, TimeUnit.SECONDS).setConstraints(constraints).build()
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.SECONDS).build()
         val workManager = WorkManager.getInstance(this)
         workManager.enqueue(workRequest)
-
-        workManager.getWorkInfoByIdLiveData(workRequest.id).observe(this, Observer {
-            // TODO: this doesn't actually work - I never get results (and I don't observe anything past the first invocation of the worker)
-            Log.i("OBS", "${it.state} | ${it.outputData}")
-        })
     }
 
     @Composable
