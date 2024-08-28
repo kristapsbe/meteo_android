@@ -353,6 +353,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     override fun onWorkerResult(result: String?) {
+        // TODO: loadData() here
         Log.i("WR", "Worker Result: $result")
     }
 }
