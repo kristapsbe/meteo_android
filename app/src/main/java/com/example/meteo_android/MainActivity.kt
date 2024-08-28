@@ -1,9 +1,11 @@
 package com.example.meteo_android
 
 import android.Manifest
+import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -51,12 +53,20 @@ import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 
 
+interface WorkerCallback {
+    fun onWorkerResult(result: String?)
+}
+
+class MyApplication : Application() {
+    var workerCallback: WorkerCallback? = null
+}
+
 // TODO: look up how to add action for a drag from top
 // (and if there's a default spinny loading thing)
 // TODO: store both the time of last succesfull download
 // and time of last attempt (probably show last attempt, and have
 // thing that can be clicked to see last success)
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), WorkerCallback {
     private var cityForecast: CityForecastData? = null
     private var isLoading: Boolean = false
     private var wasLastScrollPosNegative: Boolean = false
@@ -137,6 +147,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        val app = applicationContext as MyApplication
+        app.workerCallback = this
+
         // TODO
         // https://medium.com/@arjunnarikkuni00/workmanager-using-kotlin-android-c72660afef31
         // looks like I should be able to update stuff from the worker
@@ -336,5 +350,9 @@ class MainActivity : ComponentActivity() {
                 textAlign = TextAlign.Right
             )
         }
+    }
+
+    override fun onWorkerResult(result: String?) {
+        Log.i("WR", "Worker Result: $result")
     }
 }
