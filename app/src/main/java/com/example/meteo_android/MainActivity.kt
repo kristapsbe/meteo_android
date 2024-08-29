@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -49,7 +48,6 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 
 
@@ -61,8 +59,6 @@ class MyApplication : Application() {
     var workerCallback: WorkerCallback? = null
 }
 
-// TODO: look up how to add action for a drag from top
-// (and if there's a default spinny loading thing)
 // TODO: store both the time of last succesfull download
 // and time of last attempt (probably show last attempt, and have
 // thing that can be clicked to see last success)
@@ -83,7 +79,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             isLoading = true
             withContext(Dispatchers.IO) {
                 try {
-                    val cityForecast = CityForecastDataDownloader.downloadData("fetchData", applicationContext)
+                    val cityForecast = CityForecastDataDownloader.downloadData("fetchData", applicationContext, lat, lon)
                     Log.i("FD", "$cityForecast")
                     if (cityForecast != null) {
                         displayInfo.value = DisplayInfo(cityForecast)
@@ -143,13 +139,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val app = applicationContext as MyApplication
         app.workerCallback = this
 
-        // TODO
-        // https://medium.com/@arjunnarikkuni00/workmanager-using-kotlin-android-c72660afef31
-        // looks like I should be able to update stuff from the worker
-        // https://stackoverflow.com/questions/59762077/how-can-i-access-objects-from-my-activity-in-a-worker-to-periodically-change-a
-        // Assuming WorkManager is set up in your project
-        //val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-        //val workRequest = PeriodicWorkRequestBuilder<com.example.meteo_android.ForecastRefreshWorker>(15, TimeUnit.SECONDS).setConstraints(constraints).build()
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.SECONDS).build()
         val workManager = WorkManager.getInstance(this)
         workManager.enqueue(workRequest)

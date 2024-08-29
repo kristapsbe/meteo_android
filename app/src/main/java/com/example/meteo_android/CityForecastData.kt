@@ -43,19 +43,20 @@ class CityForecastDataDownloader {
     companion object {
         val responseFname = "response.json"
 
-        fun downloadData(src: String, ctx: Context): CityForecastData? {
+        fun downloadData(src: String, ctx: Context, lat: Double = 56.8750, lon: Double = 23.8658): CityForecastData? {
             Log.i("DL", "downloadData - $src")
 
-            val lat: Double = 56.8750
-            val lon: Double = 23.8658
-
-            val randTemp = String.format("%.1f", Random.nextInt(60)-30+ Random.nextDouble())
-            var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
-            //urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
-            val response = URL(urlString).readText()
-            Log.i("RRSP", "$response")
-            ctx.openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
-                fos.write(response.toByteArray())
+            try {
+                val randTemp = String.format("%.1f", Random.nextInt(60)-30+ Random.nextDouble())
+                var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
+                //urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
+                val response = URL(urlString).readText()
+                Log.i("RRSP", "$response")
+                ctx.openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
+                    fos.write(response.toByteArray())
+                }
+            } catch (e: Exception) {
+                Log.d("DEBUG", "DOWNLOAD FAILED $e")
             }
 
             var cityForecast: CityForecastData? = null
