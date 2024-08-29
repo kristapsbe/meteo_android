@@ -4,6 +4,7 @@ import android.app.Activity.MODE_PRIVATE
 import android.content.Context
 import android.util.Log
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.net.URL
 import kotlin.random.Random
 
@@ -42,7 +43,7 @@ class CityForecastDataDownloader {
     companion object {
         val responseFname = "response.json"
 
-        fun downloadData(src: String, ctx: Context) {
+        fun downloadData(src: String, ctx: Context): CityForecastData? {
             Log.i("DL", "downloadData - $src")
 
             val lat: Double = 56.8750
@@ -50,11 +51,22 @@ class CityForecastDataDownloader {
 
             val randTemp = String.format("%.1f", Random.nextInt(60)-30+ Random.nextDouble())
             var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
-            urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
+            //urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
             val response = URL(urlString).readText()
+            Log.i("RRSP", "$response")
             ctx.openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
                 fos.write(response.toByteArray())
             }
+
+            var cityForecast: CityForecastData? = null
+            try {
+                val content = ctx.openFileInput(responseFname).bufferedReader().use { it.readText() }
+                Log.i("CRSP", "$content")
+                cityForecast = Json.decodeFromString<CityForecastData>(content)
+            } catch (e: Exception) {
+                Log.d("DEBUG", "LOADDATA FAILED $e")
+            }
+            return cityForecast
         }
     }
 }

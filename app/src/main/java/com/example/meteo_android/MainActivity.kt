@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit
 
 
 interface WorkerCallback {
-    fun onWorkerResult(result: String?)
+    fun onWorkerResult(cityForecast: CityForecastData?, result: String?)
 }
 
 class MyApplication : Application() {
@@ -75,16 +75,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     private var displayInfo = mutableStateOf(DisplayInfo())
 
-    private fun loadData() {
-        try {
-            val content = openFileInput(CityForecastDataDownloader.responseFname).bufferedReader().use { it.readText() }
-            cityForecast = Json.decodeFromString<CityForecastData>(content)
-            displayInfo.value = DisplayInfo(cityForecast)
-        } catch (e: Exception) {
-            Log.d("DEBUG", "LOADDATA FAILED")
-        }
-    }
-
     // TODO: it's possible to get location in background process
     // https://developer.android.com/develop/sensors-and-location/location/background
     // I weather warnings are a sensible reason to ask for this
@@ -93,8 +83,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             isLoading = true
             withContext(Dispatchers.IO) {
                 try {
-                    CityForecastDataDownloader.downloadData("fetchData", applicationContext)
-                    loadData()
+                    val cityForecast = CityForecastDataDownloader.downloadData("fetchData", applicationContext)
+                    Log.i("FD", "$cityForecast")
+                    if (cityForecast != null) {
+                        displayInfo.value = DisplayInfo(cityForecast)
+                    }
                 } catch (e: Exception) {
                     // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                     println(e)
@@ -131,7 +124,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         runBlocking {
             getCoordsAndReload()
@@ -352,8 +344,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         }
     }
 
-    override fun onWorkerResult(result: String?) {
-        // TODO: loadData() here
+    override fun onWorkerResult(cityForecast: CityForecastData?, result: String?) {
         Log.i("WR", "Worker Result: $result")
+        displayInfo.value = DisplayInfo(cityForecast)
     }
 }

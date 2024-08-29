@@ -7,13 +7,13 @@ import androidx.work.WorkerParameters
 
 class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     override fun doWork(): Result {
-        CityForecastDataDownloader.downloadData("doWork", applicationContext)
+        val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext)
 
         // Get the callback from Application class and invoke it
         val result = "Result from Worker"
         val app = applicationContext as MyApplication
         val callback = app.workerCallback
-        callback?.onWorkerResult(result)
+        callback?.onWorkerResult(cityForecast, result)
 
         // TODO: push notifications if weather warnings appear, use a file to keep track of what we've already warned about?
         return Result.success()
