@@ -34,7 +34,7 @@ data class CityForecastData(
     val hourly_forecast: List<ForecastData>,
     val daily_forecast: List<ForecastData>,
     val warnings: List<WarningData>,
-    val all_warnings: HashMap<String, String>,
+    val all_warnings: HashMap<String, Int>,
     val last_updated: String
 )
 
@@ -49,7 +49,7 @@ class CityForecastDataDownloader {
             try {
                 val randTemp = String.format("%.1f", Random.nextInt(60)-30+ Random.nextDouble())
                 var urlString = "http://10.0.2.2:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
-                //urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
+                urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
                 val response = URL(urlString).readText()
                 Log.i("RRSP", "$response")
                 ctx.openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
