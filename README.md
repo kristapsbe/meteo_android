@@ -26,6 +26,8 @@ https://github.com/Kotlin/kandy
 https://github.com/JetBrains/lets-plot-kotlin
 
 icons
+https://github.com/kickstandapps/WeatherIcons?tab=readme-ov-file
+https://github.com/dps/android-vector-climacons/tree/master
 https://m2.material.io/design/iconography/system-icons.html#design-principles
 jetpack compose - helpful docs
 https://developer.android.com/develop/ui/compose/mental-model
