@@ -2,7 +2,11 @@ package com.example.meteo_android
 
 import android.Manifest
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -40,6 +44,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.work.PeriodicWorkRequest.Companion.MIN_PERIODIC_INTERVAL_MILLIS
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
@@ -139,7 +144,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val app = applicationContext as MyApplication
         app.workerCallback = this
 
-        val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.SECONDS).build()
+        createNotificationChannel(applicationContext)
+
+        val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(MIN_PERIODIC_INTERVAL_MILLIS, TimeUnit.MILLISECONDS).build()
         val workManager = WorkManager.getInstance(this)
         workManager.enqueue(workRequest)
     }
@@ -330,6 +337,23 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 text = displayInfo.value.getLastUpdated(),
                 textAlign = TextAlign.Right
             )
+        }
+    }
+
+    private val CHANNEL_ID = "YOUR_CHANNEL_ID"
+
+    fun createNotificationChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Your Channel Name"
+            val descriptionText = "Your Channel Description"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
