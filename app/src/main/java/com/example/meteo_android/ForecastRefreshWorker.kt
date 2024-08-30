@@ -14,16 +14,32 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.google.android.gms.location.LocationServices
 
 
 class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     override fun doWork(): Result {
+        val app = applicationContext as MyApplication
+        val callback = app.workerCallback
+
+        if ( // TODO: do I have to recheck permissions every time? and what do I do if I'm not allowed access - default to Riga and let the user change cities?
+            ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
+            LocationServices.getFusedLocationProviderClient(applicationContext).lastLocation.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("DEBUG", "doWork -> LAST LOCATION COMPLETED ${task.result.latitude} ${task.result.longitude}")
+                } else {
+                    Log.d("DEBUG", "doWork -> LAST LOCATION FAILED")
+                }
+            }
+            Log.d("DEBUG", "doWork -> LAST LOCATION CALLED")
+        }
+
         val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext)
 
         // Get the callback from Application class and invoke it
         val result = "Result from Worker"
-        val app = applicationContext as MyApplication
-        val callback = app.workerCallback
         callback?.onWorkerResult(cityForecast, result)
 
         if (cityForecast != null) {
@@ -33,7 +49,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
         // TODO: push notifications if weather warnings appear, use a file to keep track of what we've already warned about?
         Log.i("doWork", "showNotification")
-        showNotification("Your Title", "Your Message")
+        //showNotification("Your Title", "Your Message")
 
         return Result.success()
     }
@@ -43,7 +59,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val appWidgetManager = AppWidgetManager.getInstance(context)
 
         // Retrieve the widget IDs
-        val widget: ComponentName = ComponentName(context, ForecastWidget::class.java)
+        val widget = ComponentName(context, ForecastWidget::class.java)
         val widgetIds = appWidgetManager.getAppWidgetIds(widget)
 
         // Create an intent to update the widget

@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var isLoading: Boolean = false
     private var wasLastScrollPosNegative: Boolean = false
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var displayInfo = mutableStateOf(DisplayInfo())
 
@@ -109,8 +109,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         ) {
             fusedLocationClient.lastLocation.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Log.d("DEBUG", "LAST LOCATION COMPLETED")
-                    // TODO: not getting lat lon for some reason anymore
+                    Log.d("DEBUG", "LAST LOCATION COMPLETED ${task.result.latitude} ${task.result.longitude}")
+
                     runBlocking {
                         fetchData()
                         //fetchData(task.result.latitude, task.result.longitude)
