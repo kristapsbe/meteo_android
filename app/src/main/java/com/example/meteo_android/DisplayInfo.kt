@@ -5,7 +5,7 @@ import kotlinx.datetime.format.byUnicodePattern
 
 
 class WeatherPictogram(
-    val code: Int
+    private val code: Int
 ) {
     companion object {
         val iconMapping: HashMap<Int, Int> = hashMapOf(
@@ -38,7 +38,7 @@ class WeatherPictogram(
 }
 
 class DailyForecast(
-    val date: LocalDateTime,
+    private val date: LocalDateTime,
     val rainAmount: Int,
     val rainProb: Int,
     val tempMin: Int,

@@ -41,7 +41,7 @@ data class CityForecastData(
 
 class CityForecastDataDownloader {
     companion object {
-        val responseFname = "response.json"
+        private const val RESPONSE_FILE = "response.json"
 
         fun downloadData(src: String, ctx: Context, lat: Double = 56.8750, lon: Double = 23.8658): CityForecastData? {
             Log.i("DL", "downloadData - $src")
@@ -52,7 +52,7 @@ class CityForecastDataDownloader {
                 urlString = "http://10.0.2.2:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
                 val response = URL(urlString).readText()
                 Log.i("RRSP", "$response")
-                ctx.openFileOutput(responseFname, MODE_PRIVATE).use { fos ->
+                ctx.openFileOutput(RESPONSE_FILE, MODE_PRIVATE).use { fos ->
                     fos.write(response.toByteArray())
                 }
             } catch (e: Exception) {
@@ -61,7 +61,7 @@ class CityForecastDataDownloader {
 
             var cityForecast: CityForecastData? = null
             try {
-                val content = ctx.openFileInput(responseFname).bufferedReader().use { it.readText() }
+                val content = ctx.openFileInput(RESPONSE_FILE).bufferedReader().use { it.readText() }
                 Log.i("CRSP", "$content")
                 cityForecast = Json.decodeFromString<CityForecastData>(content)
             } catch (e: Exception) {

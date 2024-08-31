@@ -71,7 +71,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val WEATHER_WARNINGS_CHANNEL_ID = "WEATHER_WARNINGS"
     }
 
-    private var cityForecast: CityForecastData? = null
     private var isLoading: Boolean = false
     private var wasLastScrollPosNegative: Boolean = false
 
@@ -92,7 +91,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 } catch (e: Exception) {
                     println(e)
                     println(e.message)
-                    cityForecast = null
                 } finally {
                     Log.d("DEGUG", "FINALLY FINALLY FINALLY")
                     isLoading = false
