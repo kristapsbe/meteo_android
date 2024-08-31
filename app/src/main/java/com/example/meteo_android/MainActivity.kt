@@ -6,7 +6,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -68,6 +67,10 @@ class MyApplication : Application() {
 // and time of last attempt (probably show last attempt, and have
 // thing that can be clicked to see last success)
 class MainActivity : ComponentActivity(), WorkerCallback {
+    companion object {
+        const val WEATHER_WARNINGS_CHANNEL_ID = "WEATHER_WARNINGS"
+    }
+
     private var cityForecast: CityForecastData? = null
     private var isLoading: Boolean = false
     private var wasLastScrollPosNegative: Boolean = false
@@ -76,9 +79,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     private var displayInfo = mutableStateOf(DisplayInfo())
 
-    // TODO: it's possible to get location in background process
-    // https://developer.android.com/develop/sensors-and-location/location/background
-    // I weather warnings are a sensible reason to ask for this
     private suspend fun fetchData(lat: Double = 56.8750, lon: Double = 23.8658) {
         if (!isLoading) {
             isLoading = true
@@ -90,7 +90,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         displayInfo.value = DisplayInfo(cityForecast)
                     }
                 } catch (e: Exception) {
-                    // https://stackoverflow.com/questions/67771324/kotlin-networkonmainthreadexception-error-when-trying-to-run-inetaddress-isreac
                     println(e)
                     println(e.message)
                     cityForecast = null
@@ -136,7 +135,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AllForecasts(cityForecast)
+                    AllForecasts()
                 }
             }
         }
@@ -152,7 +151,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     @Composable
-    fun AllForecasts(data: CityForecastData?, modifier: Modifier = Modifier) {
+    fun AllForecasts() {
         val scrollState = rememberScrollState()
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
@@ -179,27 +178,27 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 .background(Color(0xFF82CAFF)) // Sky Blue
                 .verticalScroll(state = scrollState)
         ) {
-            ShowCurrentInfo(modifier)
-            ShowDailyInfo(modifier)
-            ShowMetadataInfo(modifier)
+            ShowCurrentInfo()
+            ShowDailyInfo()
+            ShowMetadataInfo()
         }
     }
 
     @Composable
-    fun ShowCurrentInfo(modifier: Modifier) {
+    fun ShowCurrentInfo() {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .height(400.dp)
                 .padding(0.dp, 50.dp)
         ) {
             val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
             Row(
-                modifier = modifier
+                modifier = Modifier
                     .height(260.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth(0.4f)
                         .height(160.dp)
                 ) {
@@ -213,7 +212,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     )
                 }
                 Column(
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth(1.0f)
                         .padding(20.dp, 0.dp)
                 ) {
@@ -221,7 +220,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         text = "${hForecast.currentTemp}°",
                         fontSize = 100.sp,
                         textAlign = TextAlign.Right,
-                        modifier = modifier
+                        modifier = Modifier
                             .fillMaxWidth(1.0f)
                     )
                     Text(
@@ -229,7 +228,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         fontSize = 20.sp,
                         lineHeight = 40.sp,
                         textAlign = TextAlign.Center,
-                        modifier = modifier
+                        modifier = Modifier
                             .fillMaxWidth(1.0f)
                     )
                 }
@@ -237,7 +236,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             if (displayInfo.value.dailyForecasts.isNotEmpty()) {
                 val dForecast: DailyForecast = displayInfo.value.dailyForecasts[0]
                 Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxHeight(1.0f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -246,7 +245,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         color = Color.White,
-                        modifier = modifier
+                        modifier = Modifier
                             .fillMaxWidth(.333f)
                             .alpha(0.5f)
                             .background(Color.Magenta)
@@ -254,7 +253,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     Text(text = "${dForecast.rainAmount} mm",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
-                        modifier = modifier
+                        modifier = Modifier
                             .fillMaxWidth(.5f)
                             .alpha(0.5f)
                             .background(Color.Yellow))
@@ -263,7 +262,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         color = Color.White,
-                        modifier = modifier
+                        modifier = Modifier
                             .fillMaxWidth(1.0f)
                             .alpha(0.5f)
                             .background(Color.Blue)
@@ -274,34 +273,34 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     @Composable
-    fun ShowDailyInfo(modifier: Modifier) {
+    fun ShowDailyInfo() {
         Column(
-            modifier = modifier.padding(10.dp, 0.dp)
+            modifier = Modifier.padding(10.dp, 0.dp)
         ) {
             for (d in displayInfo.value.dailyForecasts) {
                 Row(
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth(1.0f)
                         .height(60.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = d.getDay().substring(0, 1),
-                        modifier = modifier.fillMaxWidth(0.03f)
+                        modifier = Modifier.fillMaxWidth(0.03f)
                     )
                     Text(
                         text = "${d.rainAmount} mm",
                         textAlign = TextAlign.Right,
-                        modifier = modifier.fillMaxWidth(0.2f)
+                        modifier = Modifier.fillMaxWidth(0.2f)
                     )
                     Text(
                         text = "${d.rainProb}%",
                         textAlign = TextAlign.Right,
-                        modifier = modifier.fillMaxWidth(0.2f)
+                        modifier = Modifier.fillMaxWidth(0.2f)
                     )
                     Text(
                         text = "",
-                        modifier = modifier.fillMaxWidth(0.05f)
+                        modifier = Modifier.fillMaxWidth(0.05f)
                     )
                     Image(
                         painterResource(d.pictogramDay.getPictogram()),
@@ -318,7 +317,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     Text( // TODO: make width consistent
                         text = "${d.tempMin}° to ${d.tempMax}°",
                         textAlign = TextAlign.Right,
-                        modifier = modifier.fillMaxWidth(1.0f)
+                        modifier = Modifier.fillMaxWidth(1.0f)
                     )
                 }
             }
@@ -326,35 +325,31 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     @Composable
-    fun ShowMetadataInfo(modifier: Modifier) {
+    fun ShowMetadataInfo() {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp, 0.dp)
         ) {
             Text( // TODO: this is currently the time at which LVGMC last updated their forecast - I should probably show when the server last pulled data as well (?)
-                modifier = modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 text = displayInfo.value.getLastUpdated(),
                 textAlign = TextAlign.Right
             )
         }
     }
 
-    private val CHANNEL_ID = "YOUR_CHANNEL_ID"
-
-    fun createNotificationChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Your Channel Name"
-            val descriptionText = "Your Channel Description"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-            // Register the channel with the system
-            val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+    private fun createNotificationChannel(context: Context) {
+        val name = "Your Channel Name"
+        val descriptionText = "Your Channel Description"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(WEATHER_WARNINGS_CHANNEL_ID, name, importance).apply {
+            description = descriptionText
         }
+        // Register the channel with the system
+        val notificationManager: NotificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     override fun onWorkerResult(cityForecast: CityForecastData?, result: String?) {

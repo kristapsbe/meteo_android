@@ -71,9 +71,6 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         context.sendBroadcast(intent)
     }
 
-    private val NOTIFICATION_ID = 1
-    private val CHANNEL_ID = "YOUR_CHANNEL_ID"
-
     fun showNotification(title: String, message: String) {
         val intent = Intent(applicationContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -84,7 +81,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
-        val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(applicationContext, MainActivity.WEATHER_WARNINGS_CHANNEL_ID)
             .setSmallIcon(R.drawable.example_battery)
             .setContentTitle(title)
             .setContentText(message)
@@ -107,6 +104,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 // for ActivityCompat#requestPermissions for more details.
                 return
             }
+            val NOTIFICATION_ID = 1 // TODO: I think I'll new ids per warning (I think the warnings have ids I can use)
             notify(NOTIFICATION_ID, builder.build())
         }
     }
