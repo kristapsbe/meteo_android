@@ -62,7 +62,7 @@ class CityForecastDataDownloader {
             var cityForecast: CityForecastData? = null
             try {
                 val content = ctx.openFileInput(RESPONSE_FILE).bufferedReader().use { it.readText() }
-                Log.i("CRSP", "$content")
+                Log.i("CRSP", content)
                 cityForecast = Json.decodeFromString<CityForecastData>(content)
             } catch (e: Exception) {
                 Log.d("DEBUG", "LOADDATA FAILED $e")

@@ -63,7 +63,7 @@ class MyApplication : Application() {
     var workerCallback: WorkerCallback? = null
 }
 
-// TODO: store both the time of last succesfull download
+// TODO: store both the time of last successful download
 // and time of last attempt (probably show last attempt, and have
 // thing that can be clicked to see last success)
 class MainActivity : ComponentActivity(), WorkerCallback {
