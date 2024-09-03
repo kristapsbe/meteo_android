@@ -1,11 +1,9 @@
 package com.example.meteo_android
 
-import android.Manifest
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -22,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,16 +41,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest.Companion.MIN_PERIODIC_INTERVAL_MILLIS
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 
@@ -69,63 +67,20 @@ class MyApplication : Application() {
 class MainActivity : ComponentActivity(), WorkerCallback {
     companion object {
         const val WEATHER_WARNINGS_CHANNEL_ID = "WEATHER_WARNINGS"
+        const val WEATHER_WARNINGS_CHANNEL_NAME = "Weather warning channel name"
+        const val WEATHER_WARNINGS_CHANNEL_DESCRIPTION = "Weather warning channel description"
     }
 
-    private var isLoading: Boolean = false
-    private var wasLastScrollPosNegative: Boolean = false
-
-    lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var wasLastScrollNegative: Boolean = false
 
     private var displayInfo = mutableStateOf(DisplayInfo())
+    private var isLoading = mutableStateOf(false)
 
-    private suspend fun fetchData(lat: Double = 56.8750, lon: Double = 23.8658) {
-        if (!isLoading) {
-            isLoading = true
-            withContext(Dispatchers.IO) {
-                try {
-                    val cityForecast = CityForecastDataDownloader.downloadData("fetchData", applicationContext, lat, lon)
-                    Log.i("FD", "$cityForecast")
-                    if (cityForecast != null) {
-                        displayInfo.value = DisplayInfo(cityForecast)
-                    }
-                } catch (e: Exception) {
-                    println(e)
-                    println(e.message)
-                } finally {
-                    Log.d("DEGUG", "FINALLY FINALLY FINALLY")
-                    isLoading = false
-                }
-            }
-        }
-    }
-
-    private fun getCoordsAndReload() {
-        if ( // TODO: do I have to recheck permissions every time? and what do I do if I'm not allowed access - default to Riga and let the user change cities?
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ) {
-            fusedLocationClient.lastLocation.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("DEBUG", "LAST LOCATION COMPLETED ${task.result.latitude} ${task.result.longitude}")
-
-                    runBlocking {
-                        fetchData()
-                        //fetchData(task.result.latitude, task.result.longitude)
-                    }
-                } else {
-                    Log.d("DEBUG", "LAST LOCATION FAILED")
-                }
-            }
-            Log.d("DEBUG", "LAST LOCATION CALLED")
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        runBlocking {
-            getCoordsAndReload()
-        }
         enableEdgeToEdge()
         setContent {
             Meteo_androidTheme {
@@ -150,20 +105,25 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     @Composable
     fun AllForecasts() {
+        val self = this
         val scrollState = rememberScrollState()
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    Log.d("DEBUG", "$available.y ($wasLastScrollPosNegative)")
-                    if (available.y > 0 && !wasLastScrollPosNegative) {
-                        wasLastScrollPosNegative = true
-                        getCoordsAndReload()
+                    if (available.y > 0 && !wasLastScrollNegative) {
+                        wasLastScrollNegative = true
+                        if (!isLoading.value) {
+                            isLoading.value = true
+                            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                            WorkManager.getInstance(self).enqueue(workRequest)
+                        }
+
                     }
                     return super.onPreScroll(available, source)
                 }
 
                 override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                    wasLastScrollPosNegative = false
+                    wasLastScrollNegative = false
                     return super.onPostFling(consumed, available)
                 }
             }
@@ -176,6 +136,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 .background(Color(0xFF82CAFF)) // Sky Blue
                 .verticalScroll(state = scrollState)
         ) {
+            if (isLoading.value) {
+                CircularProgressIndicator(progress = { 1.0f }, modifier = Modifier.fillMaxWidth())
+            }
             ShowCurrentInfo()
             ShowDailyInfo()
             ShowMetadataInfo()
@@ -338,11 +301,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     private fun createNotificationChannel(context: Context) {
-        val name = "Your Channel Name"
-        val descriptionText = "Your Channel Description"
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(WEATHER_WARNINGS_CHANNEL_ID, name, importance).apply {
-            description = descriptionText
+        val channel = NotificationChannel(WEATHER_WARNINGS_CHANNEL_ID, WEATHER_WARNINGS_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT).apply {
+            description = WEATHER_WARNINGS_CHANNEL_DESCRIPTION
         }
         // Register the channel with the system
         val notificationManager: NotificationManager =
@@ -351,7 +311,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     override fun onWorkerResult(cityForecast: CityForecastData?, result: String?) {
-        Log.i("WR", "Worker Result: $result")
+        Log.i("onWorkerResult", "Worker Result: $result")
         displayInfo.value = DisplayInfo(cityForecast)
+        isLoading.value = false
     }
 }
