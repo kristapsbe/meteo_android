@@ -235,6 +235,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     @Composable
     fun ShowDailyInfo() {
+        // TODO - filter based on the closest (and largest) town
         Column(
             modifier = Modifier.padding(10.dp, 0.dp)
         ) {
