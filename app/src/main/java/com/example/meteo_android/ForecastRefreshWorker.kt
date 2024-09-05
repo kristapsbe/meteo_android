@@ -59,8 +59,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         runBlocking {
             val location = getLastLocation(applicationContext)
             if (location != null) {
-                val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext)
-                //val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext, location.latitude, location.longitude)
+                //val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext)
+                val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext, location.latitude, location.longitude)
 
                 // Get the callback from Application class and invoke it
                 val result = "Result from Worker"
@@ -68,7 +68,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
                 if (cityForecast != null) {
                     val displayInfo = DisplayInfo(cityForecast)
-                    updateWidget("${displayInfo.getTodayForecast().currentTemp}")
+                    updateWidget("${displayInfo.getTodayForecast().currentTemp}", displayInfo.getTodayForecast().pictogram.getPictogram())
                 }
 
                 // TODO: push notifications if weather warnings appear, use a file to keep track of what we've already warned about?
@@ -79,7 +79,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         return Result.success()
     }
 
-    private fun updateWidget(text: String) {
+    private fun updateWidget(text: String, icon: Int) {
         val context = applicationContext
         val appWidgetManager = AppWidgetManager.getInstance(context)
 
@@ -91,7 +91,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val intent = Intent(context, ForecastWidget::class.java)
         intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
-        intent.putExtra("widget_text", text) // Pass the updated text
+        intent.putExtra("widget_text", "$text°") // Pass the updated text
+        intent.putExtra("icon_image", icon) // Pass the updated text
 
         context.sendBroadcast(intent)
     }
