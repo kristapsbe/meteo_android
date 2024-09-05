@@ -98,7 +98,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         createNotificationChannel(applicationContext)
 
-        val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(MIN_PERIODIC_INTERVAL_MILLIS, TimeUnit.MILLISECONDS).build()
+        //val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(MIN_PERIODIC_INTERVAL_MILLIS, TimeUnit.MILLISECONDS).build()
+        val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.MINUTES).build()
         val workManager = WorkManager.getInstance(this)
         workManager.enqueue(workRequest)
     }

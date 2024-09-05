@@ -65,7 +65,7 @@ internal fun updateAppWidget(
     // Construct the RemoteViews object
     val views = RemoteViews(context.packageName, R.layout.forecast_widget)
     views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent)
-    
+
     if (text != null) {
         // Set the text to the TextView in the widget layout
         views.setTextViewText(R.id.appwidget_text, text)
