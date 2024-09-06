@@ -150,7 +150,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     fun ShowCurrentInfo() {
         Column(
             modifier = Modifier
-                .height(400.dp)
+                .height(500.dp)
                 .padding(0.dp, 50.dp)
         ) {
             val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
@@ -199,7 +199,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 val dForecast: DailyForecast = displayInfo.value.dailyForecasts[0]
                 Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
                     modifier = Modifier
-                        .fillMaxHeight(1.0f),
+                        .fillMaxHeight(0.5f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -230,6 +230,19 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             .background(Color.Blue)
                     )
                 }
+            }
+            Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
+            modifier = Modifier
+                .fillMaxHeight(1.0f),
+            verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${displayInfo.value.getTodayForecast().locationName}°",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier
+                        .fillMaxWidth(1.0f)
+                )
             }
         }
     }

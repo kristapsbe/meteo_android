@@ -54,6 +54,7 @@ class DailyForecast(
 class HourlyForecast(
     val currentTemp: Int,
     val feelsLikeTemp: Int,
+    val locationName: String,
     val pictogram: WeatherPictogram
 )
 
@@ -74,6 +75,7 @@ class DisplayInfo() {
                 HourlyForecast(
                     e.vals[1].toInt(),
                     e.vals[2].toInt(),
+                    cityForecastData.cities[0].name,
                     WeatherPictogram(e.vals[0].toInt())
                 )
             }
@@ -107,7 +109,7 @@ class DisplayInfo() {
         if (hourlyForecasts.isNotEmpty()) {
             return hourlyForecasts[0]
         }
-        return HourlyForecast(0, 0, WeatherPictogram(0))
+        return HourlyForecast(0, 0, "", WeatherPictogram(0))
     }
 
     fun getLastUpdated(): String {
