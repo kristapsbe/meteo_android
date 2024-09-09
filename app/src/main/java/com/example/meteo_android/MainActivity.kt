@@ -41,15 +41,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequest.Companion.MIN_PERIODIC_INTERVAL_MILLIS
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 
@@ -134,7 +131,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             modifier = Modifier
                 .nestedScroll(nestedScrollConnection)
                 .fillMaxSize()
-                .background(Color(0xFF82CAFF)) // Sky Blue
+                .background(Color(resources.getColor(R.color.sky_blue)))
                 .verticalScroll(state = scrollState)
         ) {
             if (isLoading.value) {
@@ -182,6 +179,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         text = "${hForecast.currentTemp}°",
                         fontSize = 100.sp,
                         textAlign = TextAlign.Right,
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth(1.0f)
                     )
@@ -190,6 +188,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         fontSize = 20.sp,
                         lineHeight = 40.sp,
                         textAlign = TextAlign.Center,
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth(1.0f)
                     )
@@ -206,24 +205,27 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         text = "${dForecast.tempMin}° to ${dForecast.tempMax}°",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
-                        color = Color.White,
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth(.333f)
                             .alpha(0.5f)
                             .background(Color.Magenta)
                     )
-                    Text(text = "${dForecast.rainAmount} mm",
+                    Text(
+                        text = "${dForecast.rainAmount} mm",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth(.5f)
                             .alpha(0.5f)
-                            .background(Color.Yellow))
+                            .background(Color.Yellow)
+                    )
                     Text(
                         text = "${dForecast.rainProb}%",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
-                        color = Color.White,
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth(1.0f)
                             .alpha(0.5f)
@@ -237,9 +239,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${displayInfo.value.getTodayForecast().locationName}°",
+                    text = displayInfo.value.getTodayForecast().locationName,
                     fontSize = 20.sp,
                     textAlign = TextAlign.Right,
+                    color = Color(resources.getColor(R.color.text_color)),
                     modifier = Modifier
                         .fillMaxWidth(1.0f)
                 )
@@ -262,20 +265,24 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 ) {
                     Text(
                         text = d.getDay().substring(0, 1),
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier.fillMaxWidth(0.03f)
                     )
                     Text(
                         text = "${d.rainAmount} mm",
                         textAlign = TextAlign.Right,
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier.fillMaxWidth(0.2f)
                     )
                     Text(
                         text = "${d.rainProb}%",
                         textAlign = TextAlign.Right,
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier.fillMaxWidth(0.2f)
                     )
                     Text(
                         text = "",
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier.fillMaxWidth(0.05f)
                     )
                     Image(
@@ -293,6 +300,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     Text( // TODO: make width consistent
                         text = "${d.tempMin}° to ${d.tempMax}°",
                         textAlign = TextAlign.Right,
+                        color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier.fillMaxWidth(1.0f)
                     )
                 }
@@ -310,6 +318,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             Text( // TODO: this is currently the time at which LVGMC last updated their forecast - I should probably show when the server last pulled data as well (?)
                 modifier = Modifier.fillMaxWidth(),
                 text = displayInfo.value.getLastUpdated(),
+                color = Color(resources.getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
             )
         }

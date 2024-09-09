@@ -20,7 +20,7 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null)
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null)
         }
     }
 
@@ -30,6 +30,7 @@ class ForecastWidget : AppWidgetProvider() {
         // Handle the broadcast from the Worker
         if (intent.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE) {
             val text = intent.getStringExtra("widget_text")
+            val locationText = intent.getStringExtra("widget_location")
             val icon = intent.getIntExtra("icon_image", R.drawable.example_battery)
 
             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -37,7 +38,7 @@ class ForecastWidget : AppWidgetProvider() {
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, icon)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, icon)
             }
         }
     }
@@ -56,6 +57,7 @@ internal fun updateAppWidget(
     appWidgetManager: AppWidgetManager,
     appWidgetId: Int,
     text: String?,
+    locationText: String?,
     icon: Int?
 ) {
     // Create an Intent to launch the MainActivity when clicked
@@ -64,11 +66,15 @@ internal fun updateAppWidget(
 
     // Construct the RemoteViews object
     val views = RemoteViews(context.packageName, R.layout.forecast_widget)
-    views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent)
+    views.setOnClickPendingIntent(R.id.widget, pendingIntent)
 
     if (text != null) {
         // Set the text to the TextView in the widget layout
         views.setTextViewText(R.id.appwidget_text, text)
+    }
+    if (text != null) {
+        // Set the text to the TextView in the widget layout
+        views.setTextViewText(R.id.appwidget_location, locationText)
     }
     if (icon != null) {
         // Set the text to the TextView in the widget layout
