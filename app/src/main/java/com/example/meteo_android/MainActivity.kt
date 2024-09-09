@@ -29,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -147,101 +146,47 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     fun ShowCurrentInfo() {
         Column(
             modifier = Modifier
-                .height(500.dp)
-                .padding(0.dp, 50.dp)
+                .height(300.dp)
+                .padding(0.dp, 50.dp, 0.dp, 0.dp)
         ) {
             val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
-            Row(
-                modifier = Modifier
-                    .height(260.dp),
+            Row (
+                modifier = Modifier.fillMaxHeight(0.8f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
+                Image(
+                    painterResource(hForecast.pictogram.getPictogram()),
+                    contentDescription = "",
+                    contentScale = ContentScale.FillBounds,
                     modifier = Modifier
-                        .fillMaxWidth(0.4f)
-                        .height(160.dp)
-                ) {
-                    Image(
-                        painterResource(hForecast.pictogram.getPictogram()),
-                        contentDescription = "",
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp)
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(1.0f)
-                        .padding(20.dp, 0.dp)
-                ) {
-                    Text(
-                        text = "${hForecast.currentTemp}°",
-                        fontSize = 100.sp,
-                        textAlign = TextAlign.Right,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier
-                            .fillMaxWidth(1.0f)
-                    )
-                    Text(
-                        text = "feels like ${hForecast.feelsLikeTemp}°",
-                        fontSize = 20.sp,
-                        lineHeight = 40.sp,
-                        textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier
-                            .fillMaxWidth(1.0f)
-                    )
-                }
+                        .fillMaxWidth(0.5f)
+                        .fillMaxHeight(1.0f)
+                )
+                Text(
+                    text = "${hForecast.currentTemp}°",
+                    fontSize = 100.sp,
+                    textAlign = TextAlign.Center,
+                    color = Color(resources.getColor(R.color.text_color)),
+                    modifier = Modifier.fillMaxWidth(1.0f)
+                )
             }
-            if (displayInfo.value.getCurrentDailyForecasts().isNotEmpty()) {
-                val dForecast: DailyForecast = displayInfo.value.getCurrentDailyForecasts()[0]
-                Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
-                    modifier = Modifier
-                        .fillMaxHeight(0.5f),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "${dForecast.tempMin}° to ${dForecast.tempMax}°",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier
-                            .fillMaxWidth(.333f)
-                            .alpha(0.5f)
-                            .background(Color.Magenta)
-                    )
-                    Text(
-                        text = "${dForecast.rainAmount} mm",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier
-                            .fillMaxWidth(.5f)
-                            .alpha(0.5f)
-                            .background(Color.Yellow)
-                    )
-                    Text(
-                        text = "${dForecast.rainProb}%",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier
-                            .fillMaxWidth(1.0f)
-                            .alpha(0.5f)
-                            .background(Color.Blue)
-                    )
-                }
-            }
-            Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
-            modifier = Modifier
-                .fillMaxHeight(1.0f),
-            verticalAlignment = Alignment.CenterVertically
+            Row (
+                modifier = Modifier.fillMaxHeight(1.0f),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = displayInfo.value.getTodayForecast().locationName,
                     fontSize = 20.sp,
-                    textAlign = TextAlign.Right,
+                    textAlign = TextAlign.Center,
+                    color = Color(resources.getColor(R.color.text_color)),
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                )
+                Text(
+                    text = "feels like ${hForecast.feelsLikeTemp}°",
+                    fontSize = 20.sp,
+                    lineHeight = 40.sp,
+                    textAlign = TextAlign.Center,
                     color = Color(resources.getColor(R.color.text_color)),
                     modifier = Modifier
                         .fillMaxWidth(1.0f)
@@ -254,7 +199,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     fun ShowDailyInfo() {
         // TODO - filter based on the closest (and largest) town
         Column(
-            modifier = Modifier.padding(10.dp, 0.dp)
+            modifier = Modifier.padding(20.dp, 20.dp, 20.dp, 20.dp)
         ) {
             for (d in displayInfo.value.getCurrentDailyForecasts()) {
                 Row(
