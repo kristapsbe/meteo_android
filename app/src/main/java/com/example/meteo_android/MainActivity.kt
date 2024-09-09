@@ -194,8 +194,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     )
                 }
             }
-            if (displayInfo.value.dailyForecasts.isNotEmpty()) {
-                val dForecast: DailyForecast = displayInfo.value.dailyForecasts[0]
+            if (displayInfo.value.getCurrentDailyForecasts().isNotEmpty()) {
+                val dForecast: DailyForecast = displayInfo.value.getCurrentDailyForecasts()[0]
                 Row( // TODO: this is wrong - the daily forecast doesn't contain info for today
                     modifier = Modifier
                         .fillMaxHeight(0.5f),
@@ -256,7 +256,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         Column(
             modifier = Modifier.padding(10.dp, 0.dp)
         ) {
-            for (d in displayInfo.value.dailyForecasts) {
+            for (d in displayInfo.value.getCurrentDailyForecasts()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1.0f)

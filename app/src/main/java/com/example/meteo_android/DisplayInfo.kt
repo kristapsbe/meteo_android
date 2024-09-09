@@ -1,5 +1,6 @@
 package com.example.meteo_android
 
+import android.util.Log
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.byUnicodePattern
 
@@ -39,6 +40,7 @@ class WeatherPictogram(
 
 class DailyForecast(
     private val date: LocalDateTime,
+    val locationId: String,
     val rainAmount: Int,
     val rainProb: Int,
     val tempMin: Int,
@@ -54,6 +56,7 @@ class DailyForecast(
 class HourlyForecast(
     val currentTemp: Int,
     val feelsLikeTemp: Int,
+    val locationId: String,
     val locationName: String,
     val pictogram: WeatherPictogram
 )
@@ -62,7 +65,7 @@ class DisplayInfo() {
     // Today
     var hourlyForecasts: List<HourlyForecast> = emptyList()
     // Tomorrow onwards
-    var dailyForecasts: List<DailyForecast> = emptyList()
+    private var dailyForecasts: List<DailyForecast> = emptyList()
 
     private val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
     var lastUpdated: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
@@ -75,6 +78,7 @@ class DisplayInfo() {
                 HourlyForecast(
                     e.vals[1].toInt(),
                     e.vals[2].toInt(),
+                    cityForecastData.cities[0].id,
                     cityForecastData.cities[0].name,
                     WeatherPictogram(e.vals[0].toInt())
                 )
@@ -82,6 +86,7 @@ class DisplayInfo() {
             dailyForecasts = cityForecastData.daily_forecast.map { e ->
                 DailyForecast(
                     stringToDatetime(e.time.toString()),
+                    e.id,
                     e.vals[4].toInt(),
                     e.vals[5].toInt(),
                     e.vals[3].toInt(),
@@ -109,7 +114,11 @@ class DisplayInfo() {
         if (hourlyForecasts.isNotEmpty()) {
             return hourlyForecasts[0]
         }
-        return HourlyForecast(0, 0, "", WeatherPictogram(0))
+        return HourlyForecast(0, 0, "", "", WeatherPictogram(0))
+    }
+
+    fun getCurrentDailyForecasts(): List<DailyForecast> {
+        return dailyForecasts.filter { it.locationId == getTodayForecast().locationId }
     }
 
     fun getLastUpdated(): String {
