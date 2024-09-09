@@ -58,8 +58,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         runBlocking {
             val location = getLastLocation(applicationContext)
             if (location != null) {
-                val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext)
-                //val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext, location.latitude, location.longitude)
+                //val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext)
+                val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext, location.latitude, location.longitude)
 
                 // Get the callback from Application class and invoke it
                 val result = "Result from Worker"

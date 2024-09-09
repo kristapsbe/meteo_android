@@ -197,7 +197,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     @Composable
     fun ShowDailyInfo() {
-        // TODO - filter based on the closest (and largest) town
         Column(
             modifier = Modifier.padding(20.dp, 20.dp, 20.dp, 20.dp)
         ) {
@@ -234,13 +233,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         painterResource(d.pictogramDay.getPictogram()),
                         contentDescription = "",
                         contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.fillMaxWidth(0.25f)
+                        modifier = Modifier.fillMaxWidth(0.25f).fillMaxHeight(0.8f)
                     )
                     Image(
                         painterResource(d.pictogramNight.getPictogram()),
                         contentDescription = "",
                         contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.fillMaxWidth(0.33f)
+                        modifier = Modifier.fillMaxWidth(0.33f).fillMaxHeight(0.8f)
                     )
                     Text( // TODO: make width consistent
                         text = "${d.tempMin}° to ${d.tempMax}°",

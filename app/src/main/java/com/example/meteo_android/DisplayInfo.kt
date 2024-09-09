@@ -118,6 +118,7 @@ class DisplayInfo() {
     }
 
     fun getCurrentDailyForecasts(): List<DailyForecast> {
+        // TODO - filter based on the closest (and largest) town
         return dailyForecasts.filter { it.locationId == getTodayForecast().locationId }
     }
 
