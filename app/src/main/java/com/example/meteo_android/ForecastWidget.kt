@@ -20,7 +20,7 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null)
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, null)
         }
     }
 
@@ -31,6 +31,7 @@ class ForecastWidget : AppWidgetProvider() {
         if (intent.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE) {
             val text = intent.getStringExtra("widget_text")
             val locationText = intent.getStringExtra("widget_location")
+            val feelsLikeText = intent.getStringExtra("widget_feelslike")
             val icon = intent.getIntExtra("icon_image", R.drawable.example_battery)
 
             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -38,7 +39,7 @@ class ForecastWidget : AppWidgetProvider() {
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, icon)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, icon)
             }
         }
     }
@@ -58,6 +59,7 @@ internal fun updateAppWidget(
     appWidgetId: Int,
     text: String?,
     locationText: String?,
+    feelsLikeText: String?,
     icon: Int?
 ) {
     // Create an Intent to launch the MainActivity when clicked
@@ -72,9 +74,13 @@ internal fun updateAppWidget(
         // Set the text to the TextView in the widget layout
         views.setTextViewText(R.id.appwidget_text, text)
     }
-    if (text != null) {
+    if (locationText != null) {
         // Set the text to the TextView in the widget layout
         views.setTextViewText(R.id.appwidget_location, locationText)
+    }
+    if (feelsLikeText != null) {
+        // Set the text to the TextView in the widget layout
+        views.setTextViewText(R.id.appwidget_feelslike, feelsLikeText)
     }
     if (icon != null) {
         // Set the text to the TextView in the widget layout

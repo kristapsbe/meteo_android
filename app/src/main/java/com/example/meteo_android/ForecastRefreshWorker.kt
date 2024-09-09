@@ -70,6 +70,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     updateWidget(
                         "${displayInfo.getTodayForecast().currentTemp}",
                         displayInfo.getTodayForecast().locationName,
+                        "feels like ${displayInfo.getTodayForecast().feelsLikeTemp}°",
                         displayInfo.getTodayForecast().pictogram.getPictogram()
                     )
                 }
@@ -82,7 +83,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         return Result.success()
     }
 
-    private fun updateWidget(text: String, textLocation: String, icon: Int) {
+    private fun updateWidget(text: String, textLocation: String, textFeelsLike: String, icon: Int) {
         val context = applicationContext
         val appWidgetManager = AppWidgetManager.getInstance(context)
 
@@ -96,6 +97,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
         intent.putExtra("widget_text", "$text°") // Pass the updated text
         intent.putExtra("widget_location", textLocation) // Pass the updated text
+        intent.putExtra("widget_feelslike", textFeelsLike) // Pass the updated text
         intent.putExtra("icon_image", icon) // Pass the updated text
 
         context.sendBroadcast(intent)
