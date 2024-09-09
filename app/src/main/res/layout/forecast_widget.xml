@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="26dp"
+        android:layout_marginStart="24dp"
         android:layout_marginBottom="4dp"
         android:contentDescription="@string/appwidget_text"
         android:text="@string/appwidget_text"
