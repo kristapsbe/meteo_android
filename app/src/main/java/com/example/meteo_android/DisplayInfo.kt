@@ -18,8 +18,8 @@ class WeatherPictogram(
 
             1303 to R.drawable.cloud_lightning_sun,
 
-            1504 to R.drawable.cloud_rain,
-            1506 to R.drawable.cloud_rain_sun,
+            1504 to R.drawable.cloud_drizzle,
+            1506 to R.drawable.cloud_drizzle_sun,
 
             2101 to R.drawable.moon,
             2102 to R.drawable.cloud_moon,
@@ -29,8 +29,8 @@ class WeatherPictogram(
 
             2303 to R.drawable.cloud_lightning_moon,
 
-            2504 to R.drawable.cloud_rain,
-            2506 to R.drawable.cloud_rain_moon
+            2504 to R.drawable.cloud_drizzle,
+            2506 to R.drawable.cloud_drizzle_moon
         )
     }
 
