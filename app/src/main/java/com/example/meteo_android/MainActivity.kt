@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -46,10 +47,10 @@ import androidx.work.WorkManager
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.format.byUnicodePattern
-import java.util.Calendar
 import java.util.concurrent.TimeUnit
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 
 
 interface WorkerCallback {
@@ -69,9 +70,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var wasLastScrollNegative: Boolean = false
-
-    // TODO - move
-    var lastAttemptedDownload = mutableStateOf("")
 
     private var displayInfo = mutableStateOf(DisplayInfo())
     private var isLoading = mutableStateOf(false)
@@ -95,6 +93,36 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val app = applicationContext as MyApplication
         app.workerCallback = this
 
+        val locationPermissionRequest = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            when {
+                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                    // Precise location access granted.
+                }
+                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                    // Only approximate location access granted.
+                } else -> {
+                // No location access granted.
+            }
+            }
+        }
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            locationPermissionRequest.launch(
+                arrayOf(
+                    //Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
         createNotificationChannel(applicationContext)
 
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.MINUTES).build()
@@ -280,18 +308,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 textAlign = TextAlign.Right
             )
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp, 0.dp)
-        ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = lastAttemptedDownload.value,
-                color = Color(resources.getColor(R.color.text_color)),
-                textAlign = TextAlign.Right
-            )
-        }
     }
 
     private fun createNotificationChannel(context: Context) {
@@ -307,7 +323,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     override fun onWorkerResult(cityForecast: CityForecastData?, result: String?) {
         Log.i("onWorkerResult", "Worker Result: $result")
         displayInfo.value = DisplayInfo(cityForecast)
-        lastAttemptedDownload.value = Calendar.getInstance().time.toString()
         isLoading.value = false
     }
 }
