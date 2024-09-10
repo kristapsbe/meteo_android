@@ -46,6 +46,9 @@ import androidx.work.WorkManager
 import com.example.meteo_android.ui.theme.Meteo_androidTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format.byUnicodePattern
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 
@@ -57,9 +60,6 @@ class MyApplication : Application() {
     var workerCallback: WorkerCallback? = null
 }
 
-// TODO: store both the time of last successful download
-// and time of last attempt (probably show last attempt, and have
-// thing that can be clicked to see last success)
 class MainActivity : ComponentActivity(), WorkerCallback {
     companion object {
         const val WEATHER_WARNINGS_CHANNEL_ID = "WEATHER_WARNINGS"
@@ -69,6 +69,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var wasLastScrollNegative: Boolean = false
+
+    // TODO - move
+    var lastAttemptedDownload = mutableStateOf("")
 
     private var displayInfo = mutableStateOf(DisplayInfo())
     private var isLoading = mutableStateOf(false)
@@ -94,7 +97,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         createNotificationChannel(applicationContext)
 
-        //val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(MIN_PERIODIC_INTERVAL_MILLIS, TimeUnit.MILLISECONDS).build()
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.MINUTES).build()
         val workManager = WorkManager.getInstance(this)
         workManager.enqueue(workRequest)
@@ -259,9 +261,33 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 .fillMaxWidth()
                 .padding(10.dp, 0.dp)
         ) {
-            Text( // TODO: this is currently the time at which LVGMC last updated their forecast - I should probably show when the server last pulled data as well (?)
+            Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = displayInfo.value.getLastUpdated(),
+                color = Color(resources.getColor(R.color.text_color)),
+                textAlign = TextAlign.Right
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp)
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = displayInfo.value.getLastDownloaded(),
+                color = Color(resources.getColor(R.color.text_color)),
+                textAlign = TextAlign.Right
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp)
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = lastAttemptedDownload.value,
                 color = Color(resources.getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
             )
@@ -281,6 +307,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     override fun onWorkerResult(cityForecast: CityForecastData?, result: String?) {
         Log.i("onWorkerResult", "Worker Result: $result")
         displayInfo.value = DisplayInfo(cityForecast)
+        lastAttemptedDownload.value = Calendar.getInstance().time.toString()
         isLoading.value = false
     }
 }

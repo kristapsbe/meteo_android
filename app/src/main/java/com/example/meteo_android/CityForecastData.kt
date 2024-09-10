@@ -35,7 +35,8 @@ data class CityForecastData(
     val daily_forecast: List<ForecastData>,
     val warnings: List<WarningData>,
     val all_warnings: HashMap<String, Int>,
-    val last_updated: String
+    val last_updated: String,
+    val last_downloaded: String
 )
 
 

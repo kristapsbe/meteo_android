@@ -70,16 +70,18 @@ class Location(
 class DisplayInfo() {
     var location: Location = Location("", "")
     // Today
-    var hourlyForecasts: List<HourlyForecast> = emptyList()
+    private var hourlyForecasts: List<HourlyForecast> = emptyList()
     // Tomorrow onwards
     private var dailyForecasts: List<DailyForecast> = emptyList()
 
     private val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
-    var lastUpdated: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
+    private var lastUpdated: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
+    private var lastDownloaded: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
 
     constructor(cityForecastData: CityForecastData?) : this() {
         if (cityForecastData != null) {
             lastUpdated = stringToDatetime(cityForecastData.last_updated)
+            lastDownloaded = stringToDatetime(cityForecastData.last_downloaded)
             location = Location(cityForecastData.cities[0].id, cityForecastData.cities[0].name)
             // TODO: I should get the ids dynamically
             hourlyForecasts = cityForecastData.hourly_forecast.map { e ->
@@ -131,5 +133,9 @@ class DisplayInfo() {
 
     fun getLastUpdated(): String {
         return format.format(lastUpdated)
+    }
+
+    fun getLastDownloaded(): String {
+        return format.format(lastDownloaded)
     }
 }
