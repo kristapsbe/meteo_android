@@ -57,6 +57,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
         runBlocking {
             val location = getLastLocation(applicationContext)
+            // TODO: save location whenever one gets returned so that this can run if only foreground location permissions are granted
             if (location != null) {
                 //val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext)
                 val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext, location.latitude, location.longitude)
