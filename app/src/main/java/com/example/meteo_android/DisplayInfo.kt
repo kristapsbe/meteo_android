@@ -13,22 +13,23 @@ class WeatherPictogram(
             1101 to R.drawable.sun,
             1102 to R.drawable.cloud_sun,
             1103 to R.drawable.cloud_sun,
-            1105 to R.drawable.cloud,
+            1104 to R.drawable.cloud,
+            1105 to R.drawable.cloud, // TODO: should be a cloud with a second cloud in the background
 
             1303 to R.drawable.cloud_lightning_sun,
 
-            1504 to R.drawable.cloud_rain_sun,
+            1504 to R.drawable.cloud_rain,
             1506 to R.drawable.cloud_rain_sun,
 
             2101 to R.drawable.moon,
             2102 to R.drawable.cloud_moon,
             2103 to R.drawable.cloud_moon,
-            2104 to R.drawable.cloud_moon,
-            2105 to R.drawable.cloud,
+            2104 to R.drawable.cloud,
+            2105 to R.drawable.cloud, // TODO: should be a cloud with a second cloud in the background
 
             2303 to R.drawable.cloud_lightning_moon,
 
-            2504 to R.drawable.cloud_rain_moon,
+            2504 to R.drawable.cloud_rain,
             2506 to R.drawable.cloud_rain_moon
         )
     }
