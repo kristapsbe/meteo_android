@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.meteo_android"
+    namespace = "lv.kristapsbe.meteo_android"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.meteo_android"
+        applicationId = "lv.kristapsbe.meteo_android"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:name=".MyApplication"
+        android:name="lv.kristapsbe.meteo_android.MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,7 +21,7 @@
         android:theme="@style/Theme.Meteo_android"
         tools:targetApi="31">
         <receiver
-            android:name=".ForecastWidget"
+            android:name="lv.kristapsbe.meteo_android.ForecastWidget"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -33,7 +33,7 @@
         </receiver>
 
         <activity
-            android:name=".MainActivity"
+            android:name="lv.kristapsbe.meteo_android.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Meteo_android">
