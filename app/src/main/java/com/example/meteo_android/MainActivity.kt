@@ -175,7 +175,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = displayInfo.value.getTodayForecast().locationName,
+                    text = displayInfo.value.location.name,
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center,
                     color = Color(resources.getColor(R.color.text_color)),

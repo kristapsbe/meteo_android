@@ -3,6 +3,7 @@ package com.example.meteo_android
 import android.util.Log
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.byUnicodePattern
+import kotlin.math.roundToInt
 
 
 class WeatherPictogram(
@@ -58,11 +59,16 @@ class HourlyForecast(
     val currentTemp: Int,
     val feelsLikeTemp: Int,
     val locationId: String,
-    val locationName: String,
     val pictogram: WeatherPictogram
 )
 
+class Location(
+    val id: String,
+    val name: String
+)
+
 class DisplayInfo() {
+    var location: Location = Location("", "")
     // Today
     var hourlyForecasts: List<HourlyForecast> = emptyList()
     // Tomorrow onwards
@@ -74,13 +80,13 @@ class DisplayInfo() {
     constructor(cityForecastData: CityForecastData?) : this() {
         if (cityForecastData != null) {
             lastUpdated = stringToDatetime(cityForecastData.last_updated)
+            location = Location(cityForecastData.cities[0].id, cityForecastData.cities[0].name)
             // TODO: I should get the ids dynamically
             hourlyForecasts = cityForecastData.hourly_forecast.map { e ->
                 HourlyForecast(
-                    e.vals[1].toInt(),
-                    e.vals[2].toInt(),
-                    cityForecastData.cities[0].id,
-                    cityForecastData.cities[0].name,
+                    e.vals[1].roundToInt(),
+                    e.vals[2].roundToInt(),
+                    e.id,
                     WeatherPictogram(e.vals[0].toInt())
                 )
             }
@@ -90,8 +96,8 @@ class DisplayInfo() {
                     e.id,
                     e.vals[4].toInt(),
                     e.vals[5].toInt(),
-                    e.vals[3].toInt(),
-                    e.vals[2].toInt(),
+                    e.vals[3].roundToInt(),
+                    e.vals[2].roundToInt(),
                     WeatherPictogram(e.vals[7].toInt()),
                     WeatherPictogram(e.vals[6].toInt())
                 )
@@ -113,9 +119,9 @@ class DisplayInfo() {
     fun getTodayForecast(): HourlyForecast {
         // TODO: fish out most recent relevant info
         if (hourlyForecasts.isNotEmpty()) {
-            return hourlyForecasts[0]
+            return hourlyForecasts.filter { it.locationId == location.id }[0]
         }
-        return HourlyForecast(0, 0, "", "", WeatherPictogram(0))
+        return HourlyForecast(0, 0, "", WeatherPictogram(0))
     }
 
     fun getCurrentDailyForecasts(): List<DailyForecast> {
