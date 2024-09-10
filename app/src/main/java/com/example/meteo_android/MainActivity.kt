@@ -96,12 +96,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
-            when {
+            when { // TODO: do I need to enqueue in both?
                 permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                    // Precise location access granted.
+                    val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                    WorkManager.getInstance(applicationContext).enqueue(workRequest)
                 }
                 permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                    // Only approximate location access granted.
+                    val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                    WorkManager.getInstance(applicationContext).enqueue(workRequest)
                 } else -> {
                 // No location access granted.
             }
