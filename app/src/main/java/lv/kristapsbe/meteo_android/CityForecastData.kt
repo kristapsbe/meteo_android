@@ -24,7 +24,14 @@ data class CityData(
 data class ForecastData(val id: String, val time: Long, val vals: List<Double>)
 
 @Serializable
-data class WarningData(val intensity: List<String>, val regions: List<String>, val type: List<String>)
+data class WarningData(
+    val id: Int,
+    val intensity: List<String>,
+    val regions: List<String>,
+    val type: List<String>,
+    val time: List<Long>,
+    val description: List<String>
+)
 
 @Serializable
 data class CityForecastData(
@@ -44,16 +51,13 @@ class CityForecastDataDownloader {
     companion object {
         private const val RESPONSE_FILE = "response.json"
 
-        fun downloadData(src: String, ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327): CityForecastData? {
-            Log.i("DL", "downloadData - $src")
-
+        fun downloadData(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327): CityForecastData? {
             try {
                 val randTemp = String.format("%.1f", Random.nextInt(60)-30+ Random.nextDouble())
                 // local ip 10.0.2.2
                 var urlString = "http://meteo.kristapsbe.lv:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
                 urlString = "http://meteo.kristapsbe.lv:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
                 val response = URL(urlString).readText()
-                Log.i("RRSP", "$response")
                 ctx.openFileOutput(RESPONSE_FILE, MODE_PRIVATE).use { fos ->
                     fos.write(response.toByteArray())
                 }
@@ -64,7 +68,6 @@ class CityForecastDataDownloader {
             var cityForecast: CityForecastData? = null
             try {
                 val content = ctx.openFileInput(RESPONSE_FILE).bufferedReader().use { it.readText() }
-                Log.i("CRSP", content)
                 cityForecast = Json.decodeFromString<CityForecastData>(content)
             } catch (e: Exception) {
                 Log.d("DEBUG", "LOADDATA FAILED $e")

@@ -51,7 +51,6 @@ import java.util.concurrent.TimeUnit
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
-import lv.kristapsbe.meteo_android.R
 
 
 interface WorkerCallback {
@@ -65,8 +64,10 @@ class MyApplication : Application() {
 class MainActivity : ComponentActivity(), WorkerCallback {
     companion object {
         const val WEATHER_WARNINGS_CHANNEL_ID = "WEATHER_WARNINGS"
-        const val WEATHER_WARNINGS_CHANNEL_NAME = "Weather warning channel name"
-        const val WEATHER_WARNINGS_CHANNEL_DESCRIPTION = "Weather warning channel description"
+        const val WEATHER_WARNINGS_CHANNEL_NAME = "Severe weather warnings"
+        const val WEATHER_WARNINGS_CHANNEL_DESCRIPTION = "Channel for receiving notifications about severe weather warnings"
+
+        const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
     }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -106,8 +107,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                     WorkManager.getInstance(applicationContext).enqueue(workRequest)
                 } else -> {
-                // No location access granted.
-            }
+                    // No location access granted.
+                }
             }
         }
 

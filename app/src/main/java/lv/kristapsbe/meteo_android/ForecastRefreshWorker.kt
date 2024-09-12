@@ -1,6 +1,7 @@
 package lv.kristapsbe.meteo_android
 
 import android.Manifest
+import android.app.Activity.MODE_PRIVATE
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.appwidget.AppWidgetManager
@@ -9,17 +10,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import lv.kristapsbe.meteo_android.R
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.json.Json
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -60,13 +60,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             val location = getLastLocation(applicationContext)
             // TODO: save location whenever one gets returned so that this can run if only foreground location permissions are granted
             if (location != null) {
-                //val cityForecast = CityForecastDataDownloader.downloadData("doWork", applicationContext)
-                val cityForecast = CityForecastDataDownloader.downloadData(
-                    "doWork",
-                    applicationContext,
-                    location.latitude,
-                    location.longitude
-                )
+                //val cityForecast = CityForecastDataDownloader.downloadData(applicationContext)
+                val cityForecast = CityForecastDataDownloader.downloadData(applicationContext, location.latitude, location.longitude)
 
                 // Get the callback from Application class and invoke it
                 val result = "Result from Worker"
@@ -80,11 +75,26 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                         "feels like ${displayInfo.getTodayForecast().feelsLikeTemp}°",
                         displayInfo.getTodayForecast().pictogram.getPictogram()
                     )
-                }
 
-                // TODO: push notifications if weather warnings appear, use a file to keep track of what we've already warned about?
-                Log.i("doWork", "showNotification")
-                //showNotification("Your Title", "Your Message")
+                    var warnings: HashSet<Int> = hashSetOf()
+                    for (f in applicationContext.fileList()) {
+                        if (f.equals(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)) {
+                            val content = applicationContext.openFileInput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE).bufferedReader().use { it.readText() }
+                            warnings = Json.decodeFromString<HashSet<Int>>(content)
+                            break
+                        }
+                    }
+
+                    for (w in displayInfo.warnings) {
+                        if (!warnings.contains(w.id)) {
+                            warnings.add(w.id)
+                            showNotification(w.id, w.intensity, w.type, w.description)
+                        }
+                    }
+                    applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
+                        fos.write(warnings.toString().toByteArray())
+                    }
+                }
             }
         }
         return Result.success()
@@ -110,7 +120,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         context.sendBroadcast(intent)
     }
 
-    fun showNotification(title: String, message: String) {
+    private fun showNotification(id: Int, intensity: String, type: String, description: String) {
         val intent = Intent(applicationContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -124,8 +134,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             MainActivity.WEATHER_WARNINGS_CHANNEL_ID
         )
             .setSmallIcon(R.drawable.example_battery)
-            .setContentTitle(title)
-            .setContentText(message)
+            .setContentTitle("${intensity}: ${type}")
+            .setContentText(description)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
@@ -145,8 +155,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 // for ActivityCompat#requestPermissions for more details.
                 return
             }
-            val NOTIFICATION_ID = 1 // TODO: I think I'll new ids per warning (I think the warnings have ids I can use)
-            notify(NOTIFICATION_ID, builder.build())
+            notify(id, builder.build())
         }
     }
 }

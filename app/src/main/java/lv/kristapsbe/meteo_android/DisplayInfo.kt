@@ -1,6 +1,5 @@
 package lv.kristapsbe.meteo_android
 
-import lv.kristapsbe.meteo_android.R
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.byUnicodePattern
 import kotlin.math.roundToInt
@@ -67,6 +66,13 @@ class Location(
     val name: String
 )
 
+class Warning(
+    val id: Int,
+    val intensity: String,
+    val type: String,
+    val description: String,
+)
+
 class DisplayInfo() {
     var location: Location = Location("", "")
     // Today
@@ -77,6 +83,8 @@ class DisplayInfo() {
     private val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
     private var lastUpdated: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
     private var lastDownloaded: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
+
+    var warnings: List<Warning> = emptyList()
 
     constructor(cityForecastData: CityForecastData?) : this() {
         if (cityForecastData != null) {
@@ -102,6 +110,15 @@ class DisplayInfo() {
                     e.vals[2].roundToInt(),
                     WeatherPictogram(e.vals[7].toInt()),
                     WeatherPictogram(e.vals[6].toInt())
+                )
+            }
+
+            warnings = cityForecastData.warnings.map { e ->
+                Warning(
+                    e.id,
+                    e.intensity[0],
+                    e.type[0],
+                    e.description[0]
                 )
             }
         }
