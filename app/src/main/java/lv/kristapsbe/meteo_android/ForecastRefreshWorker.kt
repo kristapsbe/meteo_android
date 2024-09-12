@@ -87,7 +87,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
                     for (w in displayInfo.warnings) {
                         if (!warnings.contains(w.id)) {
-                            warnings.add(w.id)
+                            warnings.add(w.id) // TODO: only add if allowed to push notifs
                             showNotification(w.id, w.intensity, w.type, w.description)
                         }
                     }
