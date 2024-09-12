@@ -11,3 +11,5 @@ jetpack compose - helpful docs
 https://developer.android.com/develop/ui/compose/mental-model
 
 https://developer.android.com/develop/ui/compose/graphics/draw/shapes ?
+
+Use https://termly.io/ to get a privacy policy
