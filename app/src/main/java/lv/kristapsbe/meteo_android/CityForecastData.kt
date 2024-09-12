@@ -55,8 +55,8 @@ class CityForecastDataDownloader {
             try {
                 val randTemp = String.format("%.1f", Random.nextInt(60)-30+ Random.nextDouble())
                 // local ip 10.0.2.2
-                var urlString = "http://meteo.kristapsbe.lv:8000/api/v1/forecast/test_ctemp?temp=$randTemp"
-                urlString = "http://meteo.kristapsbe.lv:8000/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
+                var urlString = "https://meteo.kristapsbe.lv/api/v1/forecast/test_ctemp?temp=$randTemp"
+                urlString = "https://meteo.kristapsbe.lv/api/v1/forecast/cities?lat=$lat&lon=$lon&radius=10"
                 val response = URL(urlString).readText()
                 ctx.openFileOutput(RESPONSE_FILE, MODE_PRIVATE).use { fos ->
                     fos.write(response.toByteArray())
