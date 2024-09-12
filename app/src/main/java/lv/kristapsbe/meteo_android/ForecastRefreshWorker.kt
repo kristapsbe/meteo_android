@@ -133,8 +133,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val builder = NotificationCompat.Builder(applicationContext,
             MainActivity.WEATHER_WARNINGS_CHANNEL_ID
         )
-            .setSmallIcon(R.drawable.example_battery)
-            .setContentTitle("${intensity}: ${type}")
+            .setSmallIcon(WeatherPictogram.warningIconMapping[intensity] ?: R.drawable.example_battery)
+            .setContentTitle(type)
             .setContentText(description)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)

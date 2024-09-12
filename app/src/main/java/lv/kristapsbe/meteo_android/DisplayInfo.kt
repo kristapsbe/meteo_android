@@ -32,6 +32,12 @@ class WeatherPictogram(
             2504 to R.drawable.cloud_rain,
             2506 to R.drawable.cloud_rain_moon
         )
+
+        val warningIconMapping: HashMap<String, Int> = hashMapOf(
+            "Yellow" to R.drawable.alert_yellow,
+            "Orange" to R.drawable.alert_orange,
+            "Red" to R.drawable.alert_red
+        )
     }
 
     fun getPictogram(): Int {
@@ -116,7 +122,7 @@ class DisplayInfo() {
             warnings = cityForecastData.warnings.map { e ->
                 Warning(
                     e.id,
-                    e.intensity[0],
+                    e.intensity[1],
                     e.type[0],
                     e.description[0]
                 )
