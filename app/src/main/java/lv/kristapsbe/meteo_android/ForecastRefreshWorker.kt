@@ -9,6 +9,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Icon
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -144,7 +145,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val builder = NotificationCompat.Builder(applicationContext,
             MainActivity.WEATHER_WARNINGS_CHANNEL_ID
         )
-            .setSmallIcon(WeatherPictogram.warningIconMapping[intensity] ?: R.drawable.example_battery)
+            .setSmallIcon(R.drawable.tornado)
+            .setLargeIcon(Icon.createWithResource(applicationContext, WeatherPictogram.warningIconMapping[intensity] ?: R.drawable.example_battery))
             .setContentTitle(type)
             .setContentText(description)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
