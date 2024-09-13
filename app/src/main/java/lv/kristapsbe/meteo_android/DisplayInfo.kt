@@ -28,7 +28,8 @@ class WeatherPictogram(
             2104 to R.drawable.cloud,
             2105 to R.drawable.cloud, // TODO: should be a cloud with a second cloud in the background
 
-            2303 to R.drawable.cloud_lightning_moon,
+            2303 to R.drawable.cloud_lightning_moon, // drizzle
+            2306 to R.drawable.cloud_lightning_moon, // rain
 
             2401 to R.drawable.cloud_fog,
             2403 to R.drawable.cloud_fog_moon,
