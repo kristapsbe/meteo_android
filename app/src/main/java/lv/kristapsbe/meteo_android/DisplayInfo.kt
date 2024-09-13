@@ -29,6 +29,9 @@ class WeatherPictogram(
 
             2303 to R.drawable.cloud_lightning_moon,
 
+            2401 to R.drawable.cloud_fog,
+            2403 to R.drawable.cloud_fog_moon,
+
             2504 to R.drawable.cloud_rain,
             2506 to R.drawable.cloud_rain_moon
         )
