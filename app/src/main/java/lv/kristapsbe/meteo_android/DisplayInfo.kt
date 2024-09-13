@@ -50,7 +50,6 @@ class WeatherPictogram(
 
 class DailyForecast(
     private val date: LocalDateTime,
-    val locationId: String,
     val rainAmount: Int,
     val rainProb: Int,
     val tempMin: Int,
@@ -66,13 +65,7 @@ class DailyForecast(
 class HourlyForecast(
     val currentTemp: Int,
     val feelsLikeTemp: Int,
-    val locationId: String,
     val pictogram: WeatherPictogram
-)
-
-class Location(
-    val id: String,
-    val name: String
 )
 
 class Warning(
@@ -83,11 +76,11 @@ class Warning(
 )
 
 class DisplayInfo() {
-    var location: Location = Location("", "")
+    var city: String = ""
     // Today
     private var hourlyForecasts: List<HourlyForecast> = emptyList()
     // Tomorrow onwards
-    private var dailyForecasts: List<DailyForecast> = emptyList()
+    var dailyForecasts: List<DailyForecast> = emptyList()
 
     private val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
     private var lastUpdated: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
@@ -99,20 +92,18 @@ class DisplayInfo() {
         if (cityForecastData != null) {
             lastUpdated = stringToDatetime(cityForecastData.last_updated)
             lastDownloaded = stringToDatetime(cityForecastData.last_downloaded)
-            location = Location(cityForecastData.cities[0].id, cityForecastData.cities[0].name)
+            city = cityForecastData.city
             // TODO: I should get the ids dynamically
             hourlyForecasts = cityForecastData.hourly_forecast.map { e ->
                 HourlyForecast(
                     e.vals[1].roundToInt(),
                     e.vals[2].roundToInt(),
-                    e.id,
                     WeatherPictogram(e.vals[0].toInt())
                 )
             }
             dailyForecasts = cityForecastData.daily_forecast.map { e ->
                 DailyForecast(
                     stringToDatetime(e.time.toString()),
-                    e.id,
                     e.vals[4].toInt(),
                     e.vals[5].toInt(),
                     e.vals[3].roundToInt(),
@@ -147,14 +138,9 @@ class DisplayInfo() {
     fun getTodayForecast(): HourlyForecast {
         // TODO: fish out most recent relevant info
         if (hourlyForecasts.isNotEmpty()) {
-            return hourlyForecasts.filter { it.locationId == location.id }[0]
+            return hourlyForecasts[0]
         }
-        return HourlyForecast(0, 0, "", WeatherPictogram(0))
-    }
-
-    fun getCurrentDailyForecasts(): List<DailyForecast> {
-        // TODO - filter based on the closest (and largest) town
-        return dailyForecasts.filter { it.locationId == getTodayForecast().locationId }
+        return HourlyForecast(0, 0, WeatherPictogram(0))
     }
 
     fun getLastUpdated(): String {

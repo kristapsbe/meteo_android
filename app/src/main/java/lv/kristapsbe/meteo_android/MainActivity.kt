@@ -209,7 +209,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = displayInfo.value.location.name,
+                    text = displayInfo.value.city,
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center,
                     color = Color(resources.getColor(R.color.text_color)),
@@ -234,7 +234,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         Column(
             modifier = Modifier.padding(20.dp, 20.dp, 20.dp, 20.dp)
         ) {
-            for (d in displayInfo.value.getCurrentDailyForecasts()) {
+            for (d in displayInfo.value.dailyForecasts) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1.0f)

@@ -71,7 +71,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     val displayInfo = DisplayInfo(cityForecast)
                     updateWidget(
                         "${displayInfo.getTodayForecast().currentTemp}",
-                        displayInfo.location.name,
+                        displayInfo.city,
                         "feels like ${displayInfo.getTodayForecast().feelsLikeTemp}°",
                         displayInfo.getTodayForecast().pictogram.getPictogram()
                     )
