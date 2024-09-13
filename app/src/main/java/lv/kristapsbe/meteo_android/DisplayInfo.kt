@@ -19,6 +19,8 @@ class WeatherPictogram(
             1301 to R.drawable.cloud_lightning,
             1303 to R.drawable.cloud_lightning_sun,
 
+            1403 to R.drawable.cloud_fog_sun,
+
             1504 to R.drawable.cloud_rain,
             1506 to R.drawable.cloud_rain_sun,
 
