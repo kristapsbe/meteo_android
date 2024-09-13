@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val WEATHER_WARNINGS_CHANNEL_DESCRIPTION = "Channel for receiving notifications about severe weather warnings"
 
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
+        const val LAST_COORDINATES_FILE = "last_coordinates.json"
     }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient

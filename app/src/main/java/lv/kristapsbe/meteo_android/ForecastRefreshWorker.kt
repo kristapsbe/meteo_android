@@ -9,7 +9,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -25,11 +24,11 @@ import kotlin.coroutines.resumeWithException
 
 
 class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
-    private suspend fun getLastLocation(context: Context): Location? {
+    private suspend fun getLastLocation(context: Context): Set<Double> {
         val fusedLocationClient: FusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
 
-        return suspendCancellableCoroutine { continuation ->
+        val lastLocation = suspendCancellableCoroutine { continuation ->
             if (ActivityCompat.checkSelfPermission(
                     context,
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -48,7 +47,20 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     .addOnCanceledListener {
                         continuation.cancel()
                     }
+            } else {
+                continuation.resume(null)
             }
+        }
+        if (lastLocation != null) {
+            return setOf(lastLocation.latitude, lastLocation.longitude)
+        } else {
+            for (f in applicationContext.fileList()) {
+                if (f.equals(MainActivity.LAST_COORDINATES_FILE)) {
+                    val content = applicationContext.openFileInput(MainActivity.LAST_COORDINATES_FILE).bufferedReader().use { it.readText() }
+                    return Json.decodeFromString<Set<Double>>(content)
+                }
+            }
+            return setOf(56.9730, 24.1327) // Don't have anything to go off of - default to Riga
         }
     }
 
@@ -58,42 +70,41 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
         runBlocking {
             val location = getLastLocation(applicationContext)
-            // TODO: save location whenever one gets returned so that this can run if only foreground location permissions are granted
-            if (location != null) {
-                //val cityForecast = CityForecastDataDownloader.downloadData(applicationContext)
-                val cityForecast = CityForecastDataDownloader.downloadData(applicationContext, location.latitude, location.longitude)
+            val cityForecast = CityForecastDataDownloader.downloadData(applicationContext, location.elementAt(0), location.elementAt(1))
 
-                // Get the callback from Application class and invoke it
-                val result = "Result from Worker"
-                callback?.onWorkerResult(cityForecast, result)
+            // Get the callback from Application class and invoke it
+            val result = "Result from Worker"
+            callback?.onWorkerResult(cityForecast, result)
 
-                if (cityForecast != null) {
-                    val displayInfo = DisplayInfo(cityForecast)
-                    updateWidget(
-                        "${displayInfo.getTodayForecast().currentTemp}",
-                        displayInfo.city,
-                        "feels like ${displayInfo.getTodayForecast().feelsLikeTemp}°",
-                        displayInfo.getTodayForecast().pictogram.getPictogram()
-                    )
+            if (cityForecast != null) {
+                val displayInfo = DisplayInfo(cityForecast)
+                updateWidget(
+                    "${displayInfo.getTodayForecast().currentTemp}",
+                    displayInfo.city,
+                    "feels like ${displayInfo.getTodayForecast().feelsLikeTemp}°",
+                    displayInfo.getTodayForecast().pictogram.getPictogram()
+                )
 
-                    var warnings: HashSet<Int> = hashSetOf()
-                    for (f in applicationContext.fileList()) {
-                        if (f.equals(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)) {
-                            val content = applicationContext.openFileInput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE).bufferedReader().use { it.readText() }
-                            warnings = Json.decodeFromString<HashSet<Int>>(content)
-                            break
-                        }
+                var warnings: HashSet<Int> = hashSetOf()
+                for (f in applicationContext.fileList()) {
+                    if (f.equals(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)) {
+                        val content = applicationContext.openFileInput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE).bufferedReader().use { it.readText() }
+                        warnings = Json.decodeFromString<HashSet<Int>>(content)
+                        break
                     }
+                }
 
-                    for (w in displayInfo.warnings) {
-                        if (!warnings.contains(w.id)) {
-                            warnings.add(w.id) // TODO: only add if allowed to push notifs
-                            showNotification(w.id, w.intensity, w.type, w.description)
-                        }
+                for (w in displayInfo.warnings) {
+                    if (!warnings.contains(w.id)) {
+                        warnings.add(w.id) // TODO: only add if allowed to push notifs
+                        showNotification(w.id, w.intensity, w.type, w.description)
                     }
-                    applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
-                        fos.write(warnings.toString().toByteArray())
-                    }
+                }
+                applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
+                    fos.write(warnings.toString().toByteArray())
+                }
+                applicationContext.openFileOutput(MainActivity.LAST_COORDINATES_FILE, MODE_PRIVATE).use { fos ->
+                    fos.write(location.toString().toByteArray())
                 }
             }
         }

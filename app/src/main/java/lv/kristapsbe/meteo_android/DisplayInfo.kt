@@ -29,13 +29,15 @@ class WeatherPictogram(
             2105 to R.drawable.cloud, // TODO: should be a cloud with a second cloud in the background
 
             2303 to R.drawable.cloud_lightning_moon, // drizzle
+            2304 to R.drawable.cloud_lightning_moon, // rain
             2306 to R.drawable.cloud_lightning_moon, // rain
 
             2401 to R.drawable.cloud_fog,
             2403 to R.drawable.cloud_fog_moon,
 
             2504 to R.drawable.cloud_rain,
-            2506 to R.drawable.cloud_rain_moon
+            2506 to R.drawable.cloud_rain_moon,
+            2507 to R.drawable.cloud_rain
         )
 
         val warningIconMapping: HashMap<String, Int> = hashMapOf(
