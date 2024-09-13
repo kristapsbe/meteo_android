@@ -16,6 +16,7 @@ class WeatherPictogram(
             1104 to R.drawable.cloud,
             1105 to R.drawable.cloud, // TODO: should be a cloud with a second cloud in the background
 
+            1301 to R.drawable.cloud_lightning,
             1303 to R.drawable.cloud_lightning_sun,
 
             1504 to R.drawable.cloud_rain,
