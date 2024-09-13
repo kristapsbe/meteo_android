@@ -142,6 +142,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    // TODO: I may be highjacking the ability to exit the app by swiping to the side?
                     if (available.y > 0 && !wasLastScrollNegative) {
                         wasLastScrollNegative = true
                         if (!isLoading.value) {
@@ -149,7 +150,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                             WorkManager.getInstance(self).enqueue(workRequest)
                         }
-
                     }
                     return super.onPreScroll(available, source)
                 }
@@ -168,9 +168,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 .background(Color(resources.getColor(R.color.sky_blue)))
                 .verticalScroll(state = scrollState)
         ) {
-            if (isLoading.value) {
-                CircularProgressIndicator(progress = { 1.0f }, modifier = Modifier.fillMaxWidth())
-            }
+            //if (isLoading.value) {
+            //    CircularProgressIndicator(progress = { 1.0f }, modifier = Modifier.fillMaxWidth())
+            //}
             ShowCurrentInfo()
             ShowDailyInfo()
             ShowMetadataInfo()
