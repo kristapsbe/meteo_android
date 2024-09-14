@@ -37,7 +37,7 @@ data class CityForecastData(
 
 class CityForecastDataDownloader {
     companion object {
-        private const val RESPONSE_FILE = "response.json"
+        const val RESPONSE_FILE = "response.json"
 
         fun downloadData(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327): CityForecastData? {
             try {

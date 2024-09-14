@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,7 +49,11 @@ import com.google.android.gms.location.LocationServices
 import java.util.concurrent.TimeUnit
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.width
 import androidx.core.app.ActivityCompat
+import kotlinx.serialization.json.Json
+import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
 
 
 interface WorkerCallback {
@@ -80,6 +83,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        for (f in applicationContext.fileList()) {
+            if (f.equals(RESPONSE_FILE)) {
+                val content = applicationContext.openFileInput(RESPONSE_FILE).bufferedReader().use { it.readText() }
+                displayInfo.value = DisplayInfo(Json.decodeFromString<CityForecastData>(content))
+                break
+            }
+        }
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         enableEdgeToEdge()
         setContent {
@@ -172,6 +183,45 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             //    CircularProgressIndicator(progress = { 1.0f }, modifier = Modifier.fillMaxWidth())
             //}
             ShowCurrentInfo()
+            Row (
+                modifier = Modifier
+                    .padding(20.dp, 20.dp, 20.dp, 0.dp)
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                for (h in displayInfo.value.hourlyForecasts) {
+                    Column (
+                        modifier = Modifier
+                            .width(70.dp)
+                            .padding(0.dp, 0.dp, 20.dp, 0.dp)
+                    ) {
+                        Text(
+                            text = h.getDay().substring(0, 3),
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            "${h.time.take(2)}:${h.time.takeLast(2)}",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            "${h.currentTemp}°",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        )
+                        Image(
+                            painterResource(h.pictogram.getPictogram()),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .width(70.dp)
+                                .height(50.dp)
+                        )
+                    }
+                }
+            }
             ShowDailyInfo()
             ShowMetadataInfo()
         }
@@ -233,7 +283,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     @Composable
     fun ShowDailyInfo() {
         Column(
-            modifier = Modifier.padding(20.dp, 20.dp, 20.dp, 20.dp)
+            modifier = Modifier.padding(20.dp, 10.dp, 20.dp, 20.dp)
         ) {
             for (d in displayInfo.value.dailyForecasts) {
                 Row(

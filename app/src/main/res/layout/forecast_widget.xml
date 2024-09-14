@@ -10,7 +10,8 @@
         android:layout_height="90dp"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:paddingEnd="12dp">
+        android:paddingEnd="12dp"
+        android:paddingBottom="4dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -34,7 +35,7 @@
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/appwidget_text"
                 android:text="@string/appwidget_text"
-                android:textSize="46dp" />
+                android:textSize="36dp" />
         </RelativeLayout>
         <RelativeLayout
             android:layout_width="match_parent"
