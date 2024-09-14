@@ -13,3 +13,7 @@ https://developer.android.com/develop/ui/compose/mental-model
 https://developer.android.com/develop/ui/compose/graphics/draw/shapes ?
 
 Use https://termly.io/ to get a privacy policy
+
+## TODO
+* back has to be invoked twice to exit the app
+* 2 cell height widget with "rain expected at..." and "forecast updated at..."
