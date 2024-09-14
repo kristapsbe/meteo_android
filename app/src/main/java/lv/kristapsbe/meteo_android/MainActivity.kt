@@ -212,6 +212,18 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
                         )
+                        Text(
+                            "${h.rainAmount} mm",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            "${h.rainProb}%",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        )
                         Image(
                             painterResource(h.pictogram.getPictogram()),
                             contentDescription = "",
