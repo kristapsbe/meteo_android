@@ -205,7 +205,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             .padding(0.dp, 0.dp, 20.dp, 0.dp)
                     ) {
                         Text(
-                            text = dayMapping[h.getDay()] ?: "X",
+                            text = dayMapping[h.getDayOfWeek()] ?: h.getDayOfWeek(),
                             color = Color(resources.getColor(R.color.text_color)),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
@@ -311,17 +311,30 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1.0f)
+                        .height(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text( // TODO: don't use substrings to format
+                        text = "${d.date.toString().take(10).takeLast(2)}.${d.date.toString().take(7).takeLast(2)}.${d.date.toString().take(4)}",
+                        fontSize = 10.sp,
+                        textAlign = TextAlign.Left,
+                        color = Color(resources.getColor(R.color.text_color))
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(1.0f)
                         .height(60.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = dayMapping[d.getDay()] ?: d.getDay(),
+                        text = dayMapping[d.getDayOfWeek()] ?: d.getDayOfWeek(),
                         textAlign = TextAlign.Left,
                         color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier.fillMaxWidth(0.09f)
                     )
                     Text( // TODO: make width consistent
-                        text = "${d.tempMin}° līdz ${d.tempMax}°",
+                        text = "${d.tempMin}° — ${d.tempMax}°",
                         textAlign = TextAlign.Center,
                         color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier.fillMaxWidth(0.33f)

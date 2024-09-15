@@ -121,7 +121,7 @@ class WeatherPictogram(
 }
 
 class DailyForecast(
-    private val date: LocalDateTime,
+    val date: LocalDateTime,
     val rainAmount: Int,
     val rainProb: Int,
     val tempMin: Int,
@@ -129,7 +129,7 @@ class DailyForecast(
     val pictogramDay: WeatherPictogram,
     val pictogramNight: WeatherPictogram
 ) {
-    fun getDay(): String {
+    fun getDayOfWeek(): String {
         return date.dayOfWeek.toString()
     }
 }
@@ -143,7 +143,7 @@ class HourlyForecast(
     val feelsLikeTemp: Int,
     val pictogram: WeatherPictogram
 ) {
-    fun getDay(): String {
+    fun getDayOfWeek(): String {
         return date.dayOfWeek.toString()
     }
 }
