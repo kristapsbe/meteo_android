@@ -4,7 +4,7 @@
     android:initialKeyguardLayout="@layout/forecast_widget"
     android:initialLayout="@layout/forecast_widget"
     android:minWidth="120dp"
-    android:minHeight="60dp"
+    android:minHeight="40dp"
     android:previewLayout="@layout/forecast_widget"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="2"
