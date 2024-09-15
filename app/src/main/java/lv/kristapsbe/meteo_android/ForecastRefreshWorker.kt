@@ -82,7 +82,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 updateWidget(
                     "${displayInfo.getTodayForecast().currentTemp}",
                     displayInfo.city,
-                    "feels like ${displayInfo.getTodayForecast().feelsLikeTemp}°",
+                    "jūtas kā ${displayInfo.getTodayForecast().feelsLikeTemp}°",
                     displayInfo.getTodayForecast().pictogram.getPictogram()
                 )
 

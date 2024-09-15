@@ -72,6 +72,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
         const val LAST_COORDINATES_FILE = "last_coordinates.json"
+
+        val dayMapping = hashMapOf(
+            "MONDAY" to "P.",
+            "TUESDAY" to "O.",
+            "WEDNESDAY" to "T.",
+            "THURSDAY" to "C.",
+            "FRIDAY" to "Pk.",
+            "SATURDAY" to "S.",
+            "SUNDAY" to "Sv."
+        )
     }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -191,11 +201,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 for (h in displayInfo.value.hourlyForecasts) {
                     Column (
                         modifier = Modifier
-                            .width(70.dp)
+                            .width(90.dp)
                             .padding(0.dp, 0.dp, 20.dp, 0.dp)
                     ) {
                         Text(
-                            text = h.getDay().substring(0, 3),
+                            text = dayMapping[h.getDay()] ?: "X",
                             color = Color(resources.getColor(R.color.text_color)),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
@@ -280,7 +290,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .fillMaxWidth(0.5f)
                 )
                 Text(
-                    text = "feels like ${hForecast.feelsLikeTemp}°",
+                    text = "jūtas kā ${hForecast.feelsLikeTemp}°",
                     fontSize = 20.sp,
                     lineHeight = 40.sp,
                     textAlign = TextAlign.Center,
@@ -305,41 +315,37 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = d.getDay().substring(0, 1),
+                        text = dayMapping[d.getDay()] ?: d.getDay(),
+                        textAlign = TextAlign.Left,
                         color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier.fillMaxWidth(0.03f)
+                        modifier = Modifier.fillMaxWidth(0.09f)
                     )
-                    Text(
-                        text = "${d.rainAmount} mm",
-                        textAlign = TextAlign.Right,
+                    Text( // TODO: make width consistent
+                        text = "${d.tempMin}° līdz ${d.tempMax}°",
+                        textAlign = TextAlign.Center,
                         color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier.fillMaxWidth(0.2f)
-                    )
-                    Text(
-                        text = "${d.rainProb}%",
-                        textAlign = TextAlign.Right,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier.fillMaxWidth(0.2f)
-                    )
-                    Text(
-                        text = "",
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier.fillMaxWidth(0.05f)
+                        modifier = Modifier.fillMaxWidth(0.33f)
                     )
                     Image(
                         painterResource(d.pictogramDay.getPictogram()),
                         contentDescription = "",
                         contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.fillMaxWidth(0.25f).fillMaxHeight(0.8f)
+                        modifier = Modifier.fillMaxWidth(0.2f).fillMaxHeight(0.8f)
                     )
                     Image(
                         painterResource(d.pictogramNight.getPictogram()),
                         contentDescription = "",
                         contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.fillMaxWidth(0.33f).fillMaxHeight(0.8f)
+                        modifier = Modifier.fillMaxWidth(0.25f).fillMaxHeight(0.8f)
                     )
-                    Text( // TODO: make width consistent
-                        text = "${d.tempMin}° to ${d.tempMax}°",
+                    Text(
+                        text = "${d.rainAmount} mm",
+                        textAlign = TextAlign.Right,
+                        color = Color(resources.getColor(R.color.text_color)),
+                        modifier = Modifier.fillMaxWidth(0.5f)
+                    )
+                    Text(
+                        text = "${d.rainProb}%",
                         textAlign = TextAlign.Right,
                         color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier.fillMaxWidth(1.0f)
@@ -358,7 +364,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = displayInfo.value.getLastUpdated(),
+                text = "prognoze atjaunināta ${displayInfo.value.getLastUpdated()}",
                 color = Color(resources.getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
             )
@@ -370,7 +376,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = displayInfo.value.getLastDownloaded(),
+                text = "prognoze lejupielādēta ${displayInfo.value.getLastDownloaded()}",
                 color = Color(resources.getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
             )
