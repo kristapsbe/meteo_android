@@ -16,4 +16,5 @@ Use https://termly.io/ to get a privacy policy
 
 ## TODO
 * back has to be invoked twice to exit the app
-* 2 cell height widget with "rain expected at..." and "forecast updated at..."
+* reduce size of update datestrings
+* make daily forecast rows less spaced out
