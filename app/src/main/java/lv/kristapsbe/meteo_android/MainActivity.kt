@@ -447,7 +447,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(0.15f)
+                            .fillMaxWidth(0.13f)
                     ) {
                         Text(
                             text = dayMapping[d.getDayOfWeek()] ?: d.getDayOfWeek(),
@@ -459,7 +459,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(0.4f)
+                            .fillMaxWidth(0.33f)
                     ) {
                         Row {
                             Text( // TODO: don't use substrings to format
@@ -483,7 +483,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(0.6f)
+                            .fillMaxWidth(0.4f)
                     ) {
                         Row {
                             Column(
@@ -518,7 +518,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(1.0f)
+                            .fillMaxWidth(0.5f)
                     ) {
                         Row {
                             Text(
@@ -530,7 +530,28 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         }
                         Row {
                             Text(
+                                text = "${d.averageWind} m/s",
+                                textAlign = TextAlign.Right,
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(1.0f)
+                    ) {
+                        Row {
+                            Text(
                                 text = "${d.rainProb}%",
+                                textAlign = TextAlign.Right,
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        Row {
+                            Text(
+                                text = "${d.maxWind} m/s",
                                 textAlign = TextAlign.Right,
                                 color = Color(resources.getColor(R.color.text_color)),
                                 modifier = Modifier.fillMaxWidth()
