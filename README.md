@@ -17,3 +17,4 @@ Use https://termly.io/ to get a privacy policy
 ## TODO
 * add ability to select location (by name)
 * ask for notification permissions
+* average and max wind would probs work better as "5 - 7 m/s" instead of both being listed separately
