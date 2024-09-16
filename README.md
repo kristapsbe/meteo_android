@@ -15,6 +15,4 @@ https://developer.android.com/develop/ui/compose/graphics/draw/shapes ?
 Use https://termly.io/ to get a privacy policy
 
 ## TODO
-* back has to be invoked twice to exit the app
-* reduce size of update datestrings
-* make daily forecast rows less spaced out
+* add ability to select location
