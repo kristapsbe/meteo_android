@@ -15,4 +15,5 @@ https://developer.android.com/develop/ui/compose/graphics/draw/shapes ?
 Use https://termly.io/ to get a privacy policy
 
 ## TODO
-* add ability to select location
+* add ability to select location (by name)
+* ask for notification permissions
