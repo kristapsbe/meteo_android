@@ -49,8 +49,10 @@ import com.google.android.gms.location.LocationServices
 import java.util.concurrent.TimeUnit
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
 import kotlinx.serialization.json.Json
@@ -194,6 +196,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             //    CircularProgressIndicator(progress = { 1.0f }, modifier = Modifier.fillMaxWidth())
             //}
             ShowCurrentInfo()
+            HorizontalDivider(
+                modifier = Modifier
+                    .padding(20.dp, 20.dp, 20.dp, 10.dp),
+                color = Color(resources.getColor(R.color.light_gray)),
+                thickness = 1.dp
+            )
             Row (
                 modifier = Modifier
                     .padding(20.dp, 20.dp, 20.dp, 0.dp)
@@ -245,7 +253,71 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                 }
             }
+            HorizontalDivider(
+                modifier = Modifier
+                    .padding(20.dp, 20.dp, 20.dp, 0.dp),
+                color = Color(resources.getColor(R.color.light_gray)),
+                thickness = 1.dp
+            )
+            if (displayInfo.value.warnings.isNotEmpty()) {
+                val displayMetrics = Resources.getSystem().displayMetrics
+                val screenWidthPx = displayMetrics.widthPixels  // Get width in pixels
+                val screenWidthDp = screenWidthPx / displayMetrics.density  // Convert to dp
+                Row (
+                    modifier = Modifier
+                        .padding(20.dp, 20.dp, 20.dp, 0.dp)
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    for (w in displayInfo.value.warnings) {
+                        Column (
+                            modifier = Modifier
+                                .width((screenWidthDp-40).dp)
+                                .padding(0.dp, 0.dp, 20.dp, 0.dp)
+                        ) {
+                            Row {
+                                Column {
+                                    Image(
+                                        painterResource(WeatherPictogram.warningIconMapping[w.intensity] ?: R.drawable.example_battery),
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .width(80.dp)
+                                            .height(80.dp)
+                                    )
+                                }
+                                Column {
+                                    Text(
+                                        w.type,
+                                        fontSize = 20.sp,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier
+                                            .padding(0.dp, 0.dp, 0.dp, 10.dp),
+                                    )
+                                    Text(
+                                        w.description,
+                                        fontSize = 15.sp,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(20.dp, 20.dp, 20.dp, 0.dp),
+                    color = Color(resources.getColor(R.color.light_gray)),
+                    thickness = 1.dp
+                )
+            }
             ShowDailyInfo()
+            HorizontalDivider(
+                modifier = Modifier
+                    .padding(20.dp, 20.dp, 20.dp, 20.dp),
+                color = Color(resources.getColor(R.color.light_gray)),
+                thickness = 1.dp
+            )
             ShowMetadataInfo()
         }
     }
