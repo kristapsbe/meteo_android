@@ -51,6 +51,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
@@ -310,59 +311,102 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             for (d in displayInfo.value.dailyForecasts) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(1.0f)
-                        .height(20.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .fillMaxWidth()
+                        .height(80.dp),
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Text( // TODO: don't use substrings to format
-                        text = "${d.date.toString().take(10).takeLast(2)}.${d.date.toString().take(7).takeLast(2)}.${d.date.toString().take(4)}",
-                        fontSize = 10.sp,
-                        textAlign = TextAlign.Left,
-                        color = Color(resources.getColor(R.color.text_color))
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(1.0f)
-                        .height(60.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = dayMapping[d.getDayOfWeek()] ?: d.getDayOfWeek(),
-                        textAlign = TextAlign.Left,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier.fillMaxWidth(0.09f)
-                    )
-                    Text( // TODO: make width consistent
-                        text = "${d.tempMin}° — ${d.tempMax}°",
-                        textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier.fillMaxWidth(0.33f)
-                    )
-                    Image(
-                        painterResource(d.pictogramDay.getPictogram()),
-                        contentDescription = "",
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.fillMaxWidth(0.2f).fillMaxHeight(0.8f)
-                    )
-                    Image(
-                        painterResource(d.pictogramNight.getPictogram()),
-                        contentDescription = "",
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.fillMaxWidth(0.25f).fillMaxHeight(0.8f)
-                    )
-                    Text(
-                        text = "${d.rainAmount} mm",
-                        textAlign = TextAlign.Right,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier.fillMaxWidth(0.5f)
-                    )
-                    Text(
-                        text = "${d.rainProb}%",
-                        textAlign = TextAlign.Right,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier.fillMaxWidth(1.0f)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.15f)
+                    ) {
+                        Text(
+                            text = dayMapping[d.getDayOfWeek()] ?: d.getDayOfWeek(),
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Left,
+                            color = Color(resources.getColor(R.color.text_color)),
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.4f)
+                    ) {
+                        Row {
+                            Text( // TODO: don't use substrings to format
+                                text = "${d.date.toString().take(10).takeLast(2)}.${d.date.toString().take(7).takeLast(2)}.${d.date.toString().take(4)}",
+                                fontSize = 10.sp,
+                                textAlign = TextAlign.Center,
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
+                        Row {
+                            Text(
+                                text = "${d.tempMin}° — ${d.tempMax}°",
+                                textAlign = TextAlign.Center,
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.6f)
+                    ) {
+                        Row {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.5f)
+                            ) {
+                                Image(
+                                    painterResource(d.pictogramDay.getPictogram()),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .width(80.dp)
+                                        .height(80.dp)
+                                        .padding(0.dp, 40.dp, 0.dp, 0.dp)
+                                )
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth(1.0f)
+                            ) {
+                                Image(
+                                    painterResource(d.pictogramNight.getPictogram()),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .width(80.dp)
+                                        .height(80.dp)
+                                        .padding(0.dp, 40.dp, 0.dp, 0.dp)
+                                )
+                            }
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(1.0f)
+                    ) {
+                        Row {
+                            Text(
+                                text = "${d.rainAmount} mm",
+                                textAlign = TextAlign.Right,
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        Row {
+                            Text(
+                                text = "${d.rainProb}%",
+                                textAlign = TextAlign.Right,
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -373,10 +417,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp, 0.dp)
+                .padding(20.dp, 0.dp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
+                fontSize = 10.sp,
                 text = "prognoze atjaunināta ${displayInfo.value.getLastUpdated()}",
                 color = Color(resources.getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
@@ -385,10 +430,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp, 0.dp)
+                .padding(20.dp, 0.dp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
+                fontSize = 10.sp,
                 text = "prognoze lejupielādēta ${displayInfo.value.getLastDownloaded()}",
                 color = Color(resources.getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
