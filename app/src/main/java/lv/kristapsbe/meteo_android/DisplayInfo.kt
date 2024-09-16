@@ -139,6 +139,8 @@ class HourlyForecast(
     val time: String,
     val rainAmount: Int,
     val rainProb: Int,
+    val windSpeed: Int,
+    val windDirection: Int,
     val currentTemp: Int,
     val feelsLikeTemp: Int,
     val pictogram: WeatherPictogram
@@ -180,6 +182,8 @@ class DisplayInfo() {
                     e.time.toString().takeLast(4),
                     e.vals[6].roundToInt(),
                     e.vals[8].roundToInt(),
+                    e.vals[3].roundToInt(),
+                    e.vals[4].roundToInt(),
                     e.vals[1].roundToInt(),
                     e.vals[2].roundToInt(),
                     WeatherPictogram(e.vals[0].toInt())
@@ -224,7 +228,7 @@ class DisplayInfo() {
         if (hourlyForecasts.isNotEmpty()) {
             return hourlyForecasts[0]
         }
-        return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, WeatherPictogram(0))
+        return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
     }
 
     fun getLastUpdated(): String {

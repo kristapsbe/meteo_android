@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
+import kotlin.math.roundToInt
 
 
 interface WorkerCallback {
@@ -159,6 +160,51 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         workManager.enqueue(workRequest)
     }
 
+    //https://uni.edu/storm/Wind%20Direction%20slide.pdf
+    var directions = hashMapOf(
+        35 to "Z",
+        36 to "Z",
+        0 to "Z",
+        1 to "Z",
+        2 to "Z/ZA",
+        3 to "Z/ZA",
+        4 to "ZA",
+        5 to "ZA",
+        6 to "A/ZA",
+        7 to "A/ZA",
+        8 to "A",
+        9 to "A",
+        10 to "A",
+        11 to "A/DA",
+        12 to "A/DA",
+        13 to "DA",
+        14 to "DA",
+        15 to "D/DA",
+        16 to "D/DA",
+        17 to "D",
+        18 to "D",
+        19 to "D",
+        20 to "D/DR",
+        21 to "D/DR",
+        22 to "DR",
+        23 to "DR",
+        24 to "R/DR",
+        25 to "R/DR",
+        26 to "R",
+        27 to "R",
+        28 to "R",
+        29 to "R/ZR",
+        30 to "R/ZR",
+        31 to "ZR",
+        32 to "ZR",
+        33 to "Z/ZR",
+        34 to "Z/ZR",
+    )
+
+    fun DegreesToDirection(deg: Int): String {
+        return directions[(deg/10)] ?: ""
+    }
+
     @Composable
     fun AllForecasts() {
         val self = this
@@ -239,6 +285,18 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         )
                         Text(
                             "${h.rainProb}%",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            "${h.windSpeed} m/s",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            "${DegreesToDirection(h.windDirection)}",
                             color = Color(resources.getColor(R.color.text_color)),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
