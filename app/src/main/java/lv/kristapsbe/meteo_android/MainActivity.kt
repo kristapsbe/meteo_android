@@ -51,8 +51,11 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
 import kotlinx.serialization.json.Json
@@ -212,7 +215,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    // TODO: I may be highjacking the ability to exit the app by swiping to the side?
+                    // TODO: I may be hijacking the ability to exit the app by swiping to the side?
                     if (available.y > 0 && !wasLastScrollNegative) {
                         wasLastScrollNegative = true
                         if (!isLoading.value) {
@@ -250,64 +253,116 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             )
             Row (
                 modifier = Modifier
-                    .padding(20.dp, 20.dp, 20.dp, 0.dp)
-                    .horizontalScroll(rememberScrollState())
+                    .padding(20.dp, 10.dp, 20.dp, 0.dp)
             ) {
-                for (h in displayInfo.value.hourlyForecasts) {
-                    Column (
+                Column(
+                    modifier = Modifier
+                        .padding(0.dp, 60.dp, 0.dp, 0.dp)
+                ) {
+                    Image(
+                        painterResource(R.drawable.thermometer_50),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .width(90.dp)
-                            .padding(0.dp, 0.dp, 20.dp, 0.dp)
+                            .width(30.dp)
+                            .height(30.dp)
+                    )
+                    Image(
+                        painterResource(R.drawable.wind),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                    )
+                    Image(
+                        painterResource(R.drawable.umbrella),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                            .padding(0.dp, 20.dp, 0.dp, 0.dp)
+                    )
+                    Image(
+                        painterResource(R.drawable.cloud_lightning),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                    )
+                }
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState())
                     ) {
-                        Text(
-                            text = dayMapping[h.getDayOfWeek()] ?: h.getDayOfWeek(),
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            "${h.time.take(2)}:${h.time.takeLast(2)}",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            "${h.currentTemp}°",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            "${h.rainAmount} mm",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            "${h.rainProb}%",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            "${h.windSpeed} m/s",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            "${DegreesToDirection(h.windDirection)}",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        )
-                        Image(
-                            painterResource(h.pictogram.getPictogram()),
-                            contentDescription = "",
-                            modifier = Modifier
-                                .width(70.dp)
-                                .height(50.dp)
-                        )
+                        var prevHDay: String? = null
+                        for (h in displayInfo.value.hourlyForecasts) {
+                            Column (
+                                modifier = Modifier
+                                    .width(90.dp)
+                                    .padding(10.dp, 0.dp, 10.dp, 0.dp)
+                            ) {
+                                Text(
+                                    h.time.take(2),
+                                    fontSize = 12.sp,
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Image(
+                                    painterResource(h.pictogram.getPictogram()),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .width(70.dp)
+                                        .height(40.dp)
+                                        .padding(0.dp, 3.dp, 0.dp, 0.dp)
+                                )
+                                Text(
+                                    "${h.currentTemp}°",
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text(
+                                    "${h.windSpeed} m/s",
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text(
+                                    "${DegreesToDirection(h.windDirection)}",
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text(
+                                    "${h.rainAmount} mm",
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text(
+                                    "${h.rainProb}%",
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                            if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
+                                VerticalDivider(
+                                    color = Color(resources.getColor(R.color.light_gray)),
+                                    modifier = Modifier.height(100.dp),
+                                    thickness = 1.dp
+                                )
+                            }
+                            prevHDay = h.getDayOfWeek()
+                        }
                     }
                 }
             }
@@ -395,10 +450,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Image(
                     painterResource(hForecast.pictogram.getPictogram()),
                     contentDescription = "",
-                    contentScale = ContentScale.FillBounds,
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
-                        .fillMaxHeight(1.0f)
+                        .fillMaxHeight(0.8f)
                 )
                 Text(
                     text = "${hForecast.currentTemp}°",
@@ -493,10 +548,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 Image(
                                     painterResource(d.pictogramDay.getPictogram()),
                                     contentDescription = "",
-                                    contentScale = ContentScale.Crop,
+                                    contentScale = ContentScale.Fit,
                                     modifier = Modifier
                                         .width(80.dp)
-                                        .height(80.dp)
+                                        .height(75.dp)
                                         .padding(0.dp, 40.dp, 0.dp, 0.dp)
                                 )
                             }
@@ -507,10 +562,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 Image(
                                     painterResource(d.pictogramNight.getPictogram()),
                                     contentDescription = "",
-                                    contentScale = ContentScale.Crop,
+                                    contentScale = ContentScale.Fit,
                                     modifier = Modifier
                                         .width(80.dp)
-                                        .height(80.dp)
+                                        .height(75.dp)
                                         .padding(0.dp, 40.dp, 0.dp, 0.dp)
                                 )
                             }

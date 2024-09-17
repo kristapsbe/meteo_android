@@ -10,101 +10,101 @@ class WeatherPictogram(
 ) {
     companion object {
         val iconMapping: HashMap<Int, Int> = hashMapOf(
-            1101 to R.drawable.sun,
-            1102 to R.drawable.cloud_sun,
-            1103 to R.drawable.cloud_sun, // single fulled out cloud with sun
-            1104 to R.drawable.cloud, // single filled out cloud
-            1105 to R.drawable.cloud, // two filled out clouds
+            1101 to R.drawable.clear,
+            1102 to R.drawable.pcloudy,
+            1103 to R.drawable.mcloudy1, // single fulled out cloud with sun
+            1104 to R.drawable.mcloudy, // single filled out cloud
+            1105 to R.drawable.mcloudy, // two filled out clouds
 
             // 12xx - sleet (?)
 
-            1301 to R.drawable.cloud_lightning, // two filled out clouds, with lightning and rain
-            1302 to R.drawable.cloud_lightning, // single filled out cloud, with lightning and rain
-            1303 to R.drawable.cloud_lightning_sun, // single filled out cloud with sun, lightning and rain
-            1304 to R.drawable.cloud_lightning, // two filled out clouds, with lightning and rain (downpour)
-            1305 to R.drawable.cloud_lightning, // single filled out cloud, with lightning and rain (downpour)
-            1306 to R.drawable.cloud_lightning_sun, // single filled out cloud with sun, lightning and rain (downpour)
-            1307 to R.drawable.cloud_lightning, // two filled out clouds, with lightning and snow or sleet
-            1308 to R.drawable.cloud_lightning, // single filled out cloud, with lightning and snow or sleet
-            1309 to R.drawable.cloud_lightning_sun, // single filled out cloud with sun, lightning and snow or sleet
+            1301 to R.drawable.tshower, // two filled out clouds, with lightning and rain
+            1302 to R.drawable.tshower, // single filled out cloud, with lightning and rain
+            1303 to R.drawable.tshower1, // single filled out cloud with sun, lightning and rain
+            1304 to R.drawable.tshower, // two filled out clouds, with lightning and rain (downpour)
+            1305 to R.drawable.tshower, // single filled out cloud, with lightning and rain (downpour)
+            1306 to R.drawable.tshower, // single filled out cloud with sun, lightning and rain (downpour)
+            1307 to R.drawable.tshower, // two filled out clouds, with lightning and snow or sleet
+            1308 to R.drawable.tshower, // single filled out cloud, with lightning and snow or sleet
+            1309 to R.drawable.tshower1, // single filled out cloud with sun, lightning and snow or sleet
 
-            1401 to R.drawable.cloud_fog, // two clouds with fog
-            1402 to R.drawable.cloud_fog, // cloud with fog
-            1403 to R.drawable.cloud_fog_sun, // single filled out cloud with fog
-            1404 to R.drawable.cloud_fog_sun, // single unfilled cloud with fog
-            1405 to R.drawable.cloud_fog, // two clouds with fog and rain (drizzle)
-            1406 to R.drawable.cloud_fog, // cloud with fog and rain (drizzle)
-            1407 to R.drawable.cloud_fog, // two clouds with fog and rain
-            1408 to R.drawable.cloud_fog_sun, // two clouds with fog, sun and rain
-            1409 to R.drawable.cloud_fog, // cloud with fog and snow or sleet
+            1401 to R.drawable.fog, // two clouds with fog
+            1402 to R.drawable.fog, // cloud with fog
+            1403 to R.drawable.fog1, // single filled out cloud with fog
+            1404 to R.drawable.fog1, // single unfilled cloud with fog
+            1405 to R.drawable.fog, // two clouds with fog and rain (drizzle)
+            1406 to R.drawable.fog, // cloud with fog and rain (drizzle)
+            1407 to R.drawable.fog, // two clouds with fog and rain
+            1408 to R.drawable.fog1, // two clouds with fog, sun and rain
+            1409 to R.drawable.fog, // cloud with fog and snow or sleet
 
-            1501 to R.drawable.cloud_drizzle, // two clouds and drizzle
-            1502 to R.drawable.cloud_drizzle, // cloud and drizzle
-            1503 to R.drawable.cloud_drizzle_sun, // cloud, sun and drizzle
-            1504 to R.drawable.cloud_rain, // two clouds and rain
-            1505 to R.drawable.cloud_rain, // cloud and rain
-            1506 to R.drawable.cloud_rain_sun, // cloud, sun and rain
-            1507 to R.drawable.cloud_rain, // two clouds and rain (downpour)
-            1508 to R.drawable.cloud_rain, // cloud and rain (downpour)
-            1509 to R.drawable.cloud_rain_sun, // cloud, sun and rain (downpour)
+            1501 to R.drawable.shower, // two clouds and drizzle
+            1502 to R.drawable.shower, // cloud and drizzle
+            1503 to R.drawable.shower1, // cloud, sun and drizzle
+            1504 to R.drawable.rain, // two clouds and rain
+            1505 to R.drawable.rain, // cloud and rain
+            1506 to R.drawable.rain1, // cloud, sun and rain
+            1507 to R.drawable.rain, // two clouds and rain (downpour)
+            1508 to R.drawable.rain, // cloud and rain (downpour)
+            1509 to R.drawable.rain1, // cloud, sun and rain (downpour)
 
-            1601 to R.drawable.cloud_snow, // two clouds and snow
-            1602 to R.drawable.cloud_snow, // cloud and snow
-            1603 to R.drawable.cloud_snow_sun, // cloud, sun and snow
-            1604 to R.drawable.cloud_snow, // two clouds and more snow
-            1605 to R.drawable.cloud_snow, // cloud and more snow
-            1606 to R.drawable.cloud_snow_sun, // cloud, sun and more snow
-            1607 to R.drawable.cloud_snow, // two clouds, snow and wind
-            1608 to R.drawable.cloud_snow_sun, // cloud, sun, snow and wind
-            1609 to R.drawable.cloud_snow, // cloud, sun, more snow and wind
+            1601 to R.drawable.lsnow, // two clouds and snow
+            1602 to R.drawable.lsnow, // cloud and snow
+            1603 to R.drawable.lsnow1, // cloud, sun and snow
+            1604 to R.drawable.snow, // two clouds and more snow
+            1605 to R.drawable.snow, // cloud and more snow
+            1606 to R.drawable.snow1, // cloud, sun and more snow
+            1607 to R.drawable.snow, // two clouds, snow and wind
+            1608 to R.drawable.snow1, // cloud, sun, snow and wind
+            1609 to R.drawable.snow, // cloud, sun, more snow and wind
 
-            2101 to R.drawable.moon,
-            2102 to R.drawable.cloud_moon,
-            2103 to R.drawable.cloud_moon,
-            2104 to R.drawable.cloud,
-            2105 to R.drawable.cloud,
+            2101 to R.drawable.clear0,
+            2102 to R.drawable.pcloudy0,
+            2103 to R.drawable.mcloudy0,
+            2104 to R.drawable.mcloudy,
+            2105 to R.drawable.mcloudy,
 
             // 22xx - sleet (?)
 
-            2301 to R.drawable.cloud_lightning, // two filled out clouds, with lightning and rain
-            2302 to R.drawable.cloud_lightning, // single filled out cloud, with lightning and rain
-            2303 to R.drawable.cloud_lightning_moon, // single filled out cloud with moon, lightning and rain
-            2304 to R.drawable.cloud_lightning, // two filled out clouds, with lightning and rain (downpour)
-            2305 to R.drawable.cloud_lightning, // single filled out cloud, with lightning and rain (downpour)
-            2306 to R.drawable.cloud_lightning_moon, // single filled out cloud with moon, lightning and rain (downpour)
-            2307 to R.drawable.cloud_lightning, // two filled out clouds, with lightning and snow or sleet
-            2308 to R.drawable.cloud_lightning, // single filled out cloud, with lightning and snow or sleet
-            2309 to R.drawable.cloud_lightning_moon, // single filled out cloud with moon, and lightning
+            2301 to R.drawable.tshower, // two filled out clouds, with lightning and rain
+            2302 to R.drawable.tshower, // single filled out cloud, with lightning and rain
+            2303 to R.drawable.tshower0, // single filled out cloud with moon, lightning and rain
+            2304 to R.drawable.tshower, // two filled out clouds, with lightning and rain (downpour)
+            2305 to R.drawable.tshower, // single filled out cloud, with lightning and rain (downpour)
+            2306 to R.drawable.tshower0, // single filled out cloud with moon, lightning and rain (downpour)
+            2307 to R.drawable.tshower, // two filled out clouds, with lightning and snow or sleet
+            2308 to R.drawable.tshower, // single filled out cloud, with lightning and snow or sleet
+            2309 to R.drawable.tshower0, // single filled out cloud with moon, and lightning
 
-            2401 to R.drawable.cloud_fog, // two clouds with fog
-            2402 to R.drawable.cloud_fog, // cloud with fog
-            2403 to R.drawable.cloud_fog_moon, // single filled out cloud with fog
-            2404 to R.drawable.cloud_fog_moon, // single unfilled cloud with fog
-            2405 to R.drawable.cloud_fog, // two clouds with fog and rain (drizzle)
-            2406 to R.drawable.cloud_fog, // cloud with fog and rain (drizzle)
-            2407 to R.drawable.cloud_fog, // two clouds with fog and rain
-            2408 to R.drawable.cloud_fog_moon, // two clouds with fog, moon and rain
-            2409 to R.drawable.cloud_fog, // cloud with fog and snow or sleet
+            2401 to R.drawable.fog, // two clouds with fog
+            2402 to R.drawable.fog, // cloud with fog
+            2403 to R.drawable.fog0, // single filled out cloud with fog
+            2404 to R.drawable.fog0, // single unfilled cloud with fog
+            2405 to R.drawable.fog, // two clouds with fog and rain (drizzle)
+            2406 to R.drawable.fog, // cloud with fog and rain (drizzle)
+            2407 to R.drawable.fog, // two clouds with fog and rain
+            2408 to R.drawable.fog0, // two clouds with fog, moon and rain
+            2409 to R.drawable.fog, // cloud with fog and snow or sleet
 
-            2501 to R.drawable.cloud_drizzle, // two clouds and drizzle
-            2502 to R.drawable.cloud_drizzle, // cloud and drizzle
-            2503 to R.drawable.cloud_drizzle_moon, // cloud, moon and drizzle
-            2504 to R.drawable.cloud_rain, // two clouds and rain
-            2505 to R.drawable.cloud_rain, // cloud and rain
-            2506 to R.drawable.cloud_rain_moon, // cloud, moon and rain
-            2507 to R.drawable.cloud_rain, // two clouds and rain (downpour)
-            2508 to R.drawable.cloud_rain, // cloud and rain (downpour)
-            2509 to R.drawable.cloud_rain_moon, // cloud, moon and rain (downpour)
+            2501 to R.drawable.shower, // two clouds and drizzle
+            2502 to R.drawable.shower, // cloud and drizzle
+            2503 to R.drawable.shower0, // cloud, moon and drizzle
+            2504 to R.drawable.rain, // two clouds and rain
+            2505 to R.drawable.rain, // cloud and rain
+            2506 to R.drawable.rain0, // cloud, moon and rain
+            2507 to R.drawable.rain, // two clouds and rain (downpour)
+            2508 to R.drawable.rain, // cloud and rain (downpour)
+            2509 to R.drawable.rain0, // cloud, moon and rain (downpour)
 
-            2601 to R.drawable.cloud_snow, // two clouds and snow
-            2602 to R.drawable.cloud_snow, // cloud and snow
-            2603 to R.drawable.cloud_snow_moon, // cloud, moon and snow
-            2604 to R.drawable.cloud_snow, // two clouds and more snow
-            2605 to R.drawable.cloud_snow, // cloud and more snow
-            2606 to R.drawable.cloud_snow_moon, // cloud, moon and more snow
-            2607 to R.drawable.cloud_snow, // two clouds, snow and wind
-            2608 to R.drawable.cloud_snow_moon, // cloud, moon, snow and wind
-            2609 to R.drawable.cloud_snow, // cloud, sun, more snow and wind
+            2601 to R.drawable.lsnow, // two clouds and snow
+            2602 to R.drawable.lsnow, // cloud and snow
+            2603 to R.drawable.lsnow0, // cloud, moon and snow
+            2604 to R.drawable.snow, // two clouds and more snow
+            2605 to R.drawable.snow, // cloud and more snow
+            2606 to R.drawable.snow0, // cloud, moon and more snow
+            2607 to R.drawable.snow, // two clouds, snow and wind
+            2608 to R.drawable.snow, // cloud, moon, snow and wind
+            2609 to R.drawable.snow0, // cloud, sun, more snow and wind
         )
 
         // TODO: make warning specific icons
