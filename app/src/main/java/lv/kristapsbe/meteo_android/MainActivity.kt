@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.width
@@ -96,6 +97,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     private var displayInfo = mutableStateOf(DisplayInfo())
     private var isLoading = mutableStateOf(false)
+    private var showFullHourly = mutableStateOf(false)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -254,46 +256,52 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             Row (
                 modifier = Modifier
                     .padding(20.dp, 10.dp, 20.dp, 0.dp)
+                    .clickable {
+                        self.showFullHourly.value = !self.showFullHourly.value
+                    }
             ) {
                 Column(
                     modifier = Modifier
                         .padding(0.dp, 60.dp, 0.dp, 0.dp)
+                        .width(30.dp)
                 ) {
-                    Image(
-                        painterResource(R.drawable.thermometer_50),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .height(30.dp)
-                    )
-                    Image(
-                        painterResource(R.drawable.wind),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .height(30.dp)
-                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
-                    )
-                    Image(
-                        painterResource(R.drawable.umbrella),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .height(30.dp)
-                            .padding(0.dp, 20.dp, 0.dp, 0.dp)
-                    )
-                    Image(
-                        painterResource(R.drawable.cloud_lightning),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .height(30.dp)
-                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
-                    )
+                    if (showFullHourly.value) {
+                        Image(
+                            painterResource(R.drawable.thermometer_50),
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .width(30.dp)
+                                .height(30.dp)
+                        )
+                        Image(
+                            painterResource(R.drawable.umbrella),
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .width(30.dp)
+                                .height(30.dp)
+                                .padding(0.dp, 0.dp, 0.dp, 10.dp)
+                        )
+                        Image(
+                            painterResource(R.drawable.cloud_lightning),
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .width(30.dp)
+                                .height(30.dp)
+                                .padding(0.dp, 0.dp, 0.dp, 20.dp)
+                        )
+                        Image(
+                            painterResource(R.drawable.wind),
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .width(30.dp)
+                                .height(30.dp)
+                                .padding(0.dp, 0.dp, 0.dp, 10.dp)
+                        )
+                    }
                 }
                 Column {
                     Row(
@@ -329,35 +337,37 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
                                 )
-                                Text(
-                                    "${h.windSpeed} m/s",
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                                Text(
-                                    "${DegreesToDirection(h.windDirection)}",
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                                Text(
-                                    "${h.rainAmount} mm",
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                                Text(
-                                    "${h.rainProb}%",
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
+                                if (showFullHourly.value) {
+                                    Text(
+                                        "${h.rainAmount} mm",
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                    Text(
+                                        "${h.rainProb}%",
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                    Text(
+                                        "${h.windSpeed} m/s",
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                    Text(
+                                        "${DegreesToDirection(h.windDirection)}",
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
                             }
                             if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
                                 VerticalDivider(
                                     color = Color(resources.getColor(R.color.light_gray)),
-                                    modifier = Modifier.height(100.dp),
+                                    modifier = Modifier.height(80.dp),
                                     thickness = 1.dp
                                 )
                             }
@@ -506,7 +516,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     ) {
                         Text(
                             text = dayMapping[d.getDayOfWeek()] ?: d.getDayOfWeek(),
-                            fontSize = 30.sp,
+                            fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Left,
                             color = Color(resources.getColor(R.color.text_color)),
