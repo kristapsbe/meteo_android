@@ -512,11 +512,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(0.13f)
+                            .fillMaxWidth(0.14f)
                     ) {
                         Text(
                             text = dayMapping[d.getDayOfWeek()] ?: d.getDayOfWeek(),
-                            fontSize = 28.sp,
+                            fontSize = 27.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Left,
                             color = Color(resources.getColor(R.color.text_color)),
