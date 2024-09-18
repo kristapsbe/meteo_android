@@ -52,16 +52,14 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
-import kotlin.math.roundToInt
 
 
 interface WorkerCallback {
@@ -80,16 +78,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
         const val LAST_COORDINATES_FILE = "last_coordinates.json"
-
-        val dayMapping = hashMapOf(
-            "MONDAY" to "P.",
-            "TUESDAY" to "O.",
-            "WEDNESDAY" to "T.",
-            "THURSDAY" to "C.",
-            "FRIDAY" to "Pk.",
-            "SATURDAY" to "S.",
-            "SUNDAY" to "Sv."
-        )
     }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -98,7 +86,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var displayInfo = mutableStateOf(DisplayInfo())
     private var isLoading = mutableStateOf(false)
     private var showFullHourly = mutableStateOf(false)
-
+    private var showFullDaily = mutableStateOf(listOf<LocalDateTime>())
+    private var showFullWarnings = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -165,51 +154,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         workManager.enqueue(workRequest)
     }
 
-    //https://uni.edu/storm/Wind%20Direction%20slide.pdf
-    var directions = hashMapOf(
-        35 to "Z",
-        36 to "Z",
-        0 to "Z",
-        1 to "Z",
-        2 to "Z/ZA",
-        3 to "Z/ZA",
-        4 to "ZA",
-        5 to "ZA",
-        6 to "A/ZA",
-        7 to "A/ZA",
-        8 to "A",
-        9 to "A",
-        10 to "A",
-        11 to "A/DA",
-        12 to "A/DA",
-        13 to "DA",
-        14 to "DA",
-        15 to "D/DA",
-        16 to "D/DA",
-        17 to "D",
-        18 to "D",
-        19 to "D",
-        20 to "D/DR",
-        21 to "D/DR",
-        22 to "DR",
-        23 to "DR",
-        24 to "R/DR",
-        25 to "R/DR",
-        26 to "R",
-        27 to "R",
-        28 to "R",
-        29 to "R/ZR",
-        30 to "R/ZR",
-        31 to "ZR",
-        32 to "ZR",
-        33 to "Z/ZR",
-        34 to "Z/ZR",
-    )
-
-    fun DegreesToDirection(deg: Int): String {
-        return directions[(deg/10)] ?: ""
-    }
-
     @Composable
     fun AllForecasts() {
         val self = this
@@ -243,204 +187,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 .background(Color(resources.getColor(R.color.sky_blue)))
                 .verticalScroll(state = scrollState)
         ) {
-            //if (isLoading.value) {
-            //    CircularProgressIndicator(progress = { 1.0f }, modifier = Modifier.fillMaxWidth())
-            //}
             ShowCurrentInfo()
-            HorizontalDivider(
-                modifier = Modifier
-                    .padding(20.dp, 20.dp, 20.dp, 10.dp),
-                color = Color(resources.getColor(R.color.light_gray)),
-                thickness = 1.dp
-            )
-            Row (
-                modifier = Modifier
-                    .padding(20.dp, 10.dp, 20.dp, 0.dp)
-                    .clickable {
-                        self.showFullHourly.value = !self.showFullHourly.value
-                    }
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(0.dp, 60.dp, 0.dp, 0.dp)
-                        .width(30.dp)
-                ) {
-                    if (showFullHourly.value) {
-                        Image(
-                            painterResource(R.drawable.thermometer_50),
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .width(30.dp)
-                                .height(30.dp)
-                        )
-                        Image(
-                            painterResource(R.drawable.umbrella),
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .width(30.dp)
-                                .height(30.dp)
-                                .padding(0.dp, 0.dp, 0.dp, 10.dp)
-                        )
-                        Image(
-                            painterResource(R.drawable.cloud_lightning),
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .width(30.dp)
-                                .height(30.dp)
-                                .padding(0.dp, 0.dp, 0.dp, 20.dp)
-                        )
-                        Image(
-                            painterResource(R.drawable.wind),
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .width(30.dp)
-                                .height(30.dp)
-                                .padding(0.dp, 0.dp, 0.dp, 10.dp)
-                        )
-                    }
-                }
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .horizontalScroll(rememberScrollState())
-                    ) {
-                        var prevHDay: String? = null
-                        for (h in displayInfo.value.hourlyForecasts) {
-                            Column (
-                                modifier = Modifier
-                                    .width(90.dp)
-                                    .padding(10.dp, 0.dp, 10.dp, 0.dp)
-                            ) {
-                                Text(
-                                    h.time.take(2),
-                                    fontSize = 12.sp,
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                                Image(
-                                    painterResource(h.pictogram.getPictogram()),
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier
-                                        .width(70.dp)
-                                        .height(40.dp)
-                                        .padding(0.dp, 3.dp, 0.dp, 0.dp)
-                                )
-                                Text(
-                                    "${h.currentTemp}°",
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                                if (showFullHourly.value) {
-                                    Text(
-                                        "${h.rainAmount} mm",
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                        modifier = Modifier.fillMaxWidth(),
-                                        textAlign = TextAlign.Center,
-                                    )
-                                    Text(
-                                        "${h.rainProb}%",
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                        modifier = Modifier.fillMaxWidth(),
-                                        textAlign = TextAlign.Center,
-                                    )
-                                    Text(
-                                        "${h.windSpeed} m/s",
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                        modifier = Modifier.fillMaxWidth(),
-                                        textAlign = TextAlign.Center,
-                                    )
-                                    Text(
-                                        "${DegreesToDirection(h.windDirection)}",
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                        modifier = Modifier.fillMaxWidth(),
-                                        textAlign = TextAlign.Center,
-                                    )
-                                }
-                            }
-                            if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
-                                VerticalDivider(
-                                    color = Color(resources.getColor(R.color.light_gray)),
-                                    modifier = Modifier.height(80.dp),
-                                    thickness = 1.dp
-                                )
-                            }
-                            prevHDay = h.getDayOfWeek()
-                        }
-                    }
-                }
-            }
-            HorizontalDivider(
-                modifier = Modifier
-                    .padding(20.dp, 20.dp, 20.dp, 0.dp),
-                color = Color(resources.getColor(R.color.light_gray)),
-                thickness = 1.dp
-            )
-            if (displayInfo.value.warnings.isNotEmpty()) {
-                val displayMetrics = Resources.getSystem().displayMetrics
-                val screenWidthPx = displayMetrics.widthPixels  // Get width in pixels
-                val screenWidthDp = screenWidthPx / displayMetrics.density  // Convert to dp
-                Row (
-                    modifier = Modifier
-                        .padding(20.dp, 20.dp, 20.dp, 0.dp)
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                ) {
-                    for (w in displayInfo.value.warnings) {
-                        Column (
-                            modifier = Modifier
-                                .width((screenWidthDp-40).dp)
-                                .padding(0.dp, 0.dp, 20.dp, 0.dp)
-                        ) {
-                            Row {
-                                Column {
-                                    Image(
-                                        painterResource(WeatherPictogram.warningIconMapping[w.intensity] ?: R.drawable.example_battery),
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .width(80.dp)
-                                            .height(80.dp)
-                                    )
-                                }
-                                Column {
-                                    Text(
-                                        w.type,
-                                        fontSize = 20.sp,
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                        modifier = Modifier
-                                            .padding(0.dp, 0.dp, 0.dp, 10.dp),
-                                    )
-                                    Text(
-                                        w.description,
-                                        fontSize = 15.sp,
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                HorizontalDivider(
-                    modifier = Modifier
-                        .padding(20.dp, 20.dp, 20.dp, 0.dp),
-                    color = Color(resources.getColor(R.color.light_gray)),
-                    thickness = 1.dp
-                )
-            }
+            ShowHourlyInfo()
+            ShowWarningInfo()
             ShowDailyInfo()
-            HorizontalDivider(
-                modifier = Modifier
-                    .padding(20.dp, 20.dp, 20.dp, 20.dp),
-                color = Color(resources.getColor(R.color.light_gray)),
-                thickness = 1.dp
-            )
             ShowMetadataInfo()
         }
     }
@@ -496,26 +246,242 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 )
             }
         }
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(20.dp, 20.dp, 20.dp, 10.dp),
+            color = Color(resources.getColor(R.color.light_gray)),
+            thickness = 1.dp
+        )
+    }
+
+    @Composable
+    fun ShowHourlyInfo() {
+        val self = this
+        Row (
+            modifier = Modifier
+                .padding(20.dp, 10.dp, 20.dp, 0.dp)
+                .clickable {
+                    self.showFullHourly.value = !self.showFullHourly.value
+                }
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(0.dp, 60.dp, 0.dp, 0.dp)
+                    .width(30.dp)
+            ) {
+                if (showFullHourly.value) {
+                    Image(
+                        painterResource(R.drawable.thermometer_50),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                    )
+                    Image(
+                        painterResource(R.drawable.umbrella),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                            .padding(0.dp, 0.dp, 0.dp, 10.dp)
+                    )
+                    Image(
+                        painterResource(R.drawable.cloud_lightning),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                            .padding(0.dp, 0.dp, 0.dp, 20.dp)
+                    )
+                    Image(
+                        painterResource(R.drawable.wind),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                            .padding(0.dp, 0.dp, 0.dp, 10.dp)
+                    )
+                }
+            }
+            Column {
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    var prevHDay: String? = null
+                    for (h in displayInfo.value.hourlyForecasts) {
+                        Column (
+                            modifier = Modifier
+                                .width(90.dp)
+                                .padding(10.dp, 0.dp, 10.dp, 0.dp)
+                        ) {
+                            Text(
+                                h.time.take(2),
+                                fontSize = 12.sp,
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                            )
+                            Image(
+                                painterResource(h.pictogram.getPictogram()),
+                                contentDescription = "",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .width(70.dp)
+                                    .height(40.dp)
+                                    .padding(0.dp, 3.dp, 0.dp, 0.dp)
+                            )
+                            Text(
+                                "${h.currentTemp}°",
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                            )
+                            if (showFullHourly.value) {
+                                Text(
+                                    "${h.rainAmount} mm",
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text(
+                                    "${h.rainProb}%",
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text(
+                                    "${h.windSpeed} m/s",
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text(
+                                    h.getDirection(),
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                        }
+                        if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
+                            VerticalDivider(
+                                color = Color(resources.getColor(R.color.light_gray)),
+                                modifier = Modifier.height(80.dp),
+                                thickness = 1.dp
+                            )
+                        }
+                        prevHDay = h.getDayOfWeek()
+                    }
+                }
+            }
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(20.dp, 20.dp, 20.dp, 0.dp),
+            color = Color(resources.getColor(R.color.light_gray)),
+            thickness = 1.dp
+        )
+    }
+
+    @Composable
+    fun ShowWarningInfo() {
+        val self = this
+        if (displayInfo.value.warnings.isNotEmpty()) {
+            val displayMetrics = Resources.getSystem().displayMetrics
+            val screenWidthPx = displayMetrics.widthPixels  // Get width in pixels
+            val screenWidthDp = screenWidthPx / displayMetrics.density  // Convert to dp
+            Row (
+                modifier = Modifier
+                    .padding(20.dp, 20.dp, 20.dp, 0.dp)
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .clickable {
+                        self.showFullWarnings.value = !self.showFullWarnings.value
+                    }
+            ) {
+                for (w in displayInfo.value.warnings) {
+                    Column (
+                        modifier = Modifier
+                            .width((screenWidthDp-40).dp)
+                            .padding(0.dp, 0.dp, 20.dp, 0.dp)
+                    ) {
+                        Row {
+                            Column {
+                                Image(
+                                    painterResource(
+                                        WeatherPictogram.warningIconMapping[w.intensity]
+                                            ?: R.drawable.example_battery
+                                    ),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .width(80.dp)
+                                        .height(30.dp)
+                                )
+                            }
+                            Column {
+                                Text(
+                                    w.type,
+                                    fontSize = 20.sp,
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier
+                                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
+                                )
+                                if (self.showFullWarnings.value) {
+                                    Text(
+                                        w.description,
+                                        fontSize = 15.sp,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            HorizontalDivider(
+                modifier = Modifier
+                    .padding(20.dp, 20.dp, 20.dp, 0.dp),
+                color = Color(resources.getColor(R.color.light_gray)),
+                thickness = 1.dp
+            )
+        }
     }
 
     @Composable
     fun ShowDailyInfo() {
+        val self = this
         Column(
-            modifier = Modifier.padding(20.dp, 10.dp, 20.dp, 20.dp)
+            modifier = Modifier.padding(20.dp, 20.dp, 20.dp, 20.dp)
         ) {
             for (d in displayInfo.value.dailyForecasts) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(80.dp),
-                    verticalAlignment = Alignment.Bottom
+                        .padding(0.dp, 0.dp, 0.dp, 10.dp)
+                        .clickable {
+                            val tmp = self.showFullDaily.value.toMutableList()
+                            if (tmp.contains(d.date)) {
+                                tmp.remove(d.date)
+                            } else {
+                                tmp.add(d.date)
+                            }
+                            self.showFullDaily.value = tmp.toList()
+                        },
+                    verticalAlignment = Alignment.Top
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(0.14f)
+                            .fillMaxWidth(0.15f)
+                            .padding(0.dp, 15.dp, 0.dp, 0.dp),
                     ) {
                         Text(
-                            text = dayMapping[d.getDayOfWeek()] ?: d.getDayOfWeek(),
+                            text = d.getDayOfWeek(),
                             fontSize = 27.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Left,
@@ -524,108 +490,134 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(0.33f)
+                            .fillMaxWidth()
                     ) {
-                        Row {
-                            Text( // TODO: don't use substrings to format
-                                text = "${d.date.toString().take(10).takeLast(2)}.${d.date.toString().take(7).takeLast(2)}.${d.date.toString().take(4)}",
-                                fontSize = 10.sp,
-                                textAlign = TextAlign.Center,
-                                color = Color(resources.getColor(R.color.text_color)),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                        }
-                        Row {
-                            Text(
-                                text = "${d.tempMin}° — ${d.tempMax}°",
-                                textAlign = TextAlign.Center,
-                                color = Color(resources.getColor(R.color.text_color)),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                        }
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(0.4f)
-                    ) {
-                        Row {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth(0.5f)
+                                    .fillMaxWidth(0.33f)
                             ) {
-                                Image(
-                                    painterResource(d.pictogramDay.getPictogram()),
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier
-                                        .width(80.dp)
-                                        .height(75.dp)
-                                        .padding(0.dp, 40.dp, 0.dp, 0.dp)
-                                )
+                                Row {
+                                    Text( // TODO: don't use substrings to format
+                                        text = "${d.date.toString().take(10).takeLast(2)}.${d.date.toString().take(7).takeLast(2)}.${d.date.toString().take(4)}",
+                                        fontSize = 10.sp,
+                                        textAlign = TextAlign.Center,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    )
+                                }
+                                Row {
+                                    Text(
+                                        text = "${d.tempMin}° — ${d.tempMax}°",
+                                        textAlign = TextAlign.Center,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    )
+                                }
                             }
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth(1.0f)
+                                    .fillMaxWidth(0.6f)
                             ) {
-                                Image(
-                                    painterResource(d.pictogramNight.getPictogram()),
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Fit,
+                                Row(
                                     modifier = Modifier
-                                        .width(80.dp)
-                                        .height(75.dp)
-                                        .padding(0.dp, 40.dp, 0.dp, 0.dp)
-                                )
+                                        .height(50.dp),
+                                    verticalAlignment = Alignment.Bottom
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.5f)
+                                    ) {
+                                        Image(
+                                            painterResource(d.pictogramDay.getPictogram()),
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Fit,
+                                            modifier = Modifier
+                                                .width(70.dp)
+                                                .height(40.dp)
+                                        )
+                                    }
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    ) {
+                                        Image(
+                                            painterResource(d.pictogramNight.getPictogram()),
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Fit,
+                                            modifier = Modifier
+                                                .width(70.dp)
+                                                .height(40.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .height(50.dp),
+                                    verticalAlignment = Alignment.Bottom
+                                ) {
+                                    Text(
+                                        text = "${d.rainAmount} mm",
+                                        textAlign = TextAlign.Right,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
                             }
                         }
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                    ) {
-                        Row {
-                            Text(
-                                text = "${d.rainAmount} mm",
-                                textAlign = TextAlign.Right,
-                                color = Color(resources.getColor(R.color.text_color)),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        Row {
-                            Text(
-                                text = "${d.averageWind} m/s",
-                                textAlign = TextAlign.Right,
-                                color = Color(resources.getColor(R.color.text_color)),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(1.0f)
-                    ) {
-                        Row {
-                            Text(
-                                text = "${d.rainProb}%",
-                                textAlign = TextAlign.Right,
-                                color = Color(resources.getColor(R.color.text_color)),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        Row {
-                            Text(
-                                text = "${d.maxWind} m/s",
-                                textAlign = TextAlign.Right,
-                                color = Color(resources.getColor(R.color.text_color)),
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                        if (showFullDaily.value.contains(d.date)) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.33f),
+                                ) {
+                                    Text(
+                                        text = "${d.averageWind} — ${d.maxWind} m/s",
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 10.sp,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    )
+                                }
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                ) {
+                                    Text(
+                                        text = "${d.rainProb}%",
+                                        textAlign = TextAlign.Right,
+                                        fontSize = 10.sp,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(20.dp, 20.dp, 20.dp, 20.dp),
+            color = Color(resources.getColor(R.color.light_gray)),
+            thickness = 1.dp
+        )
     }
 
     @Composable

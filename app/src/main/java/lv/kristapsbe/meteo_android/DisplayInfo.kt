@@ -131,8 +131,21 @@ class DailyForecast(
     val pictogramDay: WeatherPictogram,
     val pictogramNight: WeatherPictogram
 ) {
+    companion object {
+        val dayMapping = hashMapOf(
+            "MONDAY" to "P.",
+            "TUESDAY" to "O.",
+            "WEDNESDAY" to "T.",
+            "THURSDAY" to "C.",
+            "FRIDAY" to "Pk.",
+            "SATURDAY" to "S.",
+            "SUNDAY" to "Sv."
+        )
+    }
+
     fun getDayOfWeek(): String {
-        return date.dayOfWeek.toString()
+        val dow = date.dayOfWeek.toString()
+        return dayMapping[dow] ?: dow
     }
 }
 
@@ -147,8 +160,55 @@ class HourlyForecast(
     val feelsLikeTemp: Int,
     val pictogram: WeatherPictogram
 ) {
+    companion object {
+        //https://uni.edu/storm/Wind%20Direction%20slide.pdf
+        var directions = hashMapOf(
+            35 to "Z",
+            36 to "Z",
+            0 to "Z",
+            1 to "Z",
+            2 to "Z/ZA",
+            3 to "Z/ZA",
+            4 to "ZA",
+            5 to "ZA",
+            6 to "A/ZA",
+            7 to "A/ZA",
+            8 to "A",
+            9 to "A",
+            10 to "A",
+            11 to "A/DA",
+            12 to "A/DA",
+            13 to "DA",
+            14 to "DA",
+            15 to "D/DA",
+            16 to "D/DA",
+            17 to "D",
+            18 to "D",
+            19 to "D",
+            20 to "D/DR",
+            21 to "D/DR",
+            22 to "DR",
+            23 to "DR",
+            24 to "R/DR",
+            25 to "R/DR",
+            26 to "R",
+            27 to "R",
+            28 to "R",
+            29 to "R/ZR",
+            30 to "R/ZR",
+            31 to "ZR",
+            32 to "ZR",
+            33 to "Z/ZR",
+            34 to "Z/ZR",
+        )
+    }
+
     fun getDayOfWeek(): String {
         return date.dayOfWeek.toString()
+    }
+
+    fun getDirection(): String {
+        return directions[(windDirection/10)] ?: ""
     }
 }
 
