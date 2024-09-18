@@ -276,9 +276,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         )
                     }
                     Row(
-                        modifier = Modifier.height(40.dp)
+                        modifier = Modifier
+                            .height(40.dp)
+                            .padding(0.dp, 3.dp, 0.dp, 0.dp)
                     ) {
-
                     }
                     Row {
                         Text("")
