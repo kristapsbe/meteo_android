@@ -320,8 +320,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 .padding(10.dp, 0.dp, 10.dp, 0.dp)
                         ) {
                             Text(
-                                h.time.take(2),
-                                fontSize = 12.sp,
+                                "${h.time.take(2)}:${h.time.takeLast(2)}",
+                                fontSize = 10.sp,
                                 color = Color(resources.getColor(R.color.text_color)),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
@@ -463,7 +463,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(0.dp, 0.dp, 0.dp, 10.dp)
+                        .padding(0.dp, 10.dp, 0.dp, 0.dp)
                         .clickable {
                             val tmp = self.showFullDaily.value.toMutableList()
                             if (tmp.contains(d.date)) {
@@ -473,7 +473,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             }
                             self.showFullDaily.value = tmp.toList()
                         },
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.Bottom
                 ) {
                     Column(
                         modifier = Modifier
@@ -494,21 +494,28 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     ) {
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.Bottom
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth(0.33f)
                             ) {
-                                Row {
-                                    Text( // TODO: don't use substrings to format
-                                        text = "${d.date.toString().take(10).takeLast(2)}.${d.date.toString().take(7).takeLast(2)}.${d.date.toString().take(4)}",
-                                        fontSize = 10.sp,
-                                        textAlign = TextAlign.Center,
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                    )
+                                if (showFullDaily.value.contains(d.date)) {
+                                    Row {
+                                        Text( // TODO: don't use substrings to format
+                                            text = "${
+                                                d.date.toString().take(10).takeLast(2)
+                                            }.${
+                                                d.date.toString().take(7).takeLast(2)
+                                            }.${d.date.toString().take(4)}",
+                                            fontSize = 10.sp,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(resources.getColor(R.color.text_color)),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                        )
+                                    }
                                 }
                                 Row {
                                     Text(
@@ -575,38 +582,43 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 }
                             }
                         }
-                        if (showFullDaily.value.contains(d.date)) {
-                            Row(
+                    }
+                }
+                if (showFullDaily.value.contains(d.date)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(0.15f),
+                        ) {
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(0.33f),
+                        ) {
+                            Text(
+                                text = "${d.averageWind} — ${d.maxWind} m/s",
+                                textAlign = TextAlign.Center,
+                                fontSize = 10.sp,
+                                color = Color(resources.getColor(R.color.text_color)),
                                 modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.Top
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth(0.33f),
-                                ) {
-                                    Text(
-                                        text = "${d.averageWind} — ${d.maxWind} m/s",
-                                        textAlign = TextAlign.Center,
-                                        fontSize = 10.sp,
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                    )
-                                }
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                ) {
-                                    Text(
-                                        text = "${d.rainProb}%",
-                                        textAlign = TextAlign.Right,
-                                        fontSize = 10.sp,
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
+                                    .fillMaxWidth()
+                            )
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            Text(
+                                text = "${d.rainProb}%",
+                                textAlign = TextAlign.Right,
+                                fontSize = 10.sp,
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
