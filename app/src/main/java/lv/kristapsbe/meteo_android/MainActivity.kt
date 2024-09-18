@@ -266,45 +266,65 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         ) {
             Column(
                 modifier = Modifier
-                    .padding(0.dp, 60.dp, 0.dp, 0.dp)
                     .width(30.dp)
             ) {
                 if (showFullHourly.value) {
-                    Image(
-                        painterResource(R.drawable.thermometer_50),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .height(30.dp)
-                    )
-                    Image(
-                        painterResource(R.drawable.umbrella),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .height(30.dp)
-                            .padding(0.dp, 0.dp, 0.dp, 10.dp)
-                    )
-                    Image(
-                        painterResource(R.drawable.cloud_lightning),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .height(30.dp)
-                            .padding(0.dp, 0.dp, 0.dp, 20.dp)
-                    )
-                    Image(
-                        painterResource(R.drawable.wind),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .height(30.dp)
-                            .padding(0.dp, 0.dp, 0.dp, 10.dp)
-                    )
+                    Row {
+                        Text(
+                            "",
+                            fontSize = 10.sp,
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.height(40.dp)
+                    ) {
+
+                    }
+                    Row {
+                        Text("")
+                        Image(
+                            painterResource(R.drawable.baseline_device_thermostat_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                    Row {
+                        Text("")
+                        Image(
+                            painterResource(R.drawable.baseline_umbrella_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                    Row {
+                        Text("")
+                        Image(
+                            painterResource(R.drawable.baseline_bolt_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Row {
+                                Text("")
+                            }
+                            Row {
+                                Text("")
+                            }
+                        }
+                        Column {
+                            Row {
+                                Image(
+                                    painterResource(R.drawable.baseline_air_24),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Fit,
+                                )
+                            }
+                        }
+                    }
                 }
             }
             Column {
