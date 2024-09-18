@@ -550,7 +550,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             }
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth(0.6f)
+                                    .fillMaxWidth(0.70f)
                             ) {
                                 Row(
                                     modifier = Modifier
