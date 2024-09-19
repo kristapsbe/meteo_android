@@ -431,7 +431,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             .width((screenWidthDp-40).dp)
                             .padding(0.dp, 0.dp, 20.dp, 0.dp)
                     ) {
-                        Row {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Column(
                                 modifier = Modifier.fillMaxWidth(0.15f)
                             ) {
@@ -456,7 +458,18 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     modifier = Modifier
                                         .padding(0.dp, 10.dp, 0.dp, 10.dp),
                                 )
-                                if (self.showFullWarnings.value) {
+                            }
+                        }
+
+                        if (self.showFullWarnings.value) {
+                            Row {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(0.15f)
+                                ) {
+                                }
+                                Column(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
                                     Text(
                                         w.description,
                                         fontSize = 15.sp,
