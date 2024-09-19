@@ -109,9 +109,9 @@ class WeatherPictogram(
 
         // TODO: make warning specific icons
         val warningIconMapping: HashMap<String, Int> = hashMapOf(
-            "Yellow" to R.drawable.alert_yellow,
-            "Orange" to R.drawable.alert_orange,
-            "Red" to R.drawable.alert_red
+            "Yellow" to R.drawable.baseline_warning_yellow_24,
+            "Orange" to R.drawable.baseline_warning_orange_24,
+            "Red" to R.drawable.baseline_warning_24_red
         )
     }
 

@@ -145,7 +145,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val builder = NotificationCompat.Builder(applicationContext,
             MainActivity.WEATHER_WARNINGS_CHANNEL_ID
         )
-            .setSmallIcon(R.drawable.tornado)
+            .setSmallIcon(R.drawable.baseline_warning_24)
             .setLargeIcon(Icon.createWithResource(applicationContext, WeatherPictogram.warningIconMapping[intensity] ?: R.drawable.example_battery))
             .setContentTitle(type)
             .setContentText(description)

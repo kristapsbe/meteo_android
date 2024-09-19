@@ -432,26 +432,29 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             .padding(0.dp, 0.dp, 20.dp, 0.dp)
                     ) {
                         Row {
-                            Column {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(0.15f)
+                            ) {
                                 Image(
                                     painterResource(
                                         WeatherPictogram.warningIconMapping[w.intensity]
                                             ?: R.drawable.example_battery
                                     ),
                                     contentDescription = "",
-                                    contentScale = ContentScale.Crop,
+                                    contentScale = ContentScale.Fit,
                                     modifier = Modifier
-                                        .width(80.dp)
-                                        .height(30.dp)
+                                        .padding(10.dp)
                                 )
                             }
-                            Column {
+                            Column(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 Text(
                                     w.type,
                                     fontSize = 20.sp,
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier
-                                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
+                                        .padding(0.dp, 10.dp, 0.dp, 10.dp),
                                 )
                                 if (self.showFullWarnings.value) {
                                     Text(

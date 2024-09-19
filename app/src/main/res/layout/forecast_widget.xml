@@ -24,7 +24,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/weather_icon"
-                android:src="@drawable/sun" />
+                android:src="@drawable/example_battery" />
 
             <TextView
                 android:id="@+id/appwidget_text"
