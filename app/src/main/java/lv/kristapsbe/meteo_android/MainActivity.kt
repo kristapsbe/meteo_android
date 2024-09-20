@@ -53,9 +53,17 @@ import android.content.res.Resources
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.TextField
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.core.app.ActivityCompat
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
@@ -78,6 +86,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
         const val LAST_COORDINATES_FILE = "last_coordinates.json"
+        const val LOCKED_LOCATION_FILE = "locked_location"
     }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -88,6 +97,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var showFullHourly = mutableStateOf(false)
     private var showFullDaily = mutableStateOf(listOf<LocalDateTime>())
     private var showFullWarnings = mutableStateOf(false)
+    private var locationSearchMode = mutableStateOf(false)
+    private var customLocationName = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,6 +106,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             if (f.equals(RESPONSE_FILE)) {
                 val content = applicationContext.openFileInput(RESPONSE_FILE).bufferedReader().use { it.readText() }
                 displayInfo.value = DisplayInfo(Json.decodeFromString<CityForecastData>(content))
+                break
+            }
+        }
+        for (f in applicationContext.fileList()) {
+            if (f.equals(LOCKED_LOCATION_FILE)) {
+                customLocationName.value = applicationContext.openFileInput(LOCKED_LOCATION_FILE).bufferedReader().use { it.readText() }
                 break
             }
         }
@@ -197,6 +214,15 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     @Composable
     fun ShowCurrentInfo() {
+        val focusManager = LocalFocusManager.current
+
+        val focusRequester = remember { FocusRequester() }
+        if (locationSearchMode.value) {
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus() // Automatically request focus when the composable launches
+            }
+        }
+
         Column(
             modifier = Modifier
                 .height(300.dp)
@@ -207,43 +233,122 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 modifier = Modifier.fillMaxHeight(0.8f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painterResource(hForecast.pictogram.getPictogram()),
-                    contentDescription = "",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .fillMaxHeight(0.8f)
-                )
-                Text(
-                    text = "${hForecast.currentTemp}°",
-                    fontSize = 100.sp,
-                    textAlign = TextAlign.Center,
-                    color = Color(resources.getColor(R.color.text_color)),
-                    modifier = Modifier.fillMaxWidth(1.0f)
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(0.5f)
+                ) {
+                    Image(
+                        painterResource(hForecast.pictogram.getPictogram()),
+                        contentDescription = "",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.8f)
+                    )
+                }
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "${hForecast.currentTemp}°",
+                        fontSize = 100.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color(resources.getColor(R.color.text_color)),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
             Row (
-                modifier = Modifier.fillMaxHeight(1.0f),
+                modifier = Modifier.fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = displayInfo.value.city,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    color = Color(resources.getColor(R.color.text_color)),
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                )
-                Text(
-                    text = "jūtas kā ${hForecast.feelsLikeTemp}°",
-                    fontSize = 20.sp,
-                    lineHeight = 40.sp,
-                    textAlign = TextAlign.Center,
-                    color = Color(resources.getColor(R.color.text_color)),
-                    modifier = Modifier
-                        .fillMaxWidth(1.0f)
-                )
+                        .fillMaxWidth(0.22f)
+                        .padding(0.dp, 0.dp, 5.dp, 0.dp),
+                    horizontalAlignment = Alignment.End,
+                ) {
+                    Image(
+                        painterResource(R.drawable.baseline_location_pin_24),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .clickable {
+                                locationSearchMode.value = !locationSearchMode.value
+                            }
+                    )
+                }
+                Column(
+                    modifier = Modifier.fillMaxWidth(0.33f),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Row {
+                        Column(
+                            modifier = Modifier
+                                .padding(0.dp, 0.dp, 5.dp, 0.dp)
+                        ) {
+                            if (!locationSearchMode.value) {
+                                Text(
+                                    text = displayInfo.value.city,
+                                    fontSize = 20.sp,
+                                    textAlign = TextAlign.Left,
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier
+                                        .clickable {
+                                            locationSearchMode.value = !locationSearchMode.value
+                                        }
+                                )
+                            } else {
+                                TextField(
+                                    value = customLocationName.value,
+                                    onValueChange = { customLocationName.value = it },
+                                    keyboardOptions = KeyboardOptions.Default.copy(
+                                        imeAction = ImeAction.Done
+                                    ),
+                                    keyboardActions = KeyboardActions(
+                                        onDone = {
+                                            locationSearchMode.value = false
+                                            focusManager.clearFocus()
+                                            applicationContext.openFileOutput(LOCKED_LOCATION_FILE, MODE_PRIVATE).use { fos ->
+                                                fos.write(customLocationName.value.toByteArray())
+                                            }
+                                            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                                            WorkManager.getInstance(applicationContext).enqueue(workRequest)
+                                        }
+                                    ),
+                                    modifier = Modifier.focusRequester(focusRequester)
+                                )
+                            }
+                        }
+                        Column {
+                            if (customLocationName.value != "") {
+                                Image(
+                                    painterResource(R.drawable.baseline_clear_24),
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .clickable {
+                                            customLocationName.value = ""
+                                            applicationContext.openFileOutput(LOCKED_LOCATION_FILE, MODE_PRIVATE).use { fos ->
+                                                fos.write(customLocationName.value.toByteArray())
+                                            }
+                                            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                                            WorkManager.getInstance(applicationContext).enqueue(workRequest)
+                                        }
+                                )
+                            }
+                        }
+                    }
+                }
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "jūtas kā ${hForecast.feelsLikeTemp}°",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color(resources.getColor(R.color.text_color)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
             }
         }
         HorizontalDivider(

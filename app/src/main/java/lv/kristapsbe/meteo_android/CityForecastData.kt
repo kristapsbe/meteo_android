@@ -62,5 +62,28 @@ class CityForecastDataDownloader {
             }
             return cityForecast
         }
+
+
+        fun downloadData(ctx: Context, locationName: String = "Riga"): CityForecastData? {
+            try {
+                // local ip 10.0.2.2
+                val urlString = "https://meteo.kristapsbe.lv/api/v1/forecast/cities/name?city_name=$locationName"
+                val response = URL(urlString).readText()
+                ctx.openFileOutput(RESPONSE_FILE, MODE_PRIVATE).use { fos ->
+                    fos.write(response.toByteArray())
+                }
+            } catch (e: Exception) {
+                Log.d("DEBUG", "DOWNLOAD locationName FAILED $e")
+            }
+
+            var cityForecast: CityForecastData? = null
+            try {
+                val content = ctx.openFileInput(RESPONSE_FILE).bufferedReader().use { it.readText() }
+                cityForecast = Json.decodeFromString<CityForecastData>(content)
+            } catch (e: Exception) {
+                Log.d("DEBUG", "LOADDATA locationName FAILED $e")
+            }
+            return cityForecast
+        }
     }
 }

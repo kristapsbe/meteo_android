@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -20,6 +21,7 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
+import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -70,8 +72,24 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val callback = app.workerCallback
 
         runBlocking {
-            val location = getLastLocation(applicationContext)
-            val cityForecast = CityForecastDataDownloader.downloadData(applicationContext, location.elementAt(0), location.elementAt(1))
+            var customLocationName = ""
+            for (f in applicationContext.fileList()) {
+                if (f.equals(LOCKED_LOCATION_FILE)) {
+                    customLocationName = applicationContext.openFileInput(LOCKED_LOCATION_FILE).bufferedReader().use { it.readText() }
+                    break
+                }
+            }
+            val cityForecast: CityForecastData?
+            if (customLocationName != "") {
+                cityForecast = CityForecastDataDownloader.downloadData(applicationContext, customLocationName)
+            } else {
+                val location = getLastLocation(applicationContext)
+                cityForecast = CityForecastDataDownloader.downloadData(applicationContext, location.elementAt(0), location.elementAt(1))
+                applicationContext.openFileOutput(MainActivity.LAST_COORDINATES_FILE, MODE_PRIVATE).use { fos ->
+                    fos.write(location.toString().toByteArray())
+                }
+            }
+
 
             // Get the callback from Application class and invoke it
             val result = "Result from Worker"
@@ -103,9 +121,6 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 }
                 applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
                     fos.write(warnings.toString().toByteArray())
-                }
-                applicationContext.openFileOutput(MainActivity.LAST_COORDINATES_FILE, MODE_PRIVATE).use { fos ->
-                    fos.write(location.toString().toByteArray())
                 }
             }
         }
