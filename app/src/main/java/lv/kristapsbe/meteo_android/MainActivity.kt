@@ -71,6 +71,7 @@ import androidx.core.app.ActivityCompat
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
+import androidx.compose.ui.graphics.SolidColor
 
 
 interface WorkerCallback {
@@ -307,6 +308,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         imeAction = ImeAction.Done
                                     ),
                                     textStyle = TextStyle(fontSize = 20.sp, color = Color(resources.getColor(R.color.text_color))),
+                                    cursorBrush = SolidColor(Color(resources.getColor(R.color.text_color))),
                                     keyboardActions = KeyboardActions(
                                         onDone = {
                                             locationSearchMode.value = false
