@@ -52,7 +52,9 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
@@ -62,6 +64,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.core.app.ActivityCompat
@@ -297,12 +300,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         }
                                 )
                             } else {
-                                TextField(
+                                BasicTextField(
                                     value = customLocationName.value,
                                     onValueChange = { customLocationName.value = it },
                                     keyboardOptions = KeyboardOptions.Default.copy(
                                         imeAction = ImeAction.Done
                                     ),
+                                    textStyle = TextStyle(fontSize = 20.sp, color = Color(resources.getColor(R.color.text_color))),
                                     keyboardActions = KeyboardActions(
                                         onDone = {
                                             locationSearchMode.value = false
