@@ -10,7 +10,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -21,6 +20,7 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
+import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
@@ -74,28 +74,19 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val callback = app.workerCallback
 
         runBlocking {
-            var customLocationName = ""
-            for (f in applicationContext.fileList()) {
-                if (f.equals(LOCKED_LOCATION_FILE)) {
-                    customLocationName = applicationContext.openFileInput(LOCKED_LOCATION_FILE).bufferedReader().use { it.readText() }
-                    break
-                }
-            }
+            val customLocationName = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
             val cityForecast: CityForecastData?
             if (customLocationName != "") {
-                cityForecast = CityForecastDataDownloader.downloadData(applicationContext, customLocationName)
+                cityForecast = CityForecastDataDownloader.downloadDataCityName(applicationContext, customLocationName)
             } else {
                 val location = getLastLocation(applicationContext)
-                cityForecast = CityForecastDataDownloader.downloadData(applicationContext, location.elementAt(0), location.elementAt(1))
+                cityForecast = CityForecastDataDownloader.downloadDataLatLon(applicationContext, location.elementAt(0), location.elementAt(1))
                 applicationContext.openFileOutput(MainActivity.LAST_COORDINATES_FILE, MODE_PRIVATE).use { fos ->
                     fos.write(location.toString().toByteArray())
                 }
             }
 
-
-            // Get the callback from Application class and invoke it
-            val result = "Result from Worker"
-            callback?.onWorkerResult(cityForecast, result)
+            callback?.onWorkerResult(cityForecast)
 
             if (cityForecast != null) {
                 val displayInfo = DisplayInfo(cityForecast)
@@ -105,14 +96,10 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     displayInfo.getTodayForecast().feelsLikeTemp,
                     displayInfo.getTodayForecast().pictogram.getPictogram()
                 )
-
                 var warnings: HashSet<Int> = hashSetOf()
-                for (f in applicationContext.fileList()) {
-                    if (f.equals(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)) {
-                        val content = applicationContext.openFileInput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE).bufferedReader().use { it.readText() }
-                        warnings = Json.decodeFromString<HashSet<Int>>(content)
-                        break
-                    }
+                val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)
+                if (content != "") {
+                    warnings = Json.decodeFromString<HashSet<Int>>(content)
                 }
 
                 for (w in displayInfo.warnings) {
@@ -133,13 +120,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val context = applicationContext
         val appWidgetManager = AppWidgetManager.getInstance(context)
 
-        var selectedTemp = ""
-        for (f in applicationContext.fileList()) {
-            if (f.equals(SELECTED_TEMP_FILE)) {
-                selectedTemp = applicationContext.openFileInput(SELECTED_TEMP_FILE).bufferedReader().use { it.readText() }
-                break
-            }
-        }
+        val selectedTemp = loadStringFromStorage(applicationContext, SELECTED_TEMP_FILE)
 
         // Retrieve the widget IDs
         val widget = ComponentName(context, ForecastWidget::class.java)

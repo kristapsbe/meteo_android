@@ -72,11 +72,12 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import androidx.compose.ui.graphics.SolidColor
+import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import kotlin.math.roundToInt
 
 
 interface WorkerCallback {
-    fun onWorkerResult(cityForecast: CityForecastData?, result: String?)
+    fun onWorkerResult(cityForecast: CityForecastData?)
 }
 
 class MyApplication : Application() {
@@ -128,29 +129,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var showFullWarnings = mutableStateOf(false)
     private var locationSearchMode = mutableStateOf(false)
     private var customLocationName = mutableStateOf("")
-    private var selectedTemp = mutableStateOf("")
+    private var selectedTempType = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        for (f in applicationContext.fileList()) {
-            if (f.equals(RESPONSE_FILE)) {
-                val content = applicationContext.openFileInput(RESPONSE_FILE).bufferedReader().use { it.readText() }
-                displayInfo.value = DisplayInfo(Json.decodeFromString<CityForecastData>(content))
-                break
-            }
+        val content = loadStringFromStorage(applicationContext, RESPONSE_FILE)
+        if (content != "") {
+            displayInfo.value = DisplayInfo(Json.decodeFromString<CityForecastData>(content))
         }
-        for (f in applicationContext.fileList()) {
-            if (f.equals(LOCKED_LOCATION_FILE)) {
-                customLocationName.value = applicationContext.openFileInput(LOCKED_LOCATION_FILE).bufferedReader().use { it.readText() }
-                break
-            }
-        }
-        for (f in applicationContext.fileList()) {
-            if (f.equals(SELECTED_TEMP_FILE)) {
-                selectedTemp.value = applicationContext.openFileInput(SELECTED_TEMP_FILE).bufferedReader().use { it.readText() }
-                break
-            }
-        }
+        customLocationName.value = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
+        selectedTempType.value = loadStringFromStorage(applicationContext, SELECTED_TEMP_FILE)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         enableEdgeToEdge()
@@ -285,7 +273,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = convertFromCtoDisplayTemp(hForecast.currentTemp, selectedTemp.value),
+                        text = convertFromCtoDisplayTemp(hForecast.currentTemp, selectedTempType.value),
                         fontSize = 100.sp,
                         textAlign = TextAlign.Center,
                         color = Color(resources.getColor(R.color.text_color)),
@@ -379,7 +367,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "jūtas kā ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTemp.value)}",
+                        text = "jūtas kā ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         color = Color(resources.getColor(R.color.text_color)),
@@ -500,7 +488,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     .padding(0.dp, 3.dp, 0.dp, 0.dp)
                             )
                             Text(
-                                convertFromCtoDisplayTemp(h.currentTemp, selectedTemp.value),
+                                convertFromCtoDisplayTemp(h.currentTemp, selectedTempType.value),
                                 color = Color(resources.getColor(R.color.text_color)),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
@@ -699,7 +687,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 }
                                 Row {
                                     Text(
-                                        text = "${convertFromCtoDisplayTemp(d.tempMin, selectedTemp.value)} — ${convertFromCtoDisplayTemp(d.tempMax, selectedTemp.value)}",
+                                        text = "${convertFromCtoDisplayTemp(d.tempMin, selectedTempType.value)} — ${convertFromCtoDisplayTemp(d.tempMax, selectedTempType.value)}",
                                         textAlign = TextAlign.Center,
                                         color = Color(resources.getColor(R.color.text_color)),
                                         modifier = Modifier
@@ -825,16 +813,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier
                         .fillMaxWidth(0.15f)
                         .clickable {
-                            selectedTemp.value = nextTemp[selectedTemp.value] ?: ""
+                            selectedTempType.value = nextTemp[selectedTempType.value] ?: ""
                             applicationContext.openFileOutput(SELECTED_TEMP_FILE, MODE_PRIVATE).use { fos ->
-                                fos.write(selectedTemp.value.toByteArray())
+                                fos.write(selectedTempType.value.toByteArray())
                             }
                         },
                 ) {
                     Text(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        text = selecteTempFieldMapping[selectedTemp.value] ?: "",
+                        text = selecteTempFieldMapping[selectedTempType.value] ?: "",
                         color = Color(resources.getColor(R.color.text_color)),
                         textAlign = TextAlign.Left
                     )
@@ -883,8 +871,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         notificationManager.createNotificationChannel(channel)
     }
 
-    override fun onWorkerResult(cityForecast: CityForecastData?, result: String?) {
-        Log.i("onWorkerResult", "Worker Result: $result")
+    override fun onWorkerResult(cityForecast: CityForecastData?) {
         displayInfo.value = DisplayInfo(cityForecast)
         isLoading.value = false
     }
