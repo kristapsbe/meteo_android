@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -94,7 +95,11 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     displayInfo.getTodayForecast().currentTemp,
                     displayInfo.city,
                     displayInfo.getTodayForecast().feelsLikeTemp,
-                    displayInfo.getTodayForecast().pictogram.getPictogram()
+                    displayInfo.getTodayForecast().pictogram.getPictogram(),
+                    cityForecast.warnings.any { it.intensity[1] == "Red" },
+                    cityForecast.warnings.any { it.intensity[1] == "Orange" },
+                    cityForecast.warnings.any { it.intensity[1] == "Yellow" },
+                    null
                 )
                 var warnings: HashSet<Int> = hashSetOf()
                 val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)
@@ -116,7 +121,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         return Result.success()
     }
 
-    private fun updateWidget(tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int) {
+    private fun updateWidget(tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int, warningRed: Boolean, warningOrange: Boolean, warningYellow: Boolean, rainTime: String?) {
         val context = applicationContext
         val appWidgetManager = AppWidgetManager.getInstance(context)
 
@@ -130,10 +135,16 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val intent = Intent(context, ForecastWidget::class.java)
         intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
-        intent.putExtra("widget_text", convertFromCtoDisplayTemp(tempC, selectedTemp)) // Pass the updated text
-        intent.putExtra("widget_location", textLocation) // Pass the updated text
-        intent.putExtra("widget_feelslike", "jūtas kā ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}") // Pass the updated text
-        intent.putExtra("icon_image", icon) // Pass the updated text
+        intent.putExtra("widget_text", convertFromCtoDisplayTemp(tempC, selectedTemp))
+        intent.putExtra("widget_location", textLocation)
+        intent.putExtra("widget_feelslike", "jūtas kā ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
+        if (rainTime != null) {
+            intent.putExtra("widget_will_rain", "šodien HH:MM līs")
+        }
+        intent.putExtra("icon_image", icon)
+        intent.putExtra("warning_red", warningRed)
+        intent.putExtra("warning_orange", warningOrange)
+        intent.putExtra("warning_yellow", warningYellow)
 
         context.sendBroadcast(intent)
     }
