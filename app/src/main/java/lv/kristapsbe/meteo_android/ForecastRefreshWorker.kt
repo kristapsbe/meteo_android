@@ -22,6 +22,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
+import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
+import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -98,9 +100,9 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             if (cityForecast != null) {
                 val displayInfo = DisplayInfo(cityForecast)
                 updateWidget(
-                    "${displayInfo.getTodayForecast().currentTemp}",
+                    displayInfo.getTodayForecast().currentTemp,
                     displayInfo.city,
-                    "jūtas kā ${displayInfo.getTodayForecast().feelsLikeTemp}°",
+                    displayInfo.getTodayForecast().feelsLikeTemp,
                     displayInfo.getTodayForecast().pictogram.getPictogram()
                 )
 
@@ -127,9 +129,17 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         return Result.success()
     }
 
-    private fun updateWidget(text: String, textLocation: String, textFeelsLike: String, icon: Int) {
+    private fun updateWidget(tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int) {
         val context = applicationContext
         val appWidgetManager = AppWidgetManager.getInstance(context)
+
+        var selectedTemp = ""
+        for (f in applicationContext.fileList()) {
+            if (f.equals(SELECTED_TEMP_FILE)) {
+                selectedTemp = applicationContext.openFileInput(SELECTED_TEMP_FILE).bufferedReader().use { it.readText() }
+                break
+            }
+        }
 
         // Retrieve the widget IDs
         val widget = ComponentName(context, ForecastWidget::class.java)
@@ -139,9 +149,9 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val intent = Intent(context, ForecastWidget::class.java)
         intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
-        intent.putExtra("widget_text", "$text°") // Pass the updated text
+        intent.putExtra("widget_text", convertFromCtoDisplayTemp(tempC, selectedTemp)) // Pass the updated text
         intent.putExtra("widget_location", textLocation) // Pass the updated text
-        intent.putExtra("widget_feelslike", textFeelsLike) // Pass the updated text
+        intent.putExtra("widget_feelslike", "jūtas kā ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}") // Pass the updated text
         intent.putExtra("icon_image", icon) // Pass the updated text
 
         context.sendBroadcast(intent)

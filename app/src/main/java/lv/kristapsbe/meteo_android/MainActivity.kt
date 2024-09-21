@@ -72,6 +72,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import androidx.compose.ui.graphics.SolidColor
+import kotlin.math.roundToInt
 
 
 interface WorkerCallback {
@@ -91,6 +92,30 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
         const val LAST_COORDINATES_FILE = "last_coordinates.json"
         const val LOCKED_LOCATION_FILE = "locked_location"
+        const val SELECTED_TEMP_FILE = "selected_temp"
+
+        val selecteTempFieldMapping = hashMapOf(
+            "C" to "k C f",
+            "" to "k C f", // default
+            "K" to "f K c",
+            "F" to "c F k",
+        )
+
+        // TODO: do a linked list instead?
+        val nextTemp = hashMapOf(
+            "C" to "K",
+            "" to "K", // default
+            "K" to "F",
+            "F" to "C"
+        )
+
+        fun convertFromCtoDisplayTemp(tempC: Int, toConvert: String): String {
+            return when (toConvert) {
+                "F" -> "${((9.0f/5.0f)*tempC.toFloat()+32.0f).roundToInt()}°" // TODO: add F
+                "K" -> "${(tempC.toFloat()+273.15f).roundToInt()}°" // TODO: add K
+                else -> "$tempC°"
+            }
+        }
     }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -103,6 +128,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var showFullWarnings = mutableStateOf(false)
     private var locationSearchMode = mutableStateOf(false)
     private var customLocationName = mutableStateOf("")
+    private var selectedTemp = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,6 +142,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         for (f in applicationContext.fileList()) {
             if (f.equals(LOCKED_LOCATION_FILE)) {
                 customLocationName.value = applicationContext.openFileInput(LOCKED_LOCATION_FILE).bufferedReader().use { it.readText() }
+                break
+            }
+        }
+        for (f in applicationContext.fileList()) {
+            if (f.equals(SELECTED_TEMP_FILE)) {
+                selectedTemp.value = applicationContext.openFileInput(SELECTED_TEMP_FILE).bufferedReader().use { it.readText() }
                 break
             }
         }
@@ -238,7 +270,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.5f)
+                    modifier = Modifier.fillMaxWidth(0.45f)
                 ) {
                     Image(
                         painterResource(hForecast.pictogram.getPictogram()),
@@ -253,7 +285,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "${hForecast.currentTemp}°",
+                        text = convertFromCtoDisplayTemp(hForecast.currentTemp, selectedTemp.value),
                         fontSize = 100.sp,
                         textAlign = TextAlign.Center,
                         color = Color(resources.getColor(R.color.text_color)),
@@ -267,7 +299,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(0.22f)
+                        .fillMaxWidth(0.2f)
                         .padding(0.dp, 0.dp, 5.dp, 0.dp),
                     horizontalAlignment = Alignment.End,
                 ) {
@@ -347,7 +379,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "jūtas kā ${hForecast.feelsLikeTemp}°",
+                        text = "jūtas kā ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTemp.value)}",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         color = Color(resources.getColor(R.color.text_color)),
@@ -468,7 +500,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     .padding(0.dp, 3.dp, 0.dp, 0.dp)
                             )
                             Text(
-                                "${h.currentTemp}°",
+                                convertFromCtoDisplayTemp(h.currentTemp, selectedTemp.value),
                                 color = Color(resources.getColor(R.color.text_color)),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
@@ -647,7 +679,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         ) {
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth(0.33f)
+                                    .fillMaxWidth(0.40f)
                             ) {
                                 if (showFullDaily.value.contains(d.date)) {
                                     Row {
@@ -667,7 +699,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 }
                                 Row {
                                     Text(
-                                        text = "${d.tempMin}° — ${d.tempMax}°",
+                                        text = "${convertFromCtoDisplayTemp(d.tempMin, selectedTemp.value)} — ${convertFromCtoDisplayTemp(d.tempMax, selectedTemp.value)}",
                                         textAlign = TextAlign.Center,
                                         color = Color(resources.getColor(R.color.text_color)),
                                         modifier = Modifier
@@ -745,7 +777,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         }
                         Column(
                             modifier = Modifier
-                                .fillMaxWidth(0.33f),
+                                .fillMaxWidth(0.40f),
                         ) {
                             Text(
                                 text = "${d.averageWind} — ${d.maxWind} m/s",
@@ -782,31 +814,62 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     @Composable
     fun ShowMetadataInfo() {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp, 0.dp)
+                .padding(20.dp, 0.dp, 20.dp, 20.dp)
         ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                fontSize = 10.sp,
-                text = "prognoze atjaunināta ${displayInfo.value.getLastUpdated()}",
-                color = Color(resources.getColor(R.color.text_color)),
-                textAlign = TextAlign.Right
-            )
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp, 0.dp)
-        ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                fontSize = 10.sp,
-                text = "prognoze lejupielādēta ${displayInfo.value.getLastDownloaded()}",
-                color = Color(resources.getColor(R.color.text_color)),
-                textAlign = TextAlign.Right
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.15f)
+                        .clickable {
+                            selectedTemp.value = nextTemp[selectedTemp.value] ?: ""
+                            applicationContext.openFileOutput(SELECTED_TEMP_FILE, MODE_PRIVATE).use { fos ->
+                                fos.write(selectedTemp.value.toByteArray())
+                            }
+                        },
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        text = selecteTempFieldMapping[selectedTemp.value] ?: "",
+                        color = Color(resources.getColor(R.color.text_color)),
+                        textAlign = TextAlign.Left
+                    )
+                }
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp, 0.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 10.sp,
+                            text = "prognoze atjaunināta ${displayInfo.value.getLastUpdated()}",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            textAlign = TextAlign.Right
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp, 0.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 10.sp,
+                            text = "prognoze lejupielādēta ${displayInfo.value.getLastDownloaded()}",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            textAlign = TextAlign.Right
+                        )
+                    }
+                }
+            }
         }
     }
 
