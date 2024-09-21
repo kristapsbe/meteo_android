@@ -267,6 +267,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(0.8f)
+                            .padding(20.dp)
                     )
                 }
                 Column(
@@ -298,6 +299,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             .clickable {
                                 locationSearchMode.value = !locationSearchMode.value
                             }
+                            .padding(10.dp)
                     )
                 }
                 Column(
@@ -485,7 +487,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 modifier = Modifier
                                     .width(70.dp)
                                     .height(40.dp)
-                                    .padding(0.dp, 3.dp, 0.dp, 0.dp)
+                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
                             )
                             Text(
                                 convertFromCtoDisplayTemp(h.currentTemp, selectedTempType.value),
@@ -715,6 +717,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                             modifier = Modifier
                                                 .width(70.dp)
                                                 .height(40.dp)
+                                                .padding(3.dp, 3.dp, 3.dp, 0.dp)
                                         )
                                     }
                                     Column(
@@ -728,6 +731,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                             modifier = Modifier
                                                 .width(70.dp)
                                                 .height(40.dp)
+                                                .padding(3.dp, 3.dp, 3.dp, 0.dp)
                                         )
                                     }
                                 }
