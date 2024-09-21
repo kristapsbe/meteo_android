@@ -34,7 +34,7 @@ class ForecastWidget : AppWidgetProvider() {
             val locationText = intent.getStringExtra("widget_location")
             val feelsLikeText = intent.getStringExtra("widget_feelslike")
             val willRainText = intent.getStringExtra("widget_will_rain")
-            val icon = intent.getIntExtra("icon_image", R.drawable.example_battery)
+            val icon = intent.getIntExtra("icon_image", R.drawable.clear1)
             val warningRed = intent.getBooleanExtra("warning_red", false)
             val warningOrange = intent.getBooleanExtra("warning_orange", false)
             val warningYellow = intent.getBooleanExtra("warning_yellow", false)

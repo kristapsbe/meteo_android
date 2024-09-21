@@ -573,7 +573,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 Image(
                                     painterResource(
                                         WeatherPictogram.warningIconMapping[w.intensity]
-                                            ?: R.drawable.example_battery
+                                            ?: R.drawable.baseline_warning_yellow_24
                                     ),
                                     contentDescription = "",
                                     contentScale = ContentScale.Fit,

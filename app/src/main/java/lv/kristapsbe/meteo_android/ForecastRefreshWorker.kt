@@ -163,7 +163,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             MainActivity.WEATHER_WARNINGS_CHANNEL_ID
         )
             .setSmallIcon(R.drawable.baseline_warning_24)
-            .setLargeIcon(Icon.createWithResource(applicationContext, WeatherPictogram.warningIconMapping[intensity] ?: R.drawable.example_battery))
+            .setLargeIcon(Icon.createWithResource(applicationContext, WeatherPictogram.warningIconMapping[intensity] ?: R.drawable.baseline_warning_yellow_24))
             .setContentTitle(type)
             .setContentText(description)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

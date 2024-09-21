@@ -116,7 +116,7 @@ class WeatherPictogram(
     }
 
     fun getPictogram(): Int {
-        return iconMapping[code] ?: R.drawable.example_battery
+        return iconMapping[code] ?: R.drawable.clear1
     }
 }
 
