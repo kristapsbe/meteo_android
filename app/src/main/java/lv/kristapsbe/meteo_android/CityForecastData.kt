@@ -40,20 +40,24 @@ class CityForecastDataDownloader {
         const val RESPONSE_FILE = "response.json"
 
         fun downloadData(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327): CityForecastData? {
+            var cityForecast: CityForecastData? = null
             try {
                 val randTemp = String.format("%.1f", Random.nextInt(60)-30+ Random.nextDouble())
                 // local ip 10.0.2.2
                 var urlString = "https://meteo.kristapsbe.lv/api/v1/forecast/test_ctemp?temp=$randTemp"
                 urlString = "https://meteo.kristapsbe.lv/api/v1/forecast/cities?lat=$lat&lon=$lon"
                 val response = URL(urlString).readText()
-                ctx.openFileOutput(RESPONSE_FILE, MODE_PRIVATE).use { fos ->
-                    fos.write(response.toByteArray())
+                // TODO: don't deserialize twice
+                cityForecast = Json.decodeFromString<CityForecastData>(response)
+                if (cityForecast.city != "") {
+                    ctx.openFileOutput(RESPONSE_FILE, MODE_PRIVATE).use { fos ->
+                        fos.write(response.toByteArray())
+                    }
                 }
             } catch (e: Exception) {
                 Log.d("DEBUG", "DOWNLOAD FAILED $e")
             }
 
-            var cityForecast: CityForecastData? = null
             try {
                 val content = ctx.openFileInput(RESPONSE_FILE).bufferedReader().use { it.readText() }
                 cityForecast = Json.decodeFromString<CityForecastData>(content)
