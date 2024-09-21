@@ -299,9 +299,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(0.2f)
-                        .padding(0.dp, 0.dp, 5.dp, 0.dp),
-                    horizontalAlignment = Alignment.End,
+                        .fillMaxWidth(0.15f)
+                        .padding(20.dp, 0.dp, 0.dp, 0.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Image(
                         painterResource(R.drawable.baseline_location_pin_24),
@@ -313,7 +313,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     )
                 }
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.33f),
+                    modifier = Modifier.fillMaxWidth(0.60f),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Row {
