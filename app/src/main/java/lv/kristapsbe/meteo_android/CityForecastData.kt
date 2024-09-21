@@ -56,7 +56,7 @@ class CityForecastDataDownloader {
                 Log.e("ERROR", "Failed to download forecast data: $e")
             }
 
-            if (cityForecast == null) {
+            if (cityForecast == null || cityForecast.city == "") {
                 // download failed - try getting data from storage instead
                 try {
                     val content = loadStringFromStorage(ctx, RESPONSE_FILE)
