@@ -97,8 +97,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val LOCKED_LOCATION_FILE = "locked_location"
         const val SELECTED_TEMP_FILE = "selected_temp"
 
-        const val PERIODIC_FORECAST_DL_NAME = "Periodic Forecast Download"
-        const val SINGLE_FORECAST_DL_NAME = "Periodic Forecast Download"
+        const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
+        const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
 
         val selecteTempFieldMapping = hashMapOf(
             "C" to "k C f",
