@@ -380,6 +380,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(0.dp, 0.dp, 20.dp, 0.dp),
                     )
                 }
             }
