@@ -28,38 +28,9 @@ class ForecastWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        var cityForecast: CityForecastData? = null
-        try {
-            val content = loadStringFromStorage(context, RESPONSE_FILE)
-            cityForecast = Json.decodeFromString<CityForecastData>(content)
-        } catch (e: Exception) {
-            Log.e("ERROR", "Failed to load forecast data from storage: $e")
-        }
-
-        if (cityForecast == null) {
-            // There may be multiple widgets active, so update all of them
-            for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, null, false, false, false, null)
-            }
-        } else {
-            // TODO doesn't look like this actually works unless you're debugging the app
-            for (appWidgetId in appWidgetIds) {
-                val displayInfo = DisplayInfo(cityForecast)
-                val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
-                updateAppWidget(
-                    context,
-                    appWidgetManager,
-                    appWidgetId,
-                    convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp),
-                    displayInfo.city,
-                    "jūtas kā ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}",
-                    null,
-                    cityForecast.warnings.any { it.intensity[1] == "Red" },
-                    cityForecast.warnings.any { it.intensity[1] == "Orange" },
-                    cityForecast.warnings.any { it.intensity[1] == "Yellow" },
-                    displayInfo.getTodayForecast().pictogram.getPictogram(),
-                )
-            }
+        // There may be multiple widgets active, so update all of them
+        for (appWidgetId in appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null)
         }
     }
 
@@ -71,7 +42,6 @@ class ForecastWidget : AppWidgetProvider() {
             val text = intent.getStringExtra("widget_text")
             val locationText = intent.getStringExtra("widget_location")
             val feelsLikeText = intent.getStringExtra("widget_feelslike")
-            val willRainText = intent.getStringExtra("widget_will_rain")
             val icon = intent.getIntExtra("icon_image", R.drawable.clear1)
             val warningRed = intent.getBooleanExtra("warning_red", false)
             val warningOrange = intent.getBooleanExtra("warning_orange", false)
@@ -82,21 +52,14 @@ class ForecastWidget : AppWidgetProvider() {
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, willRainText, warningRed, warningOrange, warningYellow, icon)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon)
             }
         }
     }
 
-    override fun onEnabled(context: Context) {
-        // TODO doesn't look like this actually works unless you're debugging the app
-        // the widget's been added to the screen - go looking for data
-        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-        WorkManager.getInstance(context).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-    }
+    override fun onEnabled(context: Context) { }
 
-    override fun onDisabled(context: Context) {
-        // Enter relevant functionality for when the last widget is disabled
-    }
+    override fun onDisabled(context: Context) { }
 }
 
 internal fun updateAppWidget(
@@ -106,7 +69,6 @@ internal fun updateAppWidget(
     text: String?,
     locationText: String?,
     feelsLikeText: String?,
-    willRainText: String?,
     warningRed: Boolean,
     warningOrange: Boolean,
     warningYellow: Boolean,
@@ -128,9 +90,6 @@ internal fun updateAppWidget(
     }
     if (feelsLikeText != null) {
         views.setTextViewText(R.id.appwidget_feelslike, feelsLikeText)
-    }
-    if (willRainText != null) {
-        views.setTextViewText(R.id.appwidget_will_rain, willRainText)
     }
     if (icon != null) {
         views.setImageViewResource(R.id.icon_image, icon)

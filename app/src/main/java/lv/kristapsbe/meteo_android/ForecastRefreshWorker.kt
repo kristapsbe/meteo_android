@@ -138,9 +138,6 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         intent.putExtra("widget_text", convertFromCtoDisplayTemp(tempC, selectedTemp))
         intent.putExtra("widget_location", textLocation)
         intent.putExtra("widget_feelslike", "jūtas kā ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
-        if (rainTime != null) {
-            intent.putExtra("widget_will_rain", "šodien HH:MM līs")
-        }
         intent.putExtra("icon_image", icon)
         intent.putExtra("warning_red", warningRed)
         intent.putExtra("warning_orange", warningOrange)
