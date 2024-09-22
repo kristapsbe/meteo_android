@@ -8,6 +8,10 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_DL_NAME
 
 
 /**
@@ -23,6 +27,7 @@ class ForecastWidget : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, null, false, false, false, null)
         }
+
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -50,7 +55,9 @@ class ForecastWidget : AppWidgetProvider() {
     }
 
     override fun onEnabled(context: Context) {
-        // Enter relevant functionality for when the first widget is created
+        // the widget's been added to the screen - go looking for data
+        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+        WorkManager.getInstance(context).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
     }
 
     override fun onDisabled(context: Context) {

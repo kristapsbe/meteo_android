@@ -5,8 +5,6 @@
     android:initialLayout="@layout/forecast_widget"
     android:minWidth="120dp"
     android:minHeight="40dp"
-    android:maxResizeWidth="120dp"
-    android:maxResizeHeight="40dp"
     android:previewLayout="@layout/forecast_widget"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="2"
