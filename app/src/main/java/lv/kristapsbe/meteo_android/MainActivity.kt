@@ -308,7 +308,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     )
                 }
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.60f),
+                    modifier = Modifier.fillMaxWidth(0.55f),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Row {
