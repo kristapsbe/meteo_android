@@ -72,6 +72,8 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import androidx.compose.ui.graphics.SolidColor
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import kotlin.math.roundToInt
 
@@ -94,6 +96,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val LAST_COORDINATES_FILE = "last_coordinates.json"
         const val LOCKED_LOCATION_FILE = "locked_location"
         const val SELECTED_TEMP_FILE = "selected_temp"
+
+        const val PERIODIC_FORECAST_DL_NAME = "Periodic Forecast Download"
+        const val SINGLE_FORECAST_DL_NAME = "Periodic Forecast Download"
 
         val selecteTempFieldMapping = hashMapOf(
             "C" to "k C f",
@@ -162,11 +167,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             when { // TODO: do I need to enqueue in both?
                 permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
                     val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                    WorkManager.getInstance(applicationContext).enqueue(workRequest)
+                    WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                 }
                 permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
                     val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                    WorkManager.getInstance(applicationContext).enqueue(workRequest)
+                    WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                 } else -> {
                     // No location access granted.
                 }
@@ -192,7 +197,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.MINUTES).build()
         val workManager = WorkManager.getInstance(this)
-        workManager.enqueue(workRequest)
+        workManager.enqueueUniquePeriodicWork(PERIODIC_FORECAST_DL_NAME, ExistingPeriodicWorkPolicy.UPDATE, workRequest)
     }
 
     @Composable
@@ -208,7 +213,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         if (!isLoading.value) {
                             isLoading.value = true
                             val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                            WorkManager.getInstance(self).enqueue(workRequest)
+                            WorkManager.getInstance(self).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                         }
                     }
                     return super.onPreScroll(available, source)
@@ -339,7 +344,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                                 fos.write(customLocationName.value.toByteArray())
                                             }
                                             val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                                            WorkManager.getInstance(applicationContext).enqueue(workRequest)
+                                            WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                                         }
                                     ),
                                     modifier = Modifier.focusRequester(focusRequester)
@@ -358,7 +363,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                                 fos.write(customLocationName.value.toByteArray())
                                             }
                                             val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                                            WorkManager.getInstance(applicationContext).enqueue(workRequest)
+                                            WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                                         }
                                 )
                             }
