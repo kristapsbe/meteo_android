@@ -1,7 +1,10 @@
 package lv.kristapsbe.meteo_android
 
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
+import kotlinx.datetime.toLocalDateTime
 import kotlin.math.roundToInt
 
 
@@ -150,7 +153,7 @@ class DailyForecast(
 }
 
 class HourlyForecast(
-    private val date: LocalDateTime,
+    val date: LocalDateTime,
     val time: String,
     val rainAmount: Int,
     val rainProb: Int,
@@ -222,7 +225,7 @@ class Warning(
 class DisplayInfo() {
     var city: String = ""
     // Today
-    var hourlyForecasts: List<HourlyForecast> = emptyList()
+    private var hourlyForecasts: List<HourlyForecast> = emptyList()
     // Tomorrow onwards
     var dailyForecasts: List<DailyForecast> = emptyList()
 
@@ -287,10 +290,25 @@ class DisplayInfo() {
         )
     }
 
+    fun convertTimestampToLocalDateTime(timestampMillis: Long): LocalDateTime {
+        // Create an Instant from the timestamp (milliseconds)
+        val instant = Instant.fromEpochMilliseconds(timestampMillis)
+        // Convert to LocalDateTime using the system's default time zone
+        val timeZone = TimeZone.currentSystemDefault()
+        val localDateTime = instant.toLocalDateTime(timeZone)
+
+        return localDateTime
+    }
+
+    fun getHourlyForecasts(): List<HourlyForecast> {
+        val dt = convertTimestampToLocalDateTime(System.currentTimeMillis())
+        return hourlyForecasts.filter { it.date >= dt }
+    }
+
     fun getTodayForecast(): HourlyForecast {
-        // TODO: fish out most recent relevant info
-        if (hourlyForecasts.isNotEmpty()) {
-            return hourlyForecasts[0]
+        val currHourlyForecasts = getHourlyForecasts()
+        if (currHourlyForecasts.isNotEmpty()) {
+            return currHourlyForecasts[0]
         }
         return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
     }

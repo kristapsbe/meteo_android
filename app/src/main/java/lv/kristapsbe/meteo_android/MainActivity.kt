@@ -473,7 +473,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .horizontalScroll(rememberScrollState())
                 ) {
                     var prevHDay: String? = null
-                    for (h in displayInfo.value.hourlyForecasts) {
+                    for (h in displayInfo.value.getHourlyForecasts()) {
                         Column (
                             modifier = Modifier
                                 .width(90.dp)
