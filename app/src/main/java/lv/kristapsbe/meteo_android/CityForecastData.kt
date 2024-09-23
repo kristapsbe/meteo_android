@@ -5,9 +5,7 @@ import android.content.Context
 import android.util.Log
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
 import java.net.URL
-import kotlin.random.Random
 
 
 @Serializable

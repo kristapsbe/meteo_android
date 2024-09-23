@@ -8,14 +8,10 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
-import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_DL_NAME
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 
 
@@ -57,7 +53,38 @@ class ForecastWidget : AppWidgetProvider() {
         }
     }
 
-    override fun onEnabled(context: Context) { }
+    override fun onEnabled(context: Context) {
+        var cityForecast: CityForecastData? = null
+        try {
+            val content = loadStringFromStorage(context, RESPONSE_FILE)
+            cityForecast = Json.decodeFromString<CityForecastData>(content)
+        } catch (e: Exception) {
+            Log.e("ERROR", "Failed to load forecast data from storage: $e")
+        }
+
+        if (cityForecast != null) {
+            val displayInfo = DisplayInfo(cityForecast)
+            val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+
+            // Retrieve the widget IDs
+            val widget = ComponentName(context, ForecastWidget::class.java)
+            val widgetIds = appWidgetManager.getAppWidgetIds(widget)
+
+            // Create an intent to update the widget
+            val intent = Intent(context, ForecastWidget::class.java)
+            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
+            intent.putExtra("widget_text", convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp))
+            intent.putExtra("widget_location", displayInfo.city)
+            intent.putExtra("widget_feelslike", "jūtas kā ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
+            intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
+            intent.putExtra("warning_red", cityForecast.warnings.any { it.intensity[1] == "Red" })
+            intent.putExtra("warning_orange", cityForecast.warnings.any { it.intensity[1] == "Orange" })
+            intent.putExtra("warning_yellow", cityForecast.warnings.any { it.intensity[1] == "Yellow" })
+            context.sendBroadcast(intent)
+        }
+    }
 
     override fun onDisabled(context: Context) { }
 }
