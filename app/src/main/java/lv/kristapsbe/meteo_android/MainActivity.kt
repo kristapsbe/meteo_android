@@ -48,6 +48,9 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import java.util.concurrent.TimeUnit
 import android.Manifest
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import androidx.compose.foundation.clickable
@@ -827,6 +830,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             applicationContext.openFileOutput(SELECTED_TEMP_FILE, MODE_PRIVATE).use { fos ->
                                 fos.write(selectedTempType.value.toByteArray())
                             }
+                            // TODO: reuse
+                            val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
+                            val widget = ComponentName(applicationContext, ForecastWidget::class.java)
+                            val widgetIds = appWidgetManager.getAppWidgetIds(widget)
+                            val intent = Intent(applicationContext, ForecastWidget::class.java)
+                            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
+                            intent.putExtra("widget_text", convertFromCtoDisplayTemp(displayInfo.value.getTodayForecast().currentTemp, selectedTempType.value))
+                            intent.putExtra("widget_feelslike", "jūtas kā ${convertFromCtoDisplayTemp(displayInfo.value.getTodayForecast().feelsLikeTemp, selectedTempType.value)}")
+                            applicationContext.sendBroadcast(intent)
                         },
                 ) {
                     Text(
