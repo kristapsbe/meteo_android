@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
+import lv.kristapsbe.meteo_android.WeatherPictogram.Companion.rainPictograms
 import kotlin.math.roundToInt
 
 
@@ -108,6 +109,12 @@ class WeatherPictogram(
             2607 to R.drawable.snow, // two clouds, snow and wind
             2608 to R.drawable.snow, // cloud, moon, snow and wind
             2609 to R.drawable.snow0, // cloud, sun, more snow and wind
+        )
+
+        val rainPictograms: List<Int> = listOf(
+            R.drawable.tshower, R.drawable.tshower0, R.drawable.tshower1,
+            R.drawable.shower, R.drawable.shower0, R.drawable.shower1,
+            R.drawable.rain, R.drawable.rain0, R.drawable.rain1,
         )
 
         // TODO: make warning specific icons
@@ -290,7 +297,7 @@ class DisplayInfo() {
         )
     }
 
-    fun convertTimestampToLocalDateTime(timestampMillis: Long): LocalDateTime {
+    private fun convertTimestampToLocalDateTime(timestampMillis: Long): LocalDateTime {
         // Create an Instant from the timestamp (milliseconds)
         val instant = Instant.fromEpochMilliseconds(timestampMillis)
         // Convert to LocalDateTime using the system's default time zone
@@ -311,6 +318,19 @@ class DisplayInfo() {
             return currHourlyForecasts[0]
         }
         return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
+    }
+
+    fun getWhenRainExpected(): String {
+        val hourlyRain = getHourlyForecasts().filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
+        if (hourlyRain.isNotEmpty()) {
+            val dt = convertTimestampToLocalDateTime(System.currentTimeMillis())
+            if (dt.dayOfMonth != hourlyRain[0].date.dayOfMonth) {
+                return "Rīt ${hourlyRain[0].date.hour}:00 līs"
+            } else {
+                return "Šodien ${hourlyRain[0].date.hour}:00 līs"
+            }
+        }
+        return ""
     }
 
     fun getLastUpdated(): String {

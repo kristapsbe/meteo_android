@@ -70,7 +70,6 @@ class CityForecastDataDownloader {
             return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon")
         }
 
-
         fun downloadDataCityName(ctx: Context, locationName: String = "Riga"): CityForecastData? {
             return downloadData(ctx, "$BASE_URL/name?city_name=$locationName")
         }

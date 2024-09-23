@@ -98,7 +98,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     cityForecast.warnings.any { it.intensity[1] == "Red" },
                     cityForecast.warnings.any { it.intensity[1] == "Orange" },
                     cityForecast.warnings.any { it.intensity[1] == "Yellow" },
-                    null
+                    displayInfo.getWhenRainExpected()
                 )
                 var warnings: HashSet<Int> = hashSetOf()
                 val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)
@@ -120,7 +120,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         return Result.success()
     }
 
-    private fun updateWidget(tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int, warningRed: Boolean, warningOrange: Boolean, warningYellow: Boolean, rainTime: String?) {
+    private fun updateWidget(tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int, warningRed: Boolean, warningOrange: Boolean, warningYellow: Boolean, rainTime: String) {
         val context = applicationContext
         val appWidgetManager = AppWidgetManager.getInstance(context)
 
@@ -141,6 +141,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         intent.putExtra("warning_red", warningRed)
         intent.putExtra("warning_orange", warningOrange)
         intent.putExtra("warning_yellow", warningYellow)
+        intent.putExtra("rain", rainTime)
 
         context.sendBroadcast(intent)
     }
