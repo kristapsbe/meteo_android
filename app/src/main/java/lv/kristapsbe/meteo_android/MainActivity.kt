@@ -1,16 +1,25 @@
 package lv.kristapsbe.meteo_android
 
+import android.Manifest
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,63 +27,55 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import java.util.concurrent.TimeUnit
-import android.Manifest
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.res.Resources
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.VerticalDivider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.core.app.ActivityCompat
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
-import androidx.compose.ui.graphics.SolidColor
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 
@@ -138,6 +139,17 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Register a callback for back button press
+        val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Minimize the app by moving it to the background
+                moveTaskToBack(true)
+            }
+        }
+        // Add the callback to the dispatcher
+        onBackPressedDispatcher.addCallback(this, callback)
+
         val content = loadStringFromStorage(applicationContext, RESPONSE_FILE)
         if (content != "") {
             displayInfo.value = DisplayInfo(Json.decodeFromString<CityForecastData>(content))
@@ -567,7 +579,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 for (w in displayInfo.value.warnings) {
                     Column (
                         modifier = Modifier
-                            .width((screenWidthDp-40).dp)
+                            .width((screenWidthDp - 40).dp)
                             .padding(0.dp, 0.dp, 20.dp, 0.dp)
                     ) {
                         Row(
@@ -824,18 +836,35 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .fillMaxWidth(0.15f)
                         .clickable {
                             selectedTempType.value = nextTemp[selectedTempType.value] ?: ""
-                            applicationContext.openFileOutput(SELECTED_TEMP_FILE, MODE_PRIVATE).use { fos ->
-                                fos.write(selectedTempType.value.toByteArray())
-                            }
+                            applicationContext
+                                .openFileOutput(SELECTED_TEMP_FILE, MODE_PRIVATE)
+                                .use { fos ->
+                                    fos.write(selectedTempType.value.toByteArray())
+                                }
                             // TODO: reuse
                             val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
-                            val widget = ComponentName(applicationContext, ForecastWidget::class.java)
+                            val widget =
+                                ComponentName(applicationContext, ForecastWidget::class.java)
                             val widgetIds = appWidgetManager.getAppWidgetIds(widget)
                             val intent = Intent(applicationContext, ForecastWidget::class.java)
                             intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
                             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
-                            intent.putExtra("widget_text", convertFromCtoDisplayTemp(displayInfo.value.getTodayForecast().currentTemp, selectedTempType.value))
-                            intent.putExtra("widget_feelslike", "jūtas kā ${convertFromCtoDisplayTemp(displayInfo.value.getTodayForecast().feelsLikeTemp, selectedTempType.value)}")
+                            intent.putExtra(
+                                "widget_text",
+                                convertFromCtoDisplayTemp(
+                                    displayInfo.value.getTodayForecast().currentTemp,
+                                    selectedTempType.value
+                                )
+                            )
+                            intent.putExtra(
+                                "widget_feelslike",
+                                "jūtas kā ${
+                                    convertFromCtoDisplayTemp(
+                                        displayInfo.value.getTodayForecast().feelsLikeTemp,
+                                        selectedTempType.value
+                                    )
+                                }"
+                            )
                             applicationContext.sendBroadcast(intent)
                         },
                 ) {
