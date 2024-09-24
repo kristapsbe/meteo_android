@@ -27,17 +27,17 @@
             <ImageView
                 android:id="@+id/red_warning"
                 android:layout_width="20dp"
-                android:layout_height="15dp"
+                android:layout_height="12dp"
                 android:contentDescription="@string/weather_icon" />
             <ImageView
                 android:id="@+id/orange_warning"
                 android:layout_width="20dp"
-                android:layout_height="15dp"
+                android:layout_height="12dp"
                 android:contentDescription="@string/weather_icon" />
             <ImageView
                 android:id="@+id/yellow_warning"
                 android:layout_width="20dp"
-                android:layout_height="15dp"
+                android:layout_height="12dp"
                 android:contentDescription="@string/weather_icon" />
         </LinearLayout>
 
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/appwidget_text"
             android:gravity="center"
-            android:textSize="23dp" />
+            android:textSize="24dp" />
     </LinearLayout>
 
     <LinearLayout
