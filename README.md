@@ -12,4 +12,4 @@ https://developer.android.com/develop/ui/compose/mental-model
 
 https://developer.android.com/develop/ui/compose/graphics/draw/shapes ?
 
-Use https://termly.io/ to get a privacy policy
+weather icons https://github.com/kristapsbe/WeatherNowIcons
