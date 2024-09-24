@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/appwidget_text"
             android:gravity="center"
-            android:textSize="24dp" />
+            android:textSize="23dp" />
     </LinearLayout>
 
     <LinearLayout

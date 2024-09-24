@@ -309,6 +309,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         }
                         .fillMaxWidth(),
                     textAlign = TextAlign.End,
+                    color = Color(resources.getColor(R.color.text_color)),
                 )
             }
             val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
@@ -362,7 +363,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     )
                 }
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.55f),
+                    modifier = Modifier.fillMaxWidth(0.5f),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Row {
