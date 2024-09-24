@@ -97,9 +97,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val LAST_COORDINATES_FILE = "last_coordinates.json"
         const val LOCKED_LOCATION_FILE = "locked_location"
         const val SELECTED_TEMP_FILE = "selected_temp"
+        const val SELECTED_LANG = "selected_lang"
 
         const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
         const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
+
+        const val LANG_EN = "en"
+        const val LANG_LV = "lv"
 
         val selecteTempFieldMapping = hashMapOf(
             "C" to "k C f",
@@ -136,10 +140,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var locationSearchMode = mutableStateOf(false)
     private var customLocationName = mutableStateOf("")
     private var selectedTempType = mutableStateOf("")
+    private var selectedLang = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Register a callback for back button press
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -156,6 +160,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         }
         customLocationName.value = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
         selectedTempType.value = loadStringFromStorage(applicationContext, SELECTED_TEMP_FILE)
+        selectedLang.value = loadStringFromStorage(applicationContext, SELECTED_LANG)
+        if (selectedLang.value == "") { // default to EN if nothing's selected
+            selectedLang.value = LANG_EN
+            applicationContext.openFileOutput(SELECTED_LANG, MODE_PRIVATE).use { fos ->
+                fos.write(selectedLang.value.toByteArray())
+            }
+        }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         enableEdgeToEdge()
@@ -269,6 +280,69 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 .height(300.dp)
                 .padding(0.dp, 50.dp, 0.dp, 0.dp)
         ) {
+            Row(
+                modifier = Modifier
+                    .padding(20.dp, 0.dp)
+            ) {
+                Text(
+                    text = selectedLang.value,
+                    modifier = Modifier
+                        .clickable {
+                            if (selectedLang.value == LANG_EN) {
+                                selectedLang.value = LANG_LV
+                            } else {
+                                selectedLang.value = LANG_EN
+                            }
+                            applicationContext.openFileOutput(SELECTED_LANG, MODE_PRIVATE).use { fos ->
+                                fos.write(selectedLang.value.toByteArray())
+                            }
+
+                            val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
+                            val widget =
+                                ComponentName(applicationContext, ForecastWidget::class.java)
+                            val widgetIds = appWidgetManager.getAppWidgetIds(widget)
+                            val intent = Intent(applicationContext, ForecastWidget::class.java)
+                            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
+                            intent.putExtra(
+                                "widget_text",
+                                convertFromCtoDisplayTemp(
+                                    displayInfo.value.getTodayForecast().currentTemp,
+                                    selectedTempType.value
+                                )
+                            )
+                            if (selectedLang.value == LANG_EN) {
+                                intent.putExtra(
+                                    "widget_feelslike",
+                                    "${getString(R.string.feels_like_en)} ${
+                                        convertFromCtoDisplayTemp(
+                                            displayInfo.value.getTodayForecast().feelsLikeTemp,
+                                            selectedTempType.value
+                                        )
+                                    }"
+                                )
+                            } else {
+                                intent.putExtra(
+                                    "widget_feelslike",
+                                    "${getString(R.string.feels_like_lv)} ${
+                                        convertFromCtoDisplayTemp(
+                                            displayInfo.value.getTodayForecast().feelsLikeTemp,
+                                            selectedTempType.value
+                                        )
+                                    }"
+                                )
+                            }
+                            intent.putExtra(
+                                "rain",
+                                displayInfo.value.getWhenRainExpected(applicationContext, selectedLang.value)
+                            )
+
+                            applicationContext.sendBroadcast(intent)
+                        }
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.End,
+                )
+            }
             val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
             Row (
                 modifier = Modifier.fillMaxHeight(0.8f),
@@ -385,15 +459,28 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = "jūtas kā ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(0.dp, 0.dp, 20.dp, 0.dp),
-                    )
+                    if (selectedLang.value == LANG_EN) {
+                        Text(
+                            text = "${getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(0.dp, 0.dp, 20.dp, 0.dp),
+                        )
+                    } else {
+
+                        Text(
+                            text = "${getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(0.dp, 0.dp, 20.dp, 0.dp),
+                        )
+                    }
                 }
             }
         }
@@ -533,7 +620,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     textAlign = TextAlign.Center,
                                 )
                                 Text(
-                                    h.getDirection(),
+                                    h.getDirection(selectedLang.value),
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
@@ -603,7 +690,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    w.type,
+                                    w.type[selectedLang.value] ?: "",
                                     fontSize = 20.sp,
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier
@@ -622,7 +709,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text(
-                                        w.description,
+                                        w.description[selectedLang.value] ?: "",
                                         fontSize = 15.sp,
                                         color = Color(resources.getColor(R.color.text_color)),
                                     )
@@ -669,7 +756,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             .padding(0.dp, 15.dp, 0.dp, 0.dp),
                     ) {
                         Text(
-                            text = d.getDayOfWeek(),
+                            text = d.getDayOfWeek(selectedLang.value),
                             fontSize = 27.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Left,
@@ -856,15 +943,27 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     selectedTempType.value
                                 )
                             )
-                            intent.putExtra(
-                                "widget_feelslike",
-                                "jūtas kā ${
-                                    convertFromCtoDisplayTemp(
-                                        displayInfo.value.getTodayForecast().feelsLikeTemp,
-                                        selectedTempType.value
-                                    )
-                                }"
-                            )
+                            if (selectedLang.value == LANG_EN) {
+                                intent.putExtra(
+                                    "widget_feelslike",
+                                    "${getString(R.string.feels_like_en)} ${
+                                        convertFromCtoDisplayTemp(
+                                            displayInfo.value.getTodayForecast().feelsLikeTemp,
+                                            selectedTempType.value
+                                        )
+                                    }"
+                                )
+                            } else {
+                                intent.putExtra(
+                                    "widget_feelslike",
+                                    "${getString(R.string.feels_like_lv)} ${
+                                        convertFromCtoDisplayTemp(
+                                            displayInfo.value.getTodayForecast().feelsLikeTemp,
+                                            selectedTempType.value
+                                        )
+                                    }"
+                                )
+                            }
                             applicationContext.sendBroadcast(intent)
                         },
                 ) {
@@ -884,26 +983,46 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             .fillMaxWidth()
                             .padding(20.dp, 0.dp)
                     ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 10.sp,
-                            text = "prognoze atjaunināta ${displayInfo.value.getLastUpdated()}",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            textAlign = TextAlign.Right
-                        )
+                        if (selectedLang.value == LANG_EN) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = 10.sp,
+                                text = "${getString(R.string.forecast_issued_en)} ${displayInfo.value.getLastUpdated()}",
+                                color = Color(resources.getColor(R.color.text_color)),
+                                textAlign = TextAlign.Right
+                            )
+                        } else {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = 10.sp,
+                                text = "${getString(R.string.forecast_issued_lv)} ${displayInfo.value.getLastUpdated()}",
+                                color = Color(resources.getColor(R.color.text_color)),
+                                textAlign = TextAlign.Right
+                            )
+                        }
                     }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp, 0.dp)
                     ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 10.sp,
-                            text = "prognoze lejupielādēta ${displayInfo.value.getLastDownloaded()}",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            textAlign = TextAlign.Right
-                        )
+                        if (selectedLang.value == LANG_EN) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = 10.sp,
+                                text = "${getString(R.string.forecast_downloaded_en)} ${displayInfo.value.getLastDownloaded()}",
+                                color = Color(resources.getColor(R.color.text_color)),
+                                textAlign = TextAlign.Right
+                            )
+                        } else {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = 10.sp,
+                                text = "${getString(R.string.forecast_downloaded_lv)} ${displayInfo.value.getLastDownloaded()}",
+                                color = Color(resources.getColor(R.color.text_color)),
+                                textAlign = TextAlign.Right
+                            )
+                        }
                     }
                 }
             }

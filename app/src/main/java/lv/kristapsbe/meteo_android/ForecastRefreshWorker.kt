@@ -21,7 +21,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
+import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import kotlin.coroutines.resume
@@ -75,6 +77,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
         runBlocking {
             val customLocationName = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
+            val selectedLang = loadStringFromStorage(applicationContext, SELECTED_LANG)
             val cityForecast: CityForecastData?
             if (customLocationName != "") {
                 cityForecast = CityForecastDataDownloader.downloadDataCityName(applicationContext, customLocationName)
@@ -98,7 +101,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     cityForecast.warnings.any { it.intensity[1] == "Red" },
                     cityForecast.warnings.any { it.intensity[1] == "Orange" },
                     cityForecast.warnings.any { it.intensity[1] == "Yellow" },
-                    displayInfo.getWhenRainExpected()
+                    displayInfo.getWhenRainExpected(applicationContext, selectedLang),
+                    selectedLang
                 )
                 var warnings: HashSet<Int> = hashSetOf()
                 val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)
@@ -109,7 +113,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 for (w in displayInfo.warnings) {
                     if (!warnings.contains(w.id)) {
                         warnings.add(w.id) // TODO: only add if allowed to push notifs
-                        showNotification(w.id, w.intensity, w.type, w.description)
+                        showNotification(w.id, w.intensity, w.type[selectedLang] ?: "", w.description[selectedLang] ?: "")
                     }
                 }
                 applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
@@ -120,7 +124,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         return Result.success()
     }
 
-    private fun updateWidget(tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int, warningRed: Boolean, warningOrange: Boolean, warningYellow: Boolean, rainTime: String) {
+    private fun updateWidget(tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int, warningRed: Boolean, warningOrange: Boolean, warningYellow: Boolean, rainTime: String, lang: String) {
         val context = applicationContext
         val appWidgetManager = AppWidgetManager.getInstance(context)
 
@@ -136,7 +140,11 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
         intent.putExtra("widget_text", convertFromCtoDisplayTemp(tempC, selectedTemp))
         intent.putExtra("widget_location", textLocation)
-        intent.putExtra("widget_feelslike", "jūtas kā ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
+        if (lang == LANG_EN) {
+            intent.putExtra("widget_feelslike", "${applicationContext.getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
+        } else {
+            intent.putExtra("widget_feelslike", "${applicationContext.getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
+        }
         intent.putExtra("icon_image", icon)
         intent.putExtra("warning_red", warningRed)
         intent.putExtra("warning_orange", warningOrange)

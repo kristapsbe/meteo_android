@@ -1,10 +1,13 @@
 package lv.kristapsbe.meteo_android
 
+import android.content.Context
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
+import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
+import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 import lv.kristapsbe.meteo_android.WeatherPictogram.Companion.rainPictograms
 import kotlin.math.roundToInt
 
@@ -143,19 +146,30 @@ class DailyForecast(
 ) {
     companion object {
         val dayMapping = hashMapOf(
-            "MONDAY" to "P.",
-            "TUESDAY" to "O.",
-            "WEDNESDAY" to "T.",
-            "THURSDAY" to "C.",
-            "FRIDAY" to "Pk.",
-            "SATURDAY" to "S.",
-            "SUNDAY" to "Sv."
+            LANG_EN to hashMapOf(
+                "MONDAY" to "Mo",
+                "TUESDAY" to "Tu",
+                "WEDNESDAY" to "We",
+                "THURSDAY" to "Th",
+                "FRIDAY" to "Fr",
+                "SATURDAY" to "Sa",
+                "SUNDAY" to "Su"
+            ),
+            LANG_LV to hashMapOf(
+                "MONDAY" to "P.",
+                "TUESDAY" to "O.",
+                "WEDNESDAY" to "T.",
+                "THURSDAY" to "C.",
+                "FRIDAY" to "Pk.",
+                "SATURDAY" to "S.",
+                "SUNDAY" to "Sv."
+            )
         )
     }
 
-    fun getDayOfWeek(): String {
+    fun getDayOfWeek(lang: String): String {
         val dow = date.dayOfWeek.toString()
-        return dayMapping[dow] ?: dow
+        return dayMapping[lang]?.get(dow) ?: dow
     }
 }
 
@@ -173,43 +187,84 @@ class HourlyForecast(
     companion object {
         //https://uni.edu/storm/Wind%20Direction%20slide.pdf
         var directions = hashMapOf(
-            35 to "Z",
-            36 to "Z",
-            0 to "Z",
-            1 to "Z",
-            2 to "Z/ZA",
-            3 to "Z/ZA",
-            4 to "ZA",
-            5 to "ZA",
-            6 to "A/ZA",
-            7 to "A/ZA",
-            8 to "A",
-            9 to "A",
-            10 to "A",
-            11 to "A/DA",
-            12 to "A/DA",
-            13 to "DA",
-            14 to "DA",
-            15 to "D/DA",
-            16 to "D/DA",
-            17 to "D",
-            18 to "D",
-            19 to "D",
-            20 to "D/DR",
-            21 to "D/DR",
-            22 to "DR",
-            23 to "DR",
-            24 to "R/DR",
-            25 to "R/DR",
-            26 to "R",
-            27 to "R",
-            28 to "R",
-            29 to "R/ZR",
-            30 to "R/ZR",
-            31 to "ZR",
-            32 to "ZR",
-            33 to "Z/ZR",
-            34 to "Z/ZR",
+            LANG_EN to hashMapOf(
+                35 to "N",
+                36 to "N",
+                0 to "N",
+                1 to "N",
+                2 to "N/NE",
+                3 to "N/NE",
+                4 to "NE",
+                5 to "NE",
+                6 to "E/NE",
+                7 to "E/NE",
+                8 to "E",
+                9 to "E",
+                10 to "E",
+                11 to "E/SE",
+                12 to "E/SE",
+                13 to "SE",
+                14 to "SE",
+                15 to "S/SE",
+                16 to "S/SE",
+                17 to "S",
+                18 to "S",
+                19 to "S",
+                20 to "S/SW",
+                21 to "S/SW",
+                22 to "SW",
+                23 to "SW",
+                24 to "W/SW",
+                25 to "W/SW",
+                26 to "W",
+                27 to "W",
+                28 to "W",
+                29 to "W/NW",
+                30 to "W/NW",
+                31 to "NW",
+                32 to "NW",
+                33 to "N/NW",
+                34 to "N/NW",
+            ),
+            LANG_LV to hashMapOf(
+                35 to "Z",
+                36 to "Z",
+                0 to "Z",
+                1 to "Z",
+                2 to "Z/ZA",
+                3 to "Z/ZA",
+                4 to "ZA",
+                5 to "ZA",
+                6 to "A/ZA",
+                7 to "A/ZA",
+                8 to "A",
+                9 to "A",
+                10 to "A",
+                11 to "A/DA",
+                12 to "A/DA",
+                13 to "DA",
+                14 to "DA",
+                15 to "D/DA",
+                16 to "D/DA",
+                17 to "D",
+                18 to "D",
+                19 to "D",
+                20 to "D/DR",
+                21 to "D/DR",
+                22 to "DR",
+                23 to "DR",
+                24 to "R/DR",
+                25 to "R/DR",
+                26 to "R",
+                27 to "R",
+                28 to "R",
+                29 to "R/ZR",
+                30 to "R/ZR",
+                31 to "ZR",
+                32 to "ZR",
+                33 to "Z/ZR",
+                34 to "Z/ZR",
+            )
         )
     }
 
@@ -217,16 +272,16 @@ class HourlyForecast(
         return date.dayOfWeek.toString()
     }
 
-    fun getDirection(): String {
-        return directions[(windDirection/10)] ?: ""
+    fun getDirection(lang: String): String {
+        return directions[lang]?.get(windDirection/10) ?: ""
     }
 }
 
 class Warning(
     val id: Int,
     val intensity: String,
-    val type: String,
-    val description: String,
+    val type: HashMap<String, String>,
+    val description: HashMap<String, String>,
 )
 
 class DisplayInfo() {
@@ -279,8 +334,14 @@ class DisplayInfo() {
                 Warning(
                     e.id,
                     e.intensity[1],
-                    e.type[0],
-                    e.description[0]
+                    hashMapOf(
+                        "lv" to e.type[0],
+                        "en" to e.type[1]
+                    ),
+                    hashMapOf(
+                        "lv" to e.description[0],
+                        "en" to e.description[1]
+                    )
                 )
             }
         }
@@ -320,14 +381,22 @@ class DisplayInfo() {
         return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
     }
 
-    fun getWhenRainExpected(): String {
+    fun getWhenRainExpected(context: Context, lang: String): String {
         val hourlyRain = getHourlyForecasts().filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
         if (hourlyRain.isNotEmpty()) {
             val dt = convertTimestampToLocalDateTime(System.currentTimeMillis())
-            if (dt.dayOfMonth != hourlyRain[0].date.dayOfMonth) {
-                return "Rīt ${hourlyRain[0].date.hour}:00 līs"
+            return if (dt.dayOfMonth != hourlyRain[0].date.dayOfMonth) {
+                if (lang == LANG_EN) {
+                    "${context.getString(R.string.rain_expected_today_en)} ${hourlyRain[0].date.hour}:00"
+                } else {
+                    "${context.getString(R.string.rain_expected_today_lv)} ${hourlyRain[0].date.hour}:00"
+                }
             } else {
-                return "Šodien ${hourlyRain[0].date.hour}:00 līs"
+                if (lang == LANG_EN) {
+                    "${context.getString(R.string.rain_expected_tomorrow_en)} ${hourlyRain[0].date.hour}:00"
+                } else {
+                    "${context.getString(R.string.rain_expected_tomorrow_lv)} ${hourlyRain[0].date.hour}:00"
+                }
             }
         }
         return ""
