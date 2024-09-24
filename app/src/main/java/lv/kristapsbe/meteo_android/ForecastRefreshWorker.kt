@@ -93,14 +93,13 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
             if (cityForecast != null) {
                 val displayInfo = DisplayInfo(cityForecast)
-                updateWidget(
+                DisplayInfo.updateWidget(
+                    applicationContext,
                     displayInfo.getTodayForecast().currentTemp,
                     displayInfo.city,
                     displayInfo.getTodayForecast().feelsLikeTemp,
                     displayInfo.getTodayForecast().pictogram.getPictogram(),
-                    cityForecast.warnings.any { it.intensity[1] == "Red" },
-                    cityForecast.warnings.any { it.intensity[1] == "Orange" },
-                    cityForecast.warnings.any { it.intensity[1] == "Yellow" },
+                    cityForecast.warnings,
                     displayInfo.getWhenRainExpected(applicationContext, selectedLang),
                     selectedLang
                 )
@@ -122,36 +121,6 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             }
         }
         return Result.success()
-    }
-
-    private fun updateWidget(tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int, warningRed: Boolean, warningOrange: Boolean, warningYellow: Boolean, rainTime: String, lang: String) {
-        val context = applicationContext
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-
-        val selectedTemp = loadStringFromStorage(applicationContext, SELECTED_TEMP_FILE)
-
-        // Retrieve the widget IDs
-        val widget = ComponentName(context, ForecastWidget::class.java)
-        val widgetIds = appWidgetManager.getAppWidgetIds(widget)
-
-        // Create an intent to update the widget
-        val intent = Intent(context, ForecastWidget::class.java)
-        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
-        intent.putExtra("widget_text", convertFromCtoDisplayTemp(tempC, selectedTemp))
-        intent.putExtra("widget_location", textLocation)
-        if (lang == LANG_EN) {
-            intent.putExtra("widget_feelslike", "${applicationContext.getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
-        } else {
-            intent.putExtra("widget_feelslike", "${applicationContext.getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
-        }
-        intent.putExtra("icon_image", icon)
-        intent.putExtra("warning_red", warningRed)
-        intent.putExtra("warning_orange", warningOrange)
-        intent.putExtra("warning_yellow", warningYellow)
-        intent.putExtra("rain", rainTime)
-
-        context.sendBroadcast(intent)
     }
 
     private fun showNotification(id: Int, intensity: String, type: String, description: String) {

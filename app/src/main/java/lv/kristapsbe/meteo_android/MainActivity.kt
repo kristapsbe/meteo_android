@@ -296,48 +296,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             applicationContext.openFileOutput(SELECTED_LANG, MODE_PRIVATE).use { fos ->
                                 fos.write(selectedLang.value.toByteArray())
                             }
-
-                            val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
-                            val widget =
-                                ComponentName(applicationContext, ForecastWidget::class.java)
-                            val widgetIds = appWidgetManager.getAppWidgetIds(widget)
-                            val intent = Intent(applicationContext, ForecastWidget::class.java)
-                            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-                            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
-                            intent.putExtra(
-                                "widget_text",
-                                convertFromCtoDisplayTemp(
-                                    displayInfo.value.getTodayForecast().currentTemp,
-                                    selectedTempType.value
-                                )
+                            DisplayInfo.updateWidget(
+                                applicationContext,
+                                displayInfo.value.getTodayForecast().currentTemp,
+                                displayInfo.value.city,
+                                displayInfo.value.getTodayForecast().feelsLikeTemp,
+                                displayInfo.value.getTodayForecast().pictogram.getPictogram(),
+                                displayInfo.value.warningsRaw,
+                                displayInfo.value.getWhenRainExpected(applicationContext, selectedLang.value),
+                                selectedLang.value
                             )
-                            if (selectedLang.value == LANG_EN) {
-                                intent.putExtra(
-                                    "widget_feelslike",
-                                    "${getString(R.string.feels_like_en)} ${
-                                        convertFromCtoDisplayTemp(
-                                            displayInfo.value.getTodayForecast().feelsLikeTemp,
-                                            selectedTempType.value
-                                        )
-                                    }"
-                                )
-                            } else {
-                                intent.putExtra(
-                                    "widget_feelslike",
-                                    "${getString(R.string.feels_like_lv)} ${
-                                        convertFromCtoDisplayTemp(
-                                            displayInfo.value.getTodayForecast().feelsLikeTemp,
-                                            selectedTempType.value
-                                        )
-                                    }"
-                                )
-                            }
-                            intent.putExtra(
-                                "rain",
-                                displayInfo.value.getWhenRainExpected(applicationContext, selectedLang.value)
-                            )
-
-                            applicationContext.sendBroadcast(intent)
                         }
                         .fillMaxWidth(),
                     textAlign = TextAlign.End,
@@ -928,43 +896,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 .use { fos ->
                                     fos.write(selectedTempType.value.toByteArray())
                                 }
-                            // TODO: reuse
-                            val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
-                            val widget =
-                                ComponentName(applicationContext, ForecastWidget::class.java)
-                            val widgetIds = appWidgetManager.getAppWidgetIds(widget)
-                            val intent = Intent(applicationContext, ForecastWidget::class.java)
-                            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-                            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
-                            intent.putExtra(
-                                "widget_text",
-                                convertFromCtoDisplayTemp(
+                                DisplayInfo.updateWidget(
+                                    applicationContext,
                                     displayInfo.value.getTodayForecast().currentTemp,
-                                    selectedTempType.value
+                                    displayInfo.value.city,
+                                    displayInfo.value.getTodayForecast().feelsLikeTemp,
+                                    displayInfo.value.getTodayForecast().pictogram.getPictogram(),
+                                    displayInfo.value.warningsRaw,
+                                    displayInfo.value.getWhenRainExpected(applicationContext, selectedLang.value),
+                                    selectedLang.value
                                 )
-                            )
-                            if (selectedLang.value == LANG_EN) {
-                                intent.putExtra(
-                                    "widget_feelslike",
-                                    "${getString(R.string.feels_like_en)} ${
-                                        convertFromCtoDisplayTemp(
-                                            displayInfo.value.getTodayForecast().feelsLikeTemp,
-                                            selectedTempType.value
-                                        )
-                                    }"
-                                )
-                            } else {
-                                intent.putExtra(
-                                    "widget_feelslike",
-                                    "${getString(R.string.feels_like_lv)} ${
-                                        convertFromCtoDisplayTemp(
-                                            displayInfo.value.getTodayForecast().feelsLikeTemp,
-                                            selectedTempType.value
-                                        )
-                                    }"
-                                )
-                            }
-                            applicationContext.sendBroadcast(intent)
                         },
                 ) {
                     Text(

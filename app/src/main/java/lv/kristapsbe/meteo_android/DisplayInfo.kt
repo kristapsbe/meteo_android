@@ -1,13 +1,19 @@
 package lv.kristapsbe.meteo_android
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
+import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
+import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
+import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.WeatherPictogram.Companion.rainPictograms
 import kotlin.math.roundToInt
 
@@ -285,7 +291,41 @@ class Warning(
 )
 
 class DisplayInfo() {
+    companion object {
+        fun updateWidget(context: Context, tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int, warnings: List<WarningData>, rainTime: String, lang: String) {
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+
+            val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
+
+            // Retrieve the widget IDs
+            val widget = ComponentName(context, ForecastWidget::class.java)
+            val widgetIds = appWidgetManager.getAppWidgetIds(widget)
+
+            // Create an intent to update the widget
+            val intent = Intent(context, ForecastWidget::class.java)
+            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
+            intent.putExtra("widget_text", convertFromCtoDisplayTemp(tempC, selectedTemp))
+            intent.putExtra("widget_location", textLocation)
+            if (lang == LANG_EN) {
+                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
+            } else {
+                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
+            }
+
+            intent.putExtra("icon_image", icon)
+            intent.putExtra("warning_red", warnings.any { it.intensity[1] == "Red" })
+            intent.putExtra("warning_orange", warnings.any { it.intensity[1] == "Orange" })
+            intent.putExtra("warning_yellow", warnings.any { it.intensity[1] == "Yellow" })
+            intent.putExtra("rain", rainTime)
+
+            context.sendBroadcast(intent)
+        }
+    }
+
     var city: String = ""
+    // TODO: storing raw warning data - rework
+    var warningsRaw: List<WarningData> = emptyList()
     // Today
     private var hourlyForecasts: List<HourlyForecast> = emptyList()
     // Tomorrow onwards
@@ -299,6 +339,7 @@ class DisplayInfo() {
 
     constructor(cityForecastData: CityForecastData?) : this() {
         if (cityForecastData != null) {
+            warningsRaw = cityForecastData.warnings
             lastUpdated = stringToDatetime(cityForecastData.last_updated)
             lastDownloaded = stringToDatetime(cityForecastData.last_downloaded)
             city = cityForecastData.city
