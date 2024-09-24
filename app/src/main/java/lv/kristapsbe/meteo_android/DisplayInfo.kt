@@ -425,19 +425,10 @@ class DisplayInfo() {
     fun getWhenRainExpected(context: Context, lang: String): String {
         val hourlyRain = getHourlyForecasts().filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
         if (hourlyRain.isNotEmpty()) {
-            val dt = convertTimestampToLocalDateTime(System.currentTimeMillis())
-            return if (dt.dayOfMonth != hourlyRain[0].date.dayOfMonth) {
-                if (lang == LANG_EN) {
-                    "${context.getString(R.string.rain_expected_today_en)} ${hourlyRain[0].date.hour}:00"
-                } else {
-                    "${context.getString(R.string.rain_expected_today_lv)} ${hourlyRain[0].date.hour}:00"
-                }
+            if (lang == LANG_EN) {
+                "${context.getString(R.string.rain_expected_en)} ${hourlyRain[0].date.hour}:00"
             } else {
-                if (lang == LANG_EN) {
-                    "${context.getString(R.string.rain_expected_tomorrow_en)} ${hourlyRain[0].date.hour}:00"
-                } else {
-                    "${context.getString(R.string.rain_expected_tomorrow_lv)} ${hourlyRain[0].date.hour}:00"
-                }
+                "${context.getString(R.string.rain_expected_lv)} ${hourlyRain[0].date.hour}:00"
             }
         }
         return ""
