@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/widget"
+    android:paddingVertical="0dp"
     android:theme="@style/Theme.Meteo_android.AppWidgetContainer"
     android:gravity="center_vertical">
 
