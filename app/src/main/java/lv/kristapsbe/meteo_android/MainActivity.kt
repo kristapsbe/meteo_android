@@ -298,12 +298,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             }
                             DisplayInfo.updateWidget(
                                 applicationContext,
-                                displayInfo.value.getTodayForecast().currentTemp,
-                                displayInfo.value.city,
-                                displayInfo.value.getTodayForecast().feelsLikeTemp,
-                                displayInfo.value.getTodayForecast().pictogram.getPictogram(),
-                                displayInfo.value.warningsRaw,
-                                displayInfo.value.getWhenRainExpected(applicationContext, selectedLang.value),
+                                displayInfo.value,
                                 selectedLang.value
                             )
                         }
@@ -899,12 +894,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 }
                                 DisplayInfo.updateWidget(
                                     applicationContext,
-                                    displayInfo.value.getTodayForecast().currentTemp,
-                                    displayInfo.value.city,
-                                    displayInfo.value.getTodayForecast().feelsLikeTemp,
-                                    displayInfo.value.getTodayForecast().pictogram.getPictogram(),
-                                    displayInfo.value.warningsRaw,
-                                    displayInfo.value.getWhenRainExpected(applicationContext, selectedLang.value),
+                                    displayInfo.value,
                                     selectedLang.value
                                 )
                         },

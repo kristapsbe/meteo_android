@@ -185,7 +185,7 @@ class HourlyForecast(
     val rainAmount: Int,
     val rainProb: Int,
     val windSpeed: Int,
-    val windDirection: Int,
+    private val windDirection: Int,
     val currentTemp: Int,
     val feelsLikeTemp: Int,
     val pictogram: WeatherPictogram
@@ -292,7 +292,7 @@ class Warning(
 
 class DisplayInfo() {
     companion object {
-        fun updateWidget(context: Context, tempC: Int, textLocation: String, feelsLikeC: Int, icon: Int, warnings: List<WarningData>, rainTime: String, lang: String) {
+        fun updateWidget(context: Context, displayInfo: DisplayInfo, lang: String) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
 
             val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
@@ -305,27 +305,26 @@ class DisplayInfo() {
             val intent = Intent(context, ForecastWidget::class.java)
             intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
-            intent.putExtra("widget_text", convertFromCtoDisplayTemp(tempC, selectedTemp))
-            intent.putExtra("widget_location", textLocation)
+
+            intent.putExtra("widget_text", convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp))
+            intent.putExtra("widget_location", displayInfo.city)
             if (lang == LANG_EN) {
-                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
+                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
             } else {
-                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(feelsLikeC, selectedTemp)}")
+                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
             }
 
-            intent.putExtra("icon_image", icon)
-            intent.putExtra("warning_red", warnings.any { it.intensity[1] == "Red" })
-            intent.putExtra("warning_orange", warnings.any { it.intensity[1] == "Orange" })
-            intent.putExtra("warning_yellow", warnings.any { it.intensity[1] == "Yellow" })
-            intent.putExtra("rain", rainTime)
+            intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
+            intent.putExtra("warning_red", displayInfo.warnings.any { it.intensity == "Red" })
+            intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
+            intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
+            intent.putExtra("rain", displayInfo.getWhenRainExpected(context, lang))
 
             context.sendBroadcast(intent)
         }
     }
 
     var city: String = ""
-    // TODO: storing raw warning data - rework
-    var warningsRaw: List<WarningData> = emptyList()
     // Today
     private var hourlyForecasts: List<HourlyForecast> = emptyList()
     // Tomorrow onwards
@@ -339,7 +338,6 @@ class DisplayInfo() {
 
     constructor(cityForecastData: CityForecastData?) : this() {
         if (cityForecastData != null) {
-            warningsRaw = cityForecastData.warnings
             lastUpdated = stringToDatetime(cityForecastData.last_updated)
             lastDownloaded = stringToDatetime(cityForecastData.last_downloaded)
             city = cityForecastData.city

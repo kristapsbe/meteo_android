@@ -95,12 +95,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 val displayInfo = DisplayInfo(cityForecast)
                 DisplayInfo.updateWidget(
                     applicationContext,
-                    displayInfo.getTodayForecast().currentTemp,
-                    displayInfo.city,
-                    displayInfo.getTodayForecast().feelsLikeTemp,
-                    displayInfo.getTodayForecast().pictogram.getPictogram(),
-                    cityForecast.warnings,
-                    displayInfo.getWhenRainExpected(applicationContext, selectedLang),
+                    displayInfo,
                     selectedLang
                 )
                 var warnings: HashSet<Int> = hashSetOf()
