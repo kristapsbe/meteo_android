@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -156,7 +157,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         val content = loadStringFromStorage(applicationContext, RESPONSE_FILE)
         if (content != "") {
-            displayInfo.value = DisplayInfo(Json.decodeFromString<CityForecastData>(content))
+            try {
+                displayInfo.value = DisplayInfo(Json.decodeFromString<CityForecastData>(content))
+            } catch (e: Exception) {
+                Log.e("ERROR", "Failed to load data from storage: $e")
+            }
         }
         customLocationName.value = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
         selectedTempType.value = loadStringFromStorage(applicationContext, SELECTED_TEMP_FILE)

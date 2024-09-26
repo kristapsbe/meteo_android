@@ -421,8 +421,9 @@ class DisplayInfo() {
     }
 
     fun getWhenRainExpected(context: Context, lang: String): String {
-        val hourlyRain = getHourlyForecasts().filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
-        if (hourlyRain.isNotEmpty()) {
+        val hForecasts = getHourlyForecasts()
+        val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
+        if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
             return if (lang == LANG_EN) {
                 "${context.getString(R.string.rain_expected_en)} ${hourlyRain[0].date.hour}:00"
             } else {
