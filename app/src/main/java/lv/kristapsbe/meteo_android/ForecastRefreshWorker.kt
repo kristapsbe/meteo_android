@@ -4,8 +4,6 @@ import android.Manifest
 import android.app.Activity.MODE_PRIVATE
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -21,11 +19,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
-import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
-import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
