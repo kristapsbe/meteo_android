@@ -7,7 +7,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.work.ExistingWorkPolicy
@@ -21,29 +20,6 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_DL_NAM
  */
 class ForecastWidget : AppWidgetProvider() {
     override fun onAppWidgetOptionsChanged(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, newOptions: Bundle) {
-        // Create an Intent to launch the MainActivity when clicked
-        val intent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-        //val minWidth = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-        val minHeight = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-
-        val heightThresholdDp = 120
-
-        val views = RemoteViews(context.packageName, R.layout.forecast_widget)
-        views.setOnClickPendingIntent(R.id.widget, pendingIntent)
-
-        // Check if the widget width is smaller than the threshold
-        if (minHeight < heightThresholdDp) {
-            views.setViewVisibility(R.id.top_widget, View.GONE)
-            views.setViewVisibility(R.id.bottom_widget, View.GONE)
-        } else {
-            views.setViewVisibility(R.id.top_widget, View.VISIBLE)
-            views.setViewVisibility(R.id.bottom_widget, View.VISIBLE)
-        }
-
-        appWidgetManager.updateAppWidget(appWidgetId, views)
-
         val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
         WorkManager.getInstance(context).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
 
@@ -63,6 +39,30 @@ class ForecastWidget : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
+
+        val heightThresholdDp = 120
+
+        val views = RemoteViews(context.packageName, R.layout.forecast_widget)
+
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        val thisWidget = ComponentName(context, ForecastWidget::class.java)
+        val widgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
+
+        for (widgetId in widgetIds) {
+            val options = appWidgetManager.getAppWidgetOptions(widgetId)
+            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+
+            // Check if the widget width is smaller than the threshold
+            if (minHeight < heightThresholdDp) {
+                views.setViewVisibility(R.id.top_widget, View.GONE)
+                views.setViewVisibility(R.id.bottom_widget, View.GONE)
+            } else {
+                views.setViewVisibility(R.id.top_widget, View.VISIBLE)
+                views.setViewVisibility(R.id.bottom_widget, View.VISIBLE)
+            }
+
+            appWidgetManager.updateAppWidget(widgetId, views)
+        }
 
         // Handle the broadcast from the Worker
         if (intent.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE) {
