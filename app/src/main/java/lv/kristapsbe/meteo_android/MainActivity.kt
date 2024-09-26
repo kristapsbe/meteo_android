@@ -4,10 +4,7 @@ import android.Manifest
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Bundle
@@ -298,9 +295,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             } else {
                                 selectedLang.value = LANG_EN
                             }
-                            applicationContext.openFileOutput(SELECTED_LANG, MODE_PRIVATE).use { fos ->
-                                fos.write(selectedLang.value.toByteArray())
-                            }
+                            applicationContext
+                                .openFileOutput(SELECTED_LANG, MODE_PRIVATE)
+                                .use { fos ->
+                                    fos.write(selectedLang.value.toByteArray())
+                                }
                             DisplayInfo.updateWidget(
                                 applicationContext,
                                 displayInfo.value,
@@ -363,7 +362,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     )
                 }
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.5f),
+                    modifier = Modifier.fillMaxWidth(0.47f),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Row {
@@ -773,7 +772,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             }
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth(0.70f)
+                                    .fillMaxWidth(0.65f)
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -880,9 +879,17 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     @Composable
     fun ShowMetadataInfo() {
+        var navigationBarHeight = 0
+        val resources = resources
+        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            val displayMetrics = Resources.getSystem().displayMetrics
+            navigationBarHeight = (resources.getDimensionPixelSize(resourceId)/displayMetrics.density).toInt()
+        }
+
         Column(
             modifier = Modifier
-                .padding(20.dp, 0.dp, 20.dp, 20.dp)
+                .padding(20.dp, 0.dp, 20.dp, (5+navigationBarHeight).dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -897,11 +904,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 .use { fos ->
                                     fos.write(selectedTempType.value.toByteArray())
                                 }
-                                DisplayInfo.updateWidget(
-                                    applicationContext,
-                                    displayInfo.value,
-                                    selectedLang.value
-                                )
+                            DisplayInfo.updateWidget(
+                                applicationContext,
+                                displayInfo.value,
+                                selectedLang.value
+                            )
                         },
                 ) {
                     Text(
@@ -915,15 +922,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp, 0.dp)
-                    ) {
+                    Row {
                         if (selectedLang.value == LANG_EN) {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
-                                fontSize = 10.sp,
+                                fontSize = 8.sp,
                                 text = "${getString(R.string.forecast_issued_en)} ${displayInfo.value.getLastUpdated()}",
                                 color = Color(resources.getColor(R.color.text_color)),
                                 textAlign = TextAlign.Right
@@ -931,22 +934,18 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         } else {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
-                                fontSize = 10.sp,
+                                fontSize = 8.sp,
                                 text = "${getString(R.string.forecast_issued_lv)} ${displayInfo.value.getLastUpdated()}",
                                 color = Color(resources.getColor(R.color.text_color)),
                                 textAlign = TextAlign.Right
                             )
                         }
                     }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp, 0.dp)
-                    ) {
+                    Row {
                         if (selectedLang.value == LANG_EN) {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
-                                fontSize = 10.sp,
+                                fontSize = 8.sp,
                                 text = "${getString(R.string.forecast_downloaded_en)} ${displayInfo.value.getLastDownloaded()}",
                                 color = Color(resources.getColor(R.color.text_color)),
                                 textAlign = TextAlign.Right
@@ -954,7 +953,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         } else {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
-                                fontSize = 10.sp,
+                                fontSize = 8.sp,
                                 text = "${getString(R.string.forecast_downloaded_lv)} ${displayInfo.value.getLastDownloaded()}",
                                 color = Color(resources.getColor(R.color.text_color)),
                                 textAlign = TextAlign.Right
