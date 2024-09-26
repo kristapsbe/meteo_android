@@ -424,10 +424,18 @@ class DisplayInfo() {
         val hForecasts = getHourlyForecasts()
         val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
         if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
-            return if (lang == LANG_EN) {
-                "${context.getString(R.string.rain_expected_en)} ${hourlyRain[0].date.hour}:00"
+            return if (hourlyRain[0].date.dayOfMonth == getTodayForecast().date.dayOfMonth) {
+                if (lang == LANG_EN) {
+                    "${context.getString(R.string.rain_expected_today_en)} ${hourlyRain[0].date.hour}:00"
+                } else {
+                    "${context.getString(R.string.rain_expected_today_lv)} ${hourlyRain[0].date.hour}:00"
+                }
             } else {
-                "${context.getString(R.string.rain_expected_lv)} ${hourlyRain[0].date.hour}:00"
+                if (lang == LANG_EN) {
+                    "${context.getString(R.string.rain_expected_tomorrow_en)} ${hourlyRain[0].date.hour}:00"
+                } else {
+                    "${context.getString(R.string.rain_expected_tomorrow_lv)} ${hourlyRain[0].date.hour}:00"
+                }
             }
         }
         return ""
