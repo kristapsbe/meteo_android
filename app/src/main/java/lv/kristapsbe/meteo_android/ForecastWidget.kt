@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.work.ExistingWorkPolicy
@@ -87,6 +88,38 @@ class ForecastWidget : AppWidgetProvider() {
     override fun onEnabled(context: Context) {
         val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
         WorkManager.getInstance(context).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+
+        // Create an Intent to launch the MainActivity when clicked
+        //val intent = Intent(context, MainActivity::class.java)
+        //val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val views = RemoteViews(context.packageName, R.layout.forecast_widget)
+        //views.setOnClickPendingIntent(R.id.widget, pendingIntent)
+
+        // Retrieve the AppWidgetManager
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        // Use the widget ID you are working with
+        val widget = ComponentName(context, ForecastWidget::class.java)
+        val widgetIds = appWidgetManager.getAppWidgetIds(widget)
+
+        for (widgetId in widgetIds) {
+            // Retrieve the options for this widget
+            val options = appWidgetManager.getAppWidgetOptions(widgetId)
+            // Get the height constraints
+            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+
+            val heightThresholdDp = 120
+
+            // Check if the widget width is smaller than the threshold
+            if (minHeight < heightThresholdDp) {
+                views.setViewVisibility(R.id.top_widget, View.GONE)
+                views.setViewVisibility(R.id.bottom_widget, View.GONE)
+            } else {
+                views.setViewVisibility(R.id.top_widget, View.VISIBLE)
+                views.setViewVisibility(R.id.bottom_widget, View.VISIBLE)
+            }
+
+            appWidgetManager.updateAppWidget(widgetId, views)
+        }
     }
 
     override fun onDisabled(context: Context) { }
