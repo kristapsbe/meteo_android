@@ -142,6 +142,25 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val lastVersionCode = prefs.getInt("lastVersionCode", -1)
+
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            val currentVersionCode = packageInfo.versionCode
+
+            if (lastVersionCode != currentVersionCode) {
+                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+
+                // Save the current version code
+                prefs.edit().putInt("lastVersionCode", currentVersionCode).apply()
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+        }
+
         // Register a callback for back button press
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
