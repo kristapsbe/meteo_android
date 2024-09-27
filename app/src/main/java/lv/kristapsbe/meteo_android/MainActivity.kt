@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val LOCKED_LOCATION_FILE = "locked_location"
         const val SELECTED_TEMP_FILE = "selected_temp"
         const val SELECTED_LANG = "selected_lang"
-        const val WIDGET_TRANSPARENT = "selected_lang"
+        const val WIDGET_TRANSPARENT = "widget_transparent"
 
         const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
         const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
@@ -312,10 +312,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
                         .clickable {
-                            if (isWidgetTransparent.value == "") {
-                                isWidgetTransparent.value = "true"
-                            } else {
+                            if (isWidgetTransparent.value != "") {
                                 isWidgetTransparent.value = ""
+                            } else {
+                                isWidgetTransparent.value = "true"
                             }
                             applicationContext
                                 .openFileOutput(WIDGET_TRANSPARENT, MODE_PRIVATE)
