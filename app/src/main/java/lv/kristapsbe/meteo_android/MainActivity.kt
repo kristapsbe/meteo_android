@@ -97,6 +97,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val SELECTED_TEMP_FILE = "selected_temp"
         const val SELECTED_LANG = "selected_lang"
         const val WIDGET_TRANSPARENT = "widget_transparent"
+        const val USE_ALT_LAYOUT = "use_alt_layout"
 
         const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
         const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
@@ -143,6 +144,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var selectedLang = mutableStateOf("")
     private var isWidgetTransparent = mutableStateOf("")
     private var doDisplaySettings = mutableStateOf(false)
+    private var useAltLayout = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -150,6 +152,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         val lastVersionCode = prefs.getInt("lastVersionCode", -1)
         isWidgetTransparent.value = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
+        useAltLayout.value = loadStringFromStorage(applicationContext, USE_ALT_LAYOUT)
 
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
@@ -431,7 +434,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(0.dp, 0.dp, 0.dp, 20.dp),
+                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
@@ -477,6 +480,68 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             color = Color(resources.getColor(R.color.text_color)),
                             textAlign = TextAlign.Center
                         )
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp, 0.dp, 0.dp, 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                    ) {
+                        if (selectedLang.value == LANG_EN) {
+                            Text(
+                                text = "Use alternative layout",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        } else {
+                            Text(
+                                text = "Lietot alternatīvo izkārtojumu",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (useAltLayout.value != "") {
+                                    useAltLayout.value = ""
+                                } else {
+                                    useAltLayout.value = "true"
+                                }
+                                applicationContext
+                                    .openFileOutput(USE_ALT_LAYOUT, MODE_PRIVATE)
+                                    .use { fos ->
+                                        fos.write(useAltLayout.value.toByteArray())
+                                    }
+                                DisplayInfo.updateWidget(
+                                    applicationContext,
+                                    displayInfo.value,
+                                    selectedLang.value,
+                                    isWidgetTransparent.value
+                                )
+                            },
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (useAltLayout.value == "") {
+                            Image(
+                                painterResource(R.drawable.baseline_check_box_outline_blank_24),
+                                contentDescription = "",
+                                contentScale = ContentScale.Fit,
+                            )
+                        } else {
+                            Image(
+                                painterResource(R.drawable.baseline_check_box_24),
+                                contentDescription = "",
+                                contentScale = ContentScale.Fit,
+                            )
+                        }
                     }
                 }
 
