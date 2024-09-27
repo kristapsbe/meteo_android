@@ -13,8 +13,8 @@ android {
         applicationId = "lv.kristapsbe.meteo_android"
         minSdk = 26
         targetSdk = 34
-        versionCode = 63
-        versionName = "0.6.8"
+        versionCode = 64
+        versionName = "0.6.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

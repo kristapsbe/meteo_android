@@ -292,7 +292,7 @@ class Warning(
 
 class DisplayInfo() {
     companion object {
-        fun updateWidget(context: Context, displayInfo: DisplayInfo, lang: String) {
+        fun updateWidget(context: Context, displayInfo: DisplayInfo, lang: String, isWidgetTransparent: String) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
 
             val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
@@ -314,6 +314,7 @@ class DisplayInfo() {
                 intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
             }
 
+            intent.putExtra("is_widget_transparent", (isWidgetTransparent != ""))
             intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
             intent.putExtra("warning_red", displayInfo.warnings.any { it.intensity == "Red" })
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })

@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -34,7 +35,7 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, null)
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, null, false)
         }
     }
 
@@ -51,13 +52,14 @@ class ForecastWidget : AppWidgetProvider() {
             val warningOrange = intent.getBooleanExtra("warning_orange", false)
             val warningYellow = intent.getBooleanExtra("warning_yellow", false)
             val rain = intent.getStringExtra("rain")
+            val isWidgetTransparent = intent.getBooleanExtra("is_widget_transparent", false)
 
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val widget = ComponentName(context, ForecastWidget::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain, isWidgetTransparent)
             }
         }
     }
@@ -81,7 +83,8 @@ internal fun updateAppWidget(
     warningOrange: Boolean,
     warningYellow: Boolean,
     icon: Int?,
-    rain: String?
+    rain: String?,
+    isWidgetTransparent: Boolean
 ) {
     // Create an Intent to launch the MainActivity when clicked
     val intent = Intent(context, MainActivity::class.java)
@@ -90,6 +93,11 @@ internal fun updateAppWidget(
     val views = RemoteViews(context.packageName, R.layout.forecast_widget)
     views.setOnClickPendingIntent(R.id.widget, pendingIntent)
 
+    if (isWidgetTransparent) {
+        views.setInt(R.id.widget, "setBackgroundColor", ContextCompat.getColor(context, R.color.transparent))
+    } else {
+        views.setInt(R.id.widget, "setBackgroundColor", ContextCompat.getColor(context, R.color.sky_blue))
+    }
     if (text != null) {
         views.setTextViewText(R.id.appwidget_text, text)
     }

@@ -96,6 +96,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val LOCKED_LOCATION_FILE = "locked_location"
         const val SELECTED_TEMP_FILE = "selected_temp"
         const val SELECTED_LANG = "selected_lang"
+        const val WIDGET_TRANSPARENT = "selected_lang"
 
         const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
         const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
@@ -139,12 +140,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var customLocationName = mutableStateOf("")
     private var selectedTempType = mutableStateOf("")
     private var selectedLang = mutableStateOf("")
+    private var isWidgetTransparent = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         val lastVersionCode = prefs.getInt("lastVersionCode", -1)
+        isWidgetTransparent.value = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
 
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
@@ -305,30 +308,72 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 modifier = Modifier
                     .padding(20.dp, 0.dp)
             ) {
-                Text(
-                    text = selectedLang.value,
+                Column(
                     modifier = Modifier
+                        .fillMaxWidth(0.5f)
                         .clickable {
-                            if (selectedLang.value == LANG_EN) {
-                                selectedLang.value = LANG_LV
+                            if (isWidgetTransparent.value == "") {
+                                isWidgetTransparent.value = "true"
                             } else {
-                                selectedLang.value = LANG_EN
+                                isWidgetTransparent.value = ""
                             }
                             applicationContext
-                                .openFileOutput(SELECTED_LANG, MODE_PRIVATE)
+                                .openFileOutput(WIDGET_TRANSPARENT, MODE_PRIVATE)
                                 .use { fos ->
-                                    fos.write(selectedLang.value.toByteArray())
+                                    fos.write(selectedTempType.value.toByteArray())
                                 }
                             DisplayInfo.updateWidget(
                                 applicationContext,
                                 displayInfo.value,
-                                selectedLang.value
+                                selectedLang.value,
+                                isWidgetTransparent.value
                             )
                         }
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.End,
-                    color = Color(resources.getColor(R.color.text_color)),
-                )
+                ) {
+                    if (isWidgetTransparent.value != "") {
+                        Image(
+                            painterResource(R.drawable.baseline_check_box_outline_blank_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
+                    } else {
+                        Image(
+                            painterResource(R.drawable.baseline_check_box_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = selectedLang.value,
+                        modifier = Modifier
+                            .clickable {
+                                if (selectedLang.value == LANG_EN) {
+                                    selectedLang.value = LANG_LV
+                                } else {
+                                    selectedLang.value = LANG_EN
+                                }
+                                applicationContext
+                                    .openFileOutput(SELECTED_LANG, MODE_PRIVATE)
+                                    .use { fos ->
+                                        fos.write(selectedLang.value.toByteArray())
+                                    }
+                                DisplayInfo.updateWidget(
+                                    applicationContext,
+                                    displayInfo.value,
+                                    selectedLang.value,
+                                    isWidgetTransparent.value
+                                )
+                            }
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.End,
+                        color = Color(resources.getColor(R.color.text_color)),
+                    )
+                }
             }
             val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
             Row (
@@ -553,7 +598,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                 }
             }
-            Column {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Row(
                     modifier = Modifier
                         .horizontalScroll(rememberScrollState())
@@ -926,7 +973,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             DisplayInfo.updateWidget(
                                 applicationContext,
                                 displayInfo.value,
-                                selectedLang.value
+                                selectedLang.value,
+                                isWidgetTransparent.value
                             )
                         },
                 ) {

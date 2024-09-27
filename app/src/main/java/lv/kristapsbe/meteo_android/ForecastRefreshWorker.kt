@@ -21,6 +21,7 @@ import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
+import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_TRANSPARENT
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -73,6 +74,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         runBlocking {
             val customLocationName = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
             val selectedLang = loadStringFromStorage(applicationContext, SELECTED_LANG)
+            val isWidgetTransparent = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
             val cityForecast: CityForecastData?
             if (customLocationName != "") {
                 cityForecast = CityForecastDataDownloader.downloadDataCityName(applicationContext, customLocationName)
@@ -91,7 +93,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 DisplayInfo.updateWidget(
                     applicationContext,
                     displayInfo,
-                    selectedLang
+                    selectedLang,
+                    isWidgetTransparent
                 )
                 var warnings: HashSet<Int> = hashSetOf()
                 val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)
