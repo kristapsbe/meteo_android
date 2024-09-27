@@ -320,7 +320,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             applicationContext
                                 .openFileOutput(WIDGET_TRANSPARENT, MODE_PRIVATE)
                                 .use { fos ->
-                                    fos.write(selectedTempType.value.toByteArray())
+                                    fos.write(isWidgetTransparent.value.toByteArray())
                                 }
                             DisplayInfo.updateWidget(
                                 applicationContext,
@@ -330,15 +330,15 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             )
                         }
                 ) {
-                    if (isWidgetTransparent.value != "") {
+                    if (isWidgetTransparent.value == "") {
                         Image(
-                            painterResource(R.drawable.baseline_check_box_outline_blank_24),
+                            painterResource(R.drawable.baseline_check_box_24),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                         )
                     } else {
                         Image(
-                            painterResource(R.drawable.baseline_check_box_24),
+                            painterResource(R.drawable.baseline_check_box_outline_blank_24),
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
                         )
