@@ -355,8 +355,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 DisplayInfo.updateWidget(
                                     applicationContext,
                                     displayInfo.value,
-                                    selectedLang.value,
-                                    isWidgetTransparent.value
+                                    selectedLang.value
                                 )
                             }
                     ) {
@@ -410,8 +409,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 DisplayInfo.updateWidget(
                                     applicationContext,
                                     displayInfo.value,
-                                    selectedLang.value,
-                                    isWidgetTransparent.value
+                                    selectedLang.value
                                 )
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -468,8 +466,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 DisplayInfo.updateWidget(
                                     applicationContext,
                                     displayInfo.value,
-                                    selectedLang.value,
-                                    isWidgetTransparent.value
+                                    selectedLang.value
                                 )
                             }
                     ) {
@@ -523,8 +520,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 DisplayInfo.updateWidget(
                                     applicationContext,
                                     displayInfo.value,
-                                    selectedLang.value,
-                                    isWidgetTransparent.value
+                                    selectedLang.value
                                 )
                             },
                         horizontalAlignment = Alignment.CenterHorizontally

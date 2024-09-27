@@ -16,7 +16,6 @@ class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters
 
         runBlocking {
             val selectedLang = loadStringFromStorage(applicationContext, SELECTED_LANG)
-            val isWidgetTransparent = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
 
             val cityForecast = CityForecastDataDownloader.downloadDataLatLon(applicationContext, doDL = false)
 
@@ -27,8 +26,7 @@ class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters
                 DisplayInfo.updateWidget(
                     applicationContext,
                     displayInfo,
-                    selectedLang,
-                    isWidgetTransparent
+                    selectedLang
                 )
             }
         }

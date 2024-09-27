@@ -74,7 +74,6 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         runBlocking {
             val customLocationName = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
             val selectedLang = loadStringFromStorage(applicationContext, SELECTED_LANG)
-            val isWidgetTransparent = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
             val cityForecast: CityForecastData?
             if (customLocationName != "") {
                 cityForecast = CityForecastDataDownloader.downloadDataCityName(applicationContext, customLocationName)
@@ -93,8 +92,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 DisplayInfo.updateWidget(
                     applicationContext,
                     displayInfo,
-                    selectedLang,
-                    isWidgetTransparent
+                    selectedLang
                 )
                 var warnings: HashSet<Int> = hashSetOf()
                 val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)

@@ -19,6 +19,7 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.USE_ALT_LAYOUT
+import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_TRANSPARENT
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.WeatherPictogram.Companion.rainPictograms
 import kotlin.math.roundToInt
@@ -303,11 +304,12 @@ class Aurora(
 
 class DisplayInfo() {
     companion object {
-        fun updateWidget(context: Context, displayInfo: DisplayInfo, lang: String, isWidgetTransparent: String) {
+        fun updateWidget(context: Context, displayInfo: DisplayInfo, lang: String) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
 
             val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
             val useAltLayout = loadStringFromStorage(context, USE_ALT_LAYOUT)
+            val isWidgetTransparent = loadStringFromStorage(context, WIDGET_TRANSPARENT)
 
             // Retrieve the widget IDs
             val widget = ComponentName(context, ForecastWidget::class.java)
