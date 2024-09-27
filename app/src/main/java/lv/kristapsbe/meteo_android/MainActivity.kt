@@ -105,10 +105,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val LANG_LV = "lv"
 
         val selecteTempFieldMapping = hashMapOf(
-            "C" to "k C f",
-            "" to "k C f", // default
-            "K" to "f K c",
-            "F" to "c F k",
+            "C" to "C",
+            "" to "C", // default
+            "K" to "K",
+            "F" to "F",
         )
 
         // TODO: do a linked list instead?
@@ -141,6 +141,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var selectedTempType = mutableStateOf("")
     private var selectedLang = mutableStateOf("")
     private var isWidgetTransparent = mutableStateOf("")
+    private var doDisplaySettings = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -279,6 +280,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 .background(Color(resources.getColor(R.color.sky_blue)))
                 .verticalScroll(state = scrollState)
         ) {
+            ShowSettings()
             ShowCurrentInfo()
             ShowHourlyInfo()
             ShowWarningInfo()
@@ -288,67 +290,53 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     @Composable
-    fun ShowCurrentInfo() {
-        val focusManager = LocalFocusManager.current
-
-        val focusRequester = remember { FocusRequester() }
-        if (locationSearchMode.value) {
-            LaunchedEffect(Unit) {
-                focusRequester.requestFocus() // Automatically request focus when the composable launches
-            }
-        }
-
+    fun ShowSettings() {
         Column(
             modifier = Modifier
-                .padding(0.dp, 50.dp, 0.dp, 0.dp)
+                .padding(20.dp, 50.dp, 20.dp, 20.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.End
         ) {
             Row(
                 modifier = Modifier
-                    .padding(20.dp, 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .clickable {
-                            if (isWidgetTransparent.value != "") {
-                                isWidgetTransparent.value = ""
-                            } else {
-                                isWidgetTransparent.value = "true"
-                            }
-                            applicationContext
-                                .openFileOutput(WIDGET_TRANSPARENT, MODE_PRIVATE)
-                                .use { fos ->
-                                    fos.write(isWidgetTransparent.value.toByteArray())
-                                }
-                            DisplayInfo.updateWidget(
-                                applicationContext,
-                                displayInfo.value,
-                                selectedLang.value,
-                                isWidgetTransparent.value
-                            )
-                        }
-                ) {
-                    if (isWidgetTransparent.value == "") {
-                        Image(
-                            painterResource(R.drawable.baseline_check_box_24),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                        )
-                    } else {
-                        Image(
-                            painterResource(R.drawable.baseline_check_box_outline_blank_24),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                        )
+                    .clickable {
+                        doDisplaySettings.value = !doDisplaySettings.value
                     }
-                }
-                Column(
+            ) {
+                Image(
+                    painterResource(R.drawable.baseline_settings_24),
+                    contentDescription = "",
+                    contentScale = ContentScale.Fit,
+                )
+            }
+            if (doDisplaySettings.value) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(0.dp, 10.dp, 0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = selectedLang.value,
+                    Column(
                         modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                    ) {
+                        if (selectedLang.value == LANG_EN) {
+                            Text(
+                                text = "App language",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        } else {
+                            Text(
+                                text = "Lietotnes valoda",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .clickable {
                                 if (selectedLang.value == LANG_EN) {
                                     selectedLang.value = LANG_LV
@@ -367,12 +355,152 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     isWidgetTransparent.value
                                 )
                             }
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.End,
-                        color = Color(resources.getColor(R.color.text_color)),
-                    )
+                    ) {
+                        Text(
+                            text = selectedLang.value,
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            color = Color(resources.getColor(R.color.text_color)),
+                        )
+                    }
                 }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                    ) {
+                        if (selectedLang.value == LANG_EN) {
+                            Text(
+                                text = "Show widget background color",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        } else {
+                            Text(
+                                text = "Rādīt logrīka fona krāsu",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (isWidgetTransparent.value != "") {
+                                    isWidgetTransparent.value = ""
+                                } else {
+                                    isWidgetTransparent.value = "true"
+                                }
+                                applicationContext
+                                    .openFileOutput(WIDGET_TRANSPARENT, MODE_PRIVATE)
+                                    .use { fos ->
+                                        fos.write(isWidgetTransparent.value.toByteArray())
+                                    }
+                                DisplayInfo.updateWidget(
+                                    applicationContext,
+                                    displayInfo.value,
+                                    selectedLang.value,
+                                    isWidgetTransparent.value
+                                )
+                            },
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (isWidgetTransparent.value == "") {
+                            Image(
+                                painterResource(R.drawable.baseline_check_box_24),
+                                contentDescription = "",
+                                contentScale = ContentScale.Fit,
+                            )
+                        } else {
+                            Image(
+                                painterResource(R.drawable.baseline_check_box_outline_blank_24),
+                                contentDescription = "",
+                                contentScale = ContentScale.Fit,
+                            )
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp, 0.dp, 0.dp, 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                    ) {
+                        if (selectedLang.value == LANG_EN) {
+                            Text(
+                                text = "Temperature unit",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        } else {
+                            Text(
+                                text = "Temperatūras mērvienība",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                selectedTempType.value = nextTemp[selectedTempType.value] ?: ""
+                                applicationContext
+                                    .openFileOutput(SELECTED_TEMP_FILE, MODE_PRIVATE)
+                                    .use { fos ->
+                                        fos.write(selectedTempType.value.toByteArray())
+                                    }
+                                DisplayInfo.updateWidget(
+                                    applicationContext,
+                                    displayInfo.value,
+                                    selectedLang.value,
+                                    isWidgetTransparent.value
+                                )
+                            }
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            text = selecteTempFieldMapping[selectedTempType.value] ?: "",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(0.dp, 0.dp, 0.dp, 20.dp),
+                    color = Color(resources.getColor(R.color.light_gray)),
+                    thickness = 1.dp
+                )
             }
+        }
+    }
+
+    @Composable
+    fun ShowCurrentInfo() {
+        val focusManager = LocalFocusManager.current
+
+        val focusRequester = remember { FocusRequester() }
+        if (locationSearchMode.value) {
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus() // Automatically request focus when the composable launches
+            }
+        }
+
+        Column {
             val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
             Row (
                 modifier = Modifier
@@ -513,29 +641,31 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .padding(20.dp, 0.dp)
-                    .fillMaxWidth()
-            ) {
-                if (selectedLang.value == LANG_EN) {
-                    Text(
-                        text = "Aurora ${displayInfo.value.aurora.prob}% at ${displayInfo.value.aurora.time}",
-                        textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
-                    )
-                } else {
-                    Text(
-                        text = "Ziemeļblāzma ${displayInfo.value.aurora.prob}% plkst. ${displayInfo.value.aurora.time}",
-                        textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
-                    )
+            if (displayInfo.value.aurora.prob > 0) {
+                Row(
+                    modifier = Modifier
+                        .padding(20.dp, 0.dp)
+                        .fillMaxWidth()
+                ) {
+                    if (selectedLang.value == LANG_EN) {
+                        Text(
+                            text = "Aurora ${displayInfo.value.aurora.prob}% at ${displayInfo.value.aurora.time}",
+                            textAlign = TextAlign.Center,
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "Ziemeļblāzma ${displayInfo.value.aurora.prob}% plkst. ${displayInfo.value.aurora.time}",
+                            textAlign = TextAlign.Center,
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                        )
+                    }
                 }
             }
         }
@@ -983,32 +1113,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(0.15f)
-                        .clickable {
-                            selectedTempType.value = nextTemp[selectedTempType.value] ?: ""
-                            applicationContext
-                                .openFileOutput(SELECTED_TEMP_FILE, MODE_PRIVATE)
-                                .use { fos ->
-                                    fos.write(selectedTempType.value.toByteArray())
-                                }
-                            DisplayInfo.updateWidget(
-                                applicationContext,
-                                displayInfo.value,
-                                selectedLang.value,
-                                isWidgetTransparent.value
-                            )
-                        },
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = selecteTempFieldMapping[selectedTempType.value] ?: "",
-                        color = Color(resources.getColor(R.color.text_color)),
-                        textAlign = TextAlign.Left
-                    )
-                }
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {

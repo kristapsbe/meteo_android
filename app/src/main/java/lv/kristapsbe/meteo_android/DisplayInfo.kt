@@ -330,11 +330,15 @@ class DisplayInfo() {
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
             intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
             intent.putExtra("rain", displayInfo.getWhenRainExpected(context, lang))
-            
-            if (lang == LANG_EN) {
-                intent.putExtra("aurora", "Aurora ${displayInfo.aurora.prob}% at ${displayInfo.aurora.time}")
+
+            if (displayInfo.aurora.prob > 0) {
+                if (lang == LANG_EN) {
+                    intent.putExtra("aurora", "Aurora ${displayInfo.aurora.prob}% at ${displayInfo.aurora.time}")
+                } else {
+                    intent.putExtra("aurora", "Ziemeļblāzma ${displayInfo.aurora.prob}% plkst. ${displayInfo.aurora.time}")
+                }
             } else {
-                intent.putExtra("aurora", "Ziemeļblāzma ${displayInfo.aurora.prob}% plkst. ${displayInfo.aurora.time}")
+                intent.putExtra("aurora", "")
             }
 
             context.sendBroadcast(intent)
