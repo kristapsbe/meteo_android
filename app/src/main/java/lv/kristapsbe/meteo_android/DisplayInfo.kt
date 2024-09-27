@@ -4,6 +4,11 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -290,6 +295,11 @@ class Warning(
     val description: HashMap<String, String>,
 )
 
+class Aurora(
+    val prob: Int,
+    val time: String
+)
+
 class DisplayInfo() {
     companion object {
         fun updateWidget(context: Context, displayInfo: DisplayInfo, lang: String, isWidgetTransparent: String) {
@@ -320,6 +330,12 @@ class DisplayInfo() {
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
             intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
             intent.putExtra("rain", displayInfo.getWhenRainExpected(context, lang))
+            
+            if (lang == LANG_EN) {
+                intent.putExtra("aurora", "Aurora ${displayInfo.aurora.prob}% at ${displayInfo.aurora.time}")
+            } else {
+                intent.putExtra("aurora", "Ziemeļblāzma ${displayInfo.aurora.prob}% plkst. ${displayInfo.aurora.time}")
+            }
 
             context.sendBroadcast(intent)
         }
@@ -336,6 +352,7 @@ class DisplayInfo() {
     private var lastDownloaded: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
 
     var warnings: List<Warning> = emptyList()
+    var aurora: Aurora = Aurora(0, "")
 
     constructor(cityForecastData: CityForecastData?) : this() {
         if (cityForecastData != null) {
@@ -384,6 +401,11 @@ class DisplayInfo() {
                     )
                 )
             }
+
+            aurora = Aurora(
+                cityForecastData.aurora_probs.prob,
+                "${cityForecastData.aurora_probs.time.takeLast(4).take(2)}:${cityForecastData.aurora_probs.time.takeLast(2)}"
+            )
         }
     }
 

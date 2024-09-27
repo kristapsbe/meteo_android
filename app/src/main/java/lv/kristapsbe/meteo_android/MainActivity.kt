@@ -254,7 +254,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    // TODO: I may be hijacking the ability to exit the app by swiping to the side?
                     if (available.y > 0 && !wasLastScrollNegative) {
                         wasLastScrollNegative = true
                         if (!isLoading.value) {
@@ -301,7 +300,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         Column(
             modifier = Modifier
-                .height(300.dp)
                 .padding(0.dp, 50.dp, 0.dp, 0.dp)
         ) {
             Row(
@@ -377,7 +375,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
             val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
             Row (
-                modifier = Modifier.fillMaxHeight(0.8f),
+                modifier = Modifier
+                    .height(120.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
@@ -390,7 +389,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(0.8f)
-                            .padding(20.dp)
                     )
                 }
                 Column(
@@ -513,6 +511,29 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 .padding(0.dp, 0.dp, 20.dp, 0.dp),
                         )
                     }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .padding(20.dp, 0.dp)
+                    .fillMaxWidth()
+            ) {
+                if (selectedLang.value == LANG_EN) {
+                    Text(
+                        text = "Aurora ${displayInfo.value.aurora.prob}% at ${displayInfo.value.aurora.time}",
+                        textAlign = TextAlign.Center,
+                        color = Color(resources.getColor(R.color.text_color)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                } else {
+                    Text(
+                        text = "Ziemeļblāzma ${displayInfo.value.aurora.prob}% plkst. ${displayInfo.value.aurora.time}",
+                        textAlign = TextAlign.Center,
+                        color = Color(resources.getColor(R.color.text_color)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
                 }
             }
         }

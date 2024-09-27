@@ -35,7 +35,7 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, null, false)
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, null, false, null)
         }
     }
 
@@ -52,6 +52,7 @@ class ForecastWidget : AppWidgetProvider() {
             val warningOrange = intent.getBooleanExtra("warning_orange", false)
             val warningYellow = intent.getBooleanExtra("warning_yellow", false)
             val rain = intent.getStringExtra("rain")
+            val aurora = intent.getStringExtra("aurora")
             val isWidgetTransparent = intent.getBooleanExtra("is_widget_transparent", false)
 
             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -59,7 +60,7 @@ class ForecastWidget : AppWidgetProvider() {
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain, isWidgetTransparent)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain, isWidgetTransparent, aurora)
             }
         }
     }
@@ -84,7 +85,8 @@ internal fun updateAppWidget(
     warningYellow: Boolean,
     icon: Int?,
     rain: String?,
-    isWidgetTransparent: Boolean
+    isWidgetTransparent: Boolean,
+    aurora: String?
 ) {
     // Create an Intent to launch the MainActivity when clicked
     val intent = Intent(context, MainActivity::class.java)
@@ -108,6 +110,7 @@ internal fun updateAppWidget(
         views.setTextViewText(R.id.appwidget_feelslike, feelsLikeText)
     }
     views.setTextViewText(R.id.appwidget_rain, rain)
+    views.setTextViewText(R.id.appwidget_aurora, aurora)
     if (icon != null) {
         views.setImageViewResource(R.id.icon_image, icon)
     }
