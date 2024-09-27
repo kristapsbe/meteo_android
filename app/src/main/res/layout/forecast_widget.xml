@@ -100,24 +100,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/top_widget"
-        android:layout_height="0dp"
-        android:layout_width="match_parent"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/appwidget_aurora"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/appwidget_text"
-            android:gravity="center"
-            android:textColor="@color/text_color"
-            android:textSize="10dp" />
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/bottom_widget"
         android:layout_height="0dp"
         android:layout_width="match_parent"
@@ -127,6 +109,24 @@
 
         <TextView
             android:id="@+id/appwidget_rain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/appwidget_text"
+            android:gravity="center"
+            android:textColor="@color/text_color"
+            android:textSize="10dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/top_widget"
+        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/appwidget_aurora"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:contentDescription="@string/appwidget_text"
