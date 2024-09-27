@@ -525,6 +525,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
                     )
                 } else {
                     Text(
@@ -533,6 +534,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         color = Color(resources.getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
                     )
                 }
             }
