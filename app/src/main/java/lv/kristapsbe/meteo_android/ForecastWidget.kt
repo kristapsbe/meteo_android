@@ -36,7 +36,7 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, null, false, null)
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, null, false, null, false)
         }
     }
 
@@ -55,13 +55,14 @@ class ForecastWidget : AppWidgetProvider() {
             val rain = intent.getStringExtra("rain")
             val aurora = intent.getStringExtra("aurora")
             val isWidgetTransparent = intent.getBooleanExtra("is_widget_transparent", false)
+            val useAltLayout = intent.getBooleanExtra("use_alt_layout", false)
 
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val widget = ComponentName(context, ForecastWidget::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain, isWidgetTransparent, aurora)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain, isWidgetTransparent, aurora, useAltLayout)
             }
         }
     }
@@ -87,7 +88,8 @@ internal fun updateAppWidget(
     icon: Int?,
     rain: String?,
     isWidgetTransparent: Boolean,
-    aurora: String?
+    aurora: String?,
+    useAltLayout: Boolean
 ) {
     // Create an Intent to launch the MainActivity when clicked
     val intent = Intent(context, MainActivity::class.java)
@@ -115,22 +117,35 @@ internal fun updateAppWidget(
     if (icon != null) {
         views.setImageViewResource(R.id.icon_image, icon)
     }
-    if (warningRed) {
+    if (warningYellow) {
         views.setImageViewResource(R.id.red_warning, R.drawable.baseline_warning_24_red)
+        views.setImageViewResource(R.id.red_warning_alt, R.drawable.baseline_warning_24_red)
     } else {
         views.setImageViewResource(R.id.red_warning, 0)
+        views.setImageViewResource(R.id.red_warning_alt, 0)
     }
-    if (warningOrange) {
+    if (warningYellow) {
         views.setImageViewResource(R.id.orange_warning, R.drawable.baseline_warning_orange_24)
+        views.setImageViewResource(R.id.orange_warning_alt, R.drawable.baseline_warning_orange_24)
     } else {
         views.setImageViewResource(R.id.orange_warning, 0)
+        views.setImageViewResource(R.id.orange_warning_alt, 0)
     }
     if (warningYellow) {
         views.setImageViewResource(R.id.yellow_warning, R.drawable.baseline_warning_yellow_24)
+        views.setImageViewResource(R.id.yellow_warning_alt, R.drawable.baseline_warning_yellow_24)
     } else {
         views.setImageViewResource(R.id.yellow_warning, 0)
+        views.setImageViewResource(R.id.yellow_warning_alt, 0)
     }
 
+    if (useAltLayout) {
+        views.setViewVisibility(R.id.main_warnings, View.GONE)
+        views.setViewVisibility(R.id.alt_warnings, View.VISIBLE)
+    } else {
+        views.setViewVisibility(R.id.main_warnings, View.VISIBLE)
+        views.setViewVisibility(R.id.alt_warnings, View.GONE)
+    }
     val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
     val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
 

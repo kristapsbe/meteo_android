@@ -18,6 +18,7 @@ import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStri
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
+import lv.kristapsbe.meteo_android.MainActivity.Companion.USE_ALT_LAYOUT
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.WeatherPictogram.Companion.rainPictograms
 import kotlin.math.roundToInt
@@ -306,6 +307,7 @@ class DisplayInfo() {
             val appWidgetManager = AppWidgetManager.getInstance(context)
 
             val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
+            val useAltLayout = loadStringFromStorage(context, USE_ALT_LAYOUT)
 
             // Retrieve the widget IDs
             val widget = ComponentName(context, ForecastWidget::class.java)
@@ -330,6 +332,7 @@ class DisplayInfo() {
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
             intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
             intent.putExtra("rain", displayInfo.getWhenRainExpected(context, lang))
+            intent.putExtra("use_alt_layout", (useAltLayout != ""))
 
             if (displayInfo.aurora.prob > 0) {
                 if (lang == LANG_EN) {

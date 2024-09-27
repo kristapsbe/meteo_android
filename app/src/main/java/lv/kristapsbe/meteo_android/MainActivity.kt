@@ -759,10 +759,19 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             ) {
                 if (showFullHourly.value) {
                     Row {
-                        Text(
-                            "",
-                            fontSize = 10.sp,
-                        )
+                        if (useAltLayout.value == "") {
+                            Text(
+                                "",
+                                fontSize = 10.sp,
+                            )
+                        } else {
+                            Text(
+                                "",
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .padding(0.dp, 0.dp, 0.dp, 5.dp)
+                            )
+                        }
                     }
                     Row(
                         modifier = Modifier
@@ -831,13 +840,23 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 .width(90.dp)
                                 .padding(10.dp, 0.dp, 10.dp, 0.dp)
                         ) {
-                            Text(
-                                "${h.time.take(2)}:${h.time.takeLast(2)}",
-                                fontSize = 10.sp,
-                                color = Color(resources.getColor(R.color.text_color)),
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center,
-                            )
+                            if (useAltLayout.value == "") {
+                                Text(
+                                    "${h.time.take(2)}:${h.time.takeLast(2)}",
+                                    fontSize = 10.sp,
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                            } else {
+                                Text(
+                                    "${h.time.take(2)}:${h.time.takeLast(2)}",
+                                    fontSize = 20.sp,
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
                             Image(
                                 painterResource(h.pictogram.getPictogram()),
                                 contentDescription = "",
