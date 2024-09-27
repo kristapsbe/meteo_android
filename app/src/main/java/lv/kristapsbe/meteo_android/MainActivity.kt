@@ -100,6 +100,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
         const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
+        const val SINGLE_FORECAST_NO_DL_NAME = "single_forecast_refresh_nodl"
 
         const val LANG_EN = "en"
         const val LANG_LV = "lv"

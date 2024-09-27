@@ -45,18 +45,20 @@ class CityForecastDataDownloader {
         // local ip 10.0.2.2
         private const val BASE_URL = "https://meteo.kristapsbe.lv/api/v1/forecast/cities"
 
-        private fun downloadData(ctx: Context, urlString: String): CityForecastData? {
+        private fun downloadData(ctx: Context, urlString: String, doDL: Boolean): CityForecastData? {
             var cityForecast: CityForecastData? = null
-            try {
-                val response = URL(urlString).readText()
-                cityForecast = Json.decodeFromString<CityForecastData>(response)
-                if (cityForecast.city != "") {
-                    ctx.openFileOutput(RESPONSE_FILE, MODE_PRIVATE).use { fos ->
-                        fos.write(response.toByteArray())
+            if (doDL) {
+                try {
+                    val response = URL(urlString).readText()
+                    cityForecast = Json.decodeFromString<CityForecastData>(response)
+                    if (cityForecast.city != "") {
+                        ctx.openFileOutput(RESPONSE_FILE, MODE_PRIVATE).use { fos ->
+                            fos.write(response.toByteArray())
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e("ERROR", "Failed to download forecast data: $e")
                 }
-            } catch (e: Exception) {
-                Log.e("ERROR", "Failed to download forecast data: $e")
             }
 
             if (cityForecast == null || cityForecast.city == "") {
@@ -71,12 +73,12 @@ class CityForecastDataDownloader {
             return cityForecast
         }
 
-        fun downloadDataLatLon(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon&add_params=false&add_aurora=true")
+        fun downloadDataLatLon(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327, doDL: Boolean = true): CityForecastData? {
+            return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon&add_params=false&add_aurora=true", doDL)
         }
 
-        fun downloadDataCityName(ctx: Context, locationName: String = "Riga"): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL/name?city_name=$locationName&add_params=false&add_aurora=true")
+        fun downloadDataCityName(ctx: Context, locationName: String = "Riga", doDL: Boolean = true): CityForecastData? {
+            return downloadData(ctx, "$BASE_URL/name?city_name=$locationName&add_params=false&add_aurora=true", doDL)
         }
 
         fun loadStringFromStorage(ctx: Context, fileName: String): String {
