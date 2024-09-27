@@ -117,14 +117,14 @@ internal fun updateAppWidget(
     if (icon != null) {
         views.setImageViewResource(R.id.icon_image, icon)
     }
-    if (warningYellow) {
+    if (warningRed) {
         views.setImageViewResource(R.id.red_warning, R.drawable.baseline_warning_24_red)
         views.setImageViewResource(R.id.red_warning_alt, R.drawable.baseline_warning_24_red)
     } else {
         views.setImageViewResource(R.id.red_warning, 0)
         views.setImageViewResource(R.id.red_warning_alt, 0)
     }
-    if (warningYellow) {
+    if (warningOrange) {
         views.setImageViewResource(R.id.orange_warning, R.drawable.baseline_warning_orange_24)
         views.setImageViewResource(R.id.orange_warning_alt, R.drawable.baseline_warning_orange_24)
     } else {
