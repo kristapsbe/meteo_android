@@ -161,6 +161,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val lastVersionCode = prefs.getInt("lastVersionCode", -1)
         isWidgetTransparent.value = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
         useAltLayout.value = loadStringFromStorage(applicationContext, USE_ALT_LAYOUT)
+        doAlwaysShowAurora.value = loadStringFromStorage(applicationContext, DO_ALWAYS_SHOW_AURORA)
 
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
@@ -487,6 +488,66 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                    ) {
+                        if (selectedLang.value == LANG_EN) {
+                            Text(
+                                text = "Always display aurora forecast",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        } else {
+                            Text(
+                                text = "Vienmēr rādīt ziemeļblāzmas prognozi",
+                                textAlign = TextAlign.Start,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (doAlwaysShowAurora.value != "") {
+                                    doAlwaysShowAurora.value = ""
+                                } else {
+                                    doAlwaysShowAurora.value = "true"
+                                }
+                                applicationContext
+                                    .openFileOutput(DO_ALWAYS_SHOW_AURORA, MODE_PRIVATE)
+                                    .use { fos ->
+                                        fos.write(doAlwaysShowAurora.value.toByteArray())
+                                    }
+                                DisplayInfo.updateWidget(
+                                    applicationContext,
+                                    displayInfo.value
+                                )
+                            },
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (doAlwaysShowAurora.value == "") {
+                            Image(
+                                painterResource(R.drawable.baseline_check_box_outline_blank_24),
+                                contentDescription = "",
+                                contentScale = ContentScale.Fit,
+                            )
+                        } else {
+                            Image(
+                                painterResource(R.drawable.baseline_check_box_24),
+                                contentDescription = "",
+                                contentScale = ContentScale.Fit,
+                            )
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(0.dp, 0.dp, 0.dp, 20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -707,7 +768,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                 }
             }
-            if (displayInfo.value.aurora.prob > 0) {
+            if (doAlwaysShowAurora.value != "" || displayInfo.value.aurora.prob > 0) {
                 Row(
                     modifier = Modifier
                         .padding(20.dp, 0.dp)

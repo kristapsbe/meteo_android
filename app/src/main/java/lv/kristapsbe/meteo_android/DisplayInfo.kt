@@ -10,6 +10,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.MainActivity.Companion.DO_ALWAYS_SHOW_AURORA
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
@@ -307,6 +308,7 @@ class DisplayInfo() {
             val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
             val useAltLayout = loadStringFromStorage(context, USE_ALT_LAYOUT)
             val isWidgetTransparent = loadStringFromStorage(context, WIDGET_TRANSPARENT)
+            val doAlwaysShowAurora = loadStringFromStorage(context, DO_ALWAYS_SHOW_AURORA)
 
             // Retrieve the widget IDs
             val widget = ComponentName(context, ForecastWidget::class.java)
@@ -333,7 +335,7 @@ class DisplayInfo() {
             intent.putExtra("rain", displayInfo.getWhenRainExpected(context, lang))
             intent.putExtra("use_alt_layout", (useAltLayout != ""))
 
-            if (displayInfo.aurora.prob > 0) {
+            if (doAlwaysShowAurora != "" || displayInfo.aurora.prob > 0) {
                 if (lang == LANG_EN) {
                     intent.putExtra("aurora", "Aurora ${displayInfo.aurora.prob}% at ${displayInfo.aurora.time}")
                 } else {
