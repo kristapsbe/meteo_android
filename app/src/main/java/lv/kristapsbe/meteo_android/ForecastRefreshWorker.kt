@@ -21,7 +21,6 @@ import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
-import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_TRANSPARENT
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -73,7 +72,6 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
         runBlocking {
             val customLocationName = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
-            val selectedLang = loadStringFromStorage(applicationContext, SELECTED_LANG)
             val cityForecast: CityForecastData?
             if (customLocationName != "") {
                 cityForecast = CityForecastDataDownloader.downloadDataCityName(applicationContext, customLocationName)
@@ -88,11 +86,12 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             callback?.onWorkerResult(cityForecast)
 
             if (cityForecast != null) {
+                val selectedLang = loadStringFromStorage(applicationContext, SELECTED_LANG)
+
                 val displayInfo = DisplayInfo(cityForecast)
                 DisplayInfo.updateWidget(
                     applicationContext,
-                    displayInfo,
-                    selectedLang
+                    displayInfo
                 )
                 var warnings: HashSet<Int> = hashSetOf()
                 val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)
@@ -103,7 +102,14 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 for (w in displayInfo.warnings) {
                     if (!warnings.contains(w.id)) {
                         warnings.add(w.id) // TODO: only add if allowed to push notifs
-                        showNotification(w.id, w.intensity, w.type[selectedLang] ?: "", w.description[selectedLang] ?: "")
+                        showNotification(
+                            MainActivity.WEATHER_WARNINGS_CHANNEL_ID,
+                            w.id,
+                            w.type[selectedLang] ?: "",
+                            w.description[selectedLang] ?: "",
+                            R.drawable.baseline_warning_24,
+                            WeatherPictogram.warningIconMapping[w.intensity] ?: R.drawable.baseline_warning_yellow_24
+                        )
                     }
                 }
                 applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
@@ -114,7 +120,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         return Result.success()
     }
 
-    private fun showNotification(id: Int, intensity: String, type: String, description: String) {
+    private fun showNotification(notifChannel: String, id: Int, title: String, description: String, smallIcon: Int, largeIcon: Int) {
         val intent = Intent(applicationContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -124,12 +130,10 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
-        val builder = NotificationCompat.Builder(applicationContext,
-            MainActivity.WEATHER_WARNINGS_CHANNEL_ID
-        )
-            .setSmallIcon(R.drawable.baseline_warning_24)
-            .setLargeIcon(Icon.createWithResource(applicationContext, WeatherPictogram.warningIconMapping[intensity] ?: R.drawable.baseline_warning_yellow_24))
-            .setContentTitle(type)
+        val builder = NotificationCompat.Builder(applicationContext, notifChannel)
+            .setSmallIcon(smallIcon)
+            .setLargeIcon(Icon.createWithResource(applicationContext, largeIcon))
+            .setContentTitle(title)
             .setContentText(description)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)

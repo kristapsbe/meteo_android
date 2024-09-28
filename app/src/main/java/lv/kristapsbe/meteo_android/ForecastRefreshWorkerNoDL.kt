@@ -4,9 +4,6 @@ import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.runBlocking
-import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
-import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
-import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_TRANSPARENT
 
 
 class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
@@ -15,8 +12,6 @@ class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters
         val callback = app.workerCallback
 
         runBlocking {
-            val selectedLang = loadStringFromStorage(applicationContext, SELECTED_LANG)
-
             val cityForecast = CityForecastDataDownloader.downloadDataLatLon(applicationContext, doDL = false)
 
             callback?.onWorkerResult(cityForecast)
@@ -25,8 +20,7 @@ class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters
                 val displayInfo = DisplayInfo(cityForecast)
                 DisplayInfo.updateWidget(
                     applicationContext,
-                    displayInfo,
-                    selectedLang
+                    displayInfo
                 )
             }
         }

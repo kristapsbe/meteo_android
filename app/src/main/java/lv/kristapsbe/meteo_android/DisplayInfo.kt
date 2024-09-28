@@ -4,11 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Text
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -17,6 +12,7 @@ import kotlinx.datetime.toLocalDateTime
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
+import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.USE_ALT_LAYOUT
 import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_TRANSPARENT
@@ -304,9 +300,10 @@ class Aurora(
 
 class DisplayInfo() {
     companion object {
-        fun updateWidget(context: Context, displayInfo: DisplayInfo, lang: String) {
+        fun updateWidget(context: Context, displayInfo: DisplayInfo) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
 
+            val lang = loadStringFromStorage(context, SELECTED_LANG)
             val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
             val useAltLayout = loadStringFromStorage(context, USE_ALT_LAYOUT)
             val isWidgetTransparent = loadStringFromStorage(context, WIDGET_TRANSPARENT)
@@ -430,9 +427,7 @@ class DisplayInfo() {
     }
 
     private fun convertTimestampToLocalDateTime(timestampMillis: Long): LocalDateTime {
-        // Create an Instant from the timestamp (milliseconds)
         val instant = Instant.fromEpochMilliseconds(timestampMillis)
-        // Convert to LocalDateTime using the system's default time zone
         val timeZone = TimeZone.currentSystemDefault()
         val localDateTime = instant.toLocalDateTime(timeZone)
 

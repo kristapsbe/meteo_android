@@ -354,8 +354,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     }
                                 DisplayInfo.updateWidget(
                                     applicationContext,
-                                    displayInfo.value,
-                                    selectedLang.value
+                                    displayInfo.value
                                 )
                             }
                     ) {
@@ -408,8 +407,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     }
                                 DisplayInfo.updateWidget(
                                     applicationContext,
-                                    displayInfo.value,
-                                    selectedLang.value
+                                    displayInfo.value
                                 )
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -465,8 +463,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     }
                                 DisplayInfo.updateWidget(
                                     applicationContext,
-                                    displayInfo.value,
-                                    selectedLang.value
+                                    displayInfo.value
                                 )
                             }
                     ) {
@@ -519,8 +516,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     }
                                 DisplayInfo.updateWidget(
                                     applicationContext,
-                                    displayInfo.value,
-                                    selectedLang.value
+                                    displayInfo.value
                                 )
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
