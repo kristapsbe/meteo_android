@@ -105,6 +105,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val USE_ALT_LAYOUT = "use_alt_layout"
         const val HAS_AURORA_NOTIFIED = "aurora_notified"
         const val DO_ALWAYS_SHOW_AURORA = "aurora_always_display"
+        const val AURORA_NOTIF_ID = "aurora_notif_id"
 
         const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
         const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
@@ -254,7 +255,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 )
             )
         }
-        createNotificationChannel(applicationContext)
+        createNotificationChannel(applicationContext, WEATHER_WARNINGS_CHANNEL_ID, WEATHER_WARNINGS_CHANNEL_NAME, WEATHER_WARNINGS_CHANNEL_DESCRIPTION)
+        createNotificationChannel(applicationContext, AURORA_NOTIFICATION_CHANNEL_ID, AURORA_NOTIFICATION_CHANNEL_NAME, AURORA_NOTIFICATION_CHANNEL_DESCRIPTION)
 
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.MINUTES).build()
         val workManager = WorkManager.getInstance(this)
@@ -768,7 +770,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                 }
             }
-            if (doAlwaysShowAurora.value != "" || displayInfo.value.aurora.prob > 0) {
+            if (doAlwaysShowAurora.value != "" || displayInfo.value.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
                 Row(
                     modifier = Modifier
                         .padding(20.dp, 0.dp)
@@ -1305,9 +1307,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         }
     }
 
-    private fun createNotificationChannel(context: Context) {
-        val channel = NotificationChannel(WEATHER_WARNINGS_CHANNEL_ID, WEATHER_WARNINGS_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT).apply {
-            description = WEATHER_WARNINGS_CHANNEL_DESCRIPTION
+    private fun createNotificationChannel(context: Context, channelId: String, channelName: String, channelDescription: String) {
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT).apply {
+            description = channelDescription
         }
         // Register the channel with the system
         val notificationManager: NotificationManager =

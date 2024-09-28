@@ -10,6 +10,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.DO_ALWAYS_SHOW_AURORA
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
@@ -335,7 +336,7 @@ class DisplayInfo() {
             intent.putExtra("rain", displayInfo.getWhenRainExpected(context, lang))
             intent.putExtra("use_alt_layout", (useAltLayout != ""))
 
-            if (doAlwaysShowAurora != "" || displayInfo.aurora.prob > 0) {
+            if (doAlwaysShowAurora != "" || displayInfo.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
                 if (lang == LANG_EN) {
                     intent.putExtra("aurora", "Aurora ${displayInfo.aurora.prob}% at ${displayInfo.aurora.time}")
                 } else {

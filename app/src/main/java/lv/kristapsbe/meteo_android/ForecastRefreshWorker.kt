@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -19,6 +20,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
+import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIF_ID
+import lv.kristapsbe.meteo_android.MainActivity.Companion.HAS_AURORA_NOTIFIED
+import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
 import kotlin.coroutines.resume
@@ -110,6 +115,43 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                             R.drawable.baseline_warning_24,
                             WeatherPictogram.warningIconMapping[w.intensity] ?: R.drawable.baseline_warning_yellow_24
                         )
+                    }
+                }
+                val hasAuroraNotificationBeenDisplayed = (loadStringFromStorage(applicationContext, HAS_AURORA_NOTIFIED) != "")
+                if (hasAuroraNotificationBeenDisplayed) {
+                    if (displayInfo.aurora.prob < AURORA_NOTIFICATION_THRESHOLD) {
+                        applicationContext.openFileOutput(HAS_AURORA_NOTIFIED, MODE_PRIVATE).use { fos ->
+                            fos.write("".toByteArray())
+                        }
+                    }
+                } else if (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
+                    applicationContext.openFileOutput(HAS_AURORA_NOTIFIED, MODE_PRIVATE).use { fos ->
+                        fos.write("true".toByteArray())
+                    }
+                    var auroraNotifId = 1
+                    try {
+                        auroraNotifId = loadStringFromStorage(applicationContext, AURORA_NOTIF_ID).toInt()
+                    } catch (e: Exception) {
+                        Log.d("DEBUG", "Failed to parse aurora notification id: $e")
+                    }
+                    var auroraNotifTitle = "Aurora"
+                    if (selectedLang != LANG_EN) {
+                        auroraNotifTitle = "Ziemeļblāzma"
+                    }
+                    var auroraNotifDescription = "Aurora probability has increased to ${displayInfo.aurora.prob}%."
+                    if (selectedLang != LANG_EN) {
+                        auroraNotifDescription = "Ziemeļblāzmas varbūtība ir palielinājusies līdz ${displayInfo.aurora.prob}%."
+                    }
+                    showNotification(
+                        MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
+                        auroraNotifId,
+                        auroraNotifTitle,
+                        auroraNotifDescription,
+                        R.drawable.baseline_star_border_24,
+                        R.drawable.baseline_star_border_green_24
+                    )
+                    applicationContext.openFileOutput(AURORA_NOTIF_ID, MODE_PRIVATE).use { fos ->
+                        fos.write((auroraNotifId+1).toString().toByteArray())
                     }
                 }
                 applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
