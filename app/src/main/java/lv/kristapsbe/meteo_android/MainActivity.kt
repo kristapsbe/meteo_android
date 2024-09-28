@@ -91,6 +91,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val WEATHER_WARNINGS_CHANNEL_NAME = "Severe weather warnings"
         const val WEATHER_WARNINGS_CHANNEL_DESCRIPTION = "Channel for receiving notifications about severe weather warnings"
 
+        const val AURORA_NOTIFICATION_CHANNEL_ID = "AURORA_NOTIFICATION"
+        const val AURORA_NOTIFICATION_CHANNEL_NAME = "Aurora notifications"
+        const val AURORA_NOTIFICATION_CHANNEL_DESCRIPTION = "Channel for receiving notifications about increases in the probability of observing an aurora"
+        const val AURORA_NOTIFICATION_THRESHOLD = 1 // notify when the probability of an aurora is greater or equal than this
+
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
         const val LAST_COORDINATES_FILE = "last_coordinates.json"
         const val LOCKED_LOCATION_FILE = "locked_location"
@@ -98,6 +103,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val SELECTED_LANG = "selected_lang"
         const val WIDGET_TRANSPARENT = "widget_transparent"
         const val USE_ALT_LAYOUT = "use_alt_layout"
+        const val HAS_AURORA_NOTIFIED = "aurora_notified"
+        const val DO_ALWAYS_SHOW_AURORA = "aurora_always_display"
 
         const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
         const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
@@ -106,7 +113,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val LANG_EN = "en"
         const val LANG_LV = "lv"
 
-        val selecteTempFieldMapping = hashMapOf(
+        val selectedTempFieldMapping = hashMapOf(
             "C" to "C",
             "" to "C", // default
             "K" to "K",
@@ -145,6 +152,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var isWidgetTransparent = mutableStateOf("")
     private var doDisplaySettings = mutableStateOf(false)
     private var useAltLayout = mutableStateOf("")
+    private var doAlwaysShowAurora = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -470,7 +478,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth(),
-                            text = selecteTempFieldMapping[selectedTempType.value] ?: "",
+                            text = selectedTempFieldMapping[selectedTempType.value] ?: "",
                             color = Color(resources.getColor(R.color.text_color)),
                             textAlign = TextAlign.Center
                         )
