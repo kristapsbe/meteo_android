@@ -24,10 +24,10 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_TH
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIF_ID
 import lv.kristapsbe.meteo_android.MainActivity.Companion.HAS_AURORA_NOTIFIED
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
+import lv.kristapsbe.meteo_android.MainActivity.Companion.LAST_COORDINATES_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 
 class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
@@ -48,11 +48,11 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     .addOnSuccessListener { location ->
                         continuation.resume(location)
                     }
-                    .addOnFailureListener { exception ->
-                        continuation.resumeWithException(exception)
+                    .addOnFailureListener { _ ->
+                        continuation.resume(null)
                     }
                     .addOnCanceledListener {
-                        continuation.cancel()
+                        continuation.resume(null)
                     }
             } else {
                 continuation.resume(null)
@@ -61,13 +61,12 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         if (lastLocation != null) {
             return setOf(lastLocation.latitude, lastLocation.longitude)
         } else {
-            for (f in applicationContext.fileList()) {
-                if (f.equals(MainActivity.LAST_COORDINATES_FILE)) {
-                    val content = applicationContext.openFileInput(MainActivity.LAST_COORDINATES_FILE).bufferedReader().use { it.readText() }
-                    return Json.decodeFromString<Set<Double>>(content)
-                }
+            val coordContent = loadStringFromStorage(applicationContext, LAST_COORDINATES_FILE)
+            return if (coordContent != "") {
+                Json.decodeFromString<Set<Double>>(coordContent)
+            } else {
+                setOf(56.9730, 24.1327)
             }
-            return setOf(56.9730, 24.1327) // Don't have anything to go off of - default to Riga
         }
     }
 
@@ -83,7 +82,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             } else {
                 val location = getLastLocation(applicationContext)
                 cityForecast = CityForecastDataDownloader.downloadDataLatLon(applicationContext, location.elementAt(0), location.elementAt(1))
-                applicationContext.openFileOutput(MainActivity.LAST_COORDINATES_FILE, MODE_PRIVATE).use { fos ->
+                applicationContext.openFileOutput(LAST_COORDINATES_FILE, MODE_PRIVATE).use { fos ->
                     fos.write(location.toString().toByteArray())
                 }
             }

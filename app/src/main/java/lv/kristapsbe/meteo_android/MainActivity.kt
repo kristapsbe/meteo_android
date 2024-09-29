@@ -226,7 +226,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
-            when { // TODO: do I need to enqueue in both?
+            when { // TODO: do I need to enqueue in all?
                 permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
                     val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                     WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
@@ -235,7 +235,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                     WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                 } else -> {
-                    // No location access granted.
+                    val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                    WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                 }
             }
         }
@@ -301,6 +302,70 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             ShowWarningInfo()
             ShowDailyInfo()
             ShowMetadataInfo()
+        }
+    }
+
+    @Composable
+    fun settingsEntry() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 0.dp, 0.dp, 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+            ) {
+                if (selectedLang.value == LANG_EN) {
+                    Text(
+                        text = "Show widget background color",
+                        textAlign = TextAlign.Start,
+                        color = Color(resources.getColor(R.color.text_color)),
+                    )
+                } else {
+                    Text(
+                        text = "Rādīt logrīka fona krāsu",
+                        textAlign = TextAlign.Start,
+                        color = Color(resources.getColor(R.color.text_color)),
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (isWidgetTransparent.value != "") {
+                            isWidgetTransparent.value = ""
+                        } else {
+                            isWidgetTransparent.value = "true"
+                        }
+                        applicationContext
+                            .openFileOutput(WIDGET_TRANSPARENT, MODE_PRIVATE)
+                            .use { fos ->
+                                fos.write(isWidgetTransparent.value.toByteArray())
+                            }
+                        DisplayInfo.updateWidget(
+                            applicationContext,
+                            displayInfo.value
+                        )
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (isWidgetTransparent.value == "") {
+                    Image(
+                        painterResource(R.drawable.baseline_check_box_24),
+                        contentDescription = "",
+                        contentScale = ContentScale.Fit,
+                    )
+                } else {
+                    Image(
+                        painterResource(R.drawable.baseline_check_box_outline_blank_24),
+                        contentDescription = "",
+                        contentScale = ContentScale.Fit,
+                    )
+                }
+            }
         }
     }
 
@@ -550,7 +615,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(0.dp, 0.dp, 0.dp, 20.dp),
+                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
@@ -610,7 +675,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
                 HorizontalDivider(
                     modifier = Modifier
-                        .padding(0.dp, 0.dp, 0.dp, 20.dp),
+                        .padding(0.dp, 10.dp, 0.dp, 20.dp),
                     color = Color(resources.getColor(R.color.light_gray)),
                     thickness = 1.dp
                 )
