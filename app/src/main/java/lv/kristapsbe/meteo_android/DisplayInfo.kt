@@ -1,5 +1,6 @@
 package lv.kristapsbe.meteo_android
 
+import android.app.Activity.MODE_PRIVATE
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -198,6 +199,8 @@ class DisplayInfo() {
     companion object {
         fun updateWidget(context: Context, displayInfo: DisplayInfo) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
+
+            val prefs = context.getSharedPreferences(PrefUtils.APP_PREFS, MODE_PRIVATE)
 
             val lang = loadStringFromStorage(context, SELECTED_LANG)
             val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)

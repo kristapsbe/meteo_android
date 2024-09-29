@@ -131,8 +131,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         fun convertFromCtoDisplayTemp(tempC: Int, toConvert: String): String {
             return when (toConvert) {
-                "F" -> "${((9.0f/5.0f)*tempC.toFloat()+32.0f).roundToInt()}°" // TODO: add F
-                "K" -> "${(tempC.toFloat()+273.15f).roundToInt()}°" // TODO: add K
+                "F" -> "${((9.0f/5.0f)*tempC.toFloat()+32.0f).roundToInt()}°"
+                "K" -> "${(tempC.toFloat()+273.15f).roundToInt()}°"
                 else -> "$tempC°"
             }
         }
@@ -158,7 +158,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val prefs = getSharedPreferences(PrefUtils.APP_PREFS, MODE_PRIVATE)
+
         val lastVersionCode = prefs.getInt("lastVersionCode", -1)
         isWidgetTransparent.value = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
         useAltLayout.value = loadStringFromStorage(applicationContext, USE_ALT_LAYOUT)

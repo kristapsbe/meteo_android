@@ -75,14 +75,16 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val callback = app.workerCallback
 
         runBlocking {
-            val customLocationName = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
+            val prefs = app.getSharedPreferences(PrefUtils.APP_PREFS, MODE_PRIVATE)
+
+            val customLocationName = loadStringFromStorage(app, LOCKED_LOCATION_FILE)
             val cityForecast: CityForecastData?
             if (customLocationName != "") {
-                cityForecast = CityForecastDataDownloader.downloadDataCityName(applicationContext, customLocationName)
+                cityForecast = CityForecastDataDownloader.downloadDataCityName(app, customLocationName)
             } else {
-                val location = getLastLocation(applicationContext)
-                cityForecast = CityForecastDataDownloader.downloadDataLatLon(applicationContext, location.elementAt(0), location.elementAt(1))
-                applicationContext.openFileOutput(LAST_COORDINATES_FILE, MODE_PRIVATE).use { fos ->
+                val location = getLastLocation(app)
+                cityForecast = CityForecastDataDownloader.downloadDataLatLon(app, location.elementAt(0), location.elementAt(1))
+                app.openFileOutput(LAST_COORDINATES_FILE, MODE_PRIVATE).use { fos ->
                     fos.write(location.toString().toByteArray())
                 }
             }
