@@ -216,18 +216,14 @@ class DisplayInfo() {
 
             intent.putExtra("widget_text", convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp))
             intent.putExtra("widget_location", displayInfo.city)
-            if (lang == LANG_EN) {
-                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
-            } else {
-                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
-            }
+            intent.putExtra("widget_feelslike", "${LangStrings.getTranslationString(lang, Translations.FEELS_LIKE)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
 
             intent.putExtra("is_widget_transparent", (isWidgetTransparent != ""))
             intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
             intent.putExtra("warning_red", displayInfo.warnings.any { it.intensity == "Red" })
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
             intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
-            intent.putExtra("rain", displayInfo.getWhenRainExpected(context, lang))
+            intent.putExtra("rain", displayInfo.getWhenRainExpected(lang))
             intent.putExtra("use_alt_layout", (useAltLayout != ""))
 
             if (doAlwaysShowAurora != "" || displayInfo.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
@@ -344,22 +340,14 @@ class DisplayInfo() {
         return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
     }
 
-    fun getWhenRainExpected(context: Context, lang: String): String {
+    fun getWhenRainExpected(lang: String): String {
         val hForecasts = getHourlyForecasts()
         val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
         if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
             return if (hourlyRain[0].date.dayOfMonth == getTodayForecast().date.dayOfMonth) {
-                if (lang == LANG_EN) {
-                    "${context.getString(R.string.rain_expected_today_en)} ${hourlyRain[0].date.hour}:00"
-                } else {
-                    "${context.getString(R.string.rain_expected_today_lv)} ${hourlyRain[0].date.hour}:00"
-                }
+                "${LangStrings.getTranslationString(lang, Translations.RAIN_EXPECTED_TODAY)} ${hourlyRain[0].date.hour}:00"
             } else {
-                if (lang == LANG_EN) {
-                    "${context.getString(R.string.rain_expected_tomorrow_en)} ${hourlyRain[0].date.hour}:00"
-                } else {
-                    "${context.getString(R.string.rain_expected_tomorrow_lv)} ${hourlyRain[0].date.hour}:00"
-                }
+                "${LangStrings.getTranslationString(lang, Translations.RAIN_EXPECTED_TOMORROW)} ${hourlyRain[0].date.hour}:00"
             }
         }
         return ""

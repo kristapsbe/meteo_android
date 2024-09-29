@@ -811,28 +811,15 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (selectedLang.value == LANG_EN) {
-                        Text(
-                            text = "${getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(0.dp, 0.dp, 20.dp, 0.dp),
-                        )
-                    } else {
-
-                        Text(
-                            text = "${getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(0.dp, 0.dp, 20.dp, 0.dp),
-                        )
-                    }
+                    Text(
+                        text = "${LangStrings.getTranslationString(selectedLang.value, Translations.FEELS_LIKE)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color(resources.getColor(R.color.text_color)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp, 0.dp, 20.dp, 0.dp),
+                    )
                 }
             }
             if (doAlwaysShowAurora.value != "" || displayInfo.value.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
@@ -1330,42 +1317,22 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row {
-                        if (selectedLang.value == LANG_EN) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                fontSize = 8.sp,
-                                text = "${getString(R.string.forecast_issued_en)} ${displayInfo.value.getLastUpdated()}",
-                                color = Color(resources.getColor(R.color.text_color)),
-                                textAlign = TextAlign.Right
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                fontSize = 8.sp,
-                                text = "${getString(R.string.forecast_issued_lv)} ${displayInfo.value.getLastUpdated()}",
-                                color = Color(resources.getColor(R.color.text_color)),
-                                textAlign = TextAlign.Right
-                            )
-                        }
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 8.sp,
+                            text = "${LangStrings.getTranslationString(selectedLang.value, Translations.FORECAST_ISSUED)} ${displayInfo.value.getLastUpdated()}",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            textAlign = TextAlign.Right
+                        )
                     }
                     Row {
-                        if (selectedLang.value == LANG_EN) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                fontSize = 8.sp,
-                                text = "${getString(R.string.forecast_downloaded_en)} ${displayInfo.value.getLastDownloaded()}",
-                                color = Color(resources.getColor(R.color.text_color)),
-                                textAlign = TextAlign.Right
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                fontSize = 8.sp,
-                                text = "${getString(R.string.forecast_downloaded_lv)} ${displayInfo.value.getLastDownloaded()}",
-                                color = Color(resources.getColor(R.color.text_color)),
-                                textAlign = TextAlign.Right
-                            )
-                        }
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 8.sp,
+                            text = "${LangStrings.getTranslationString(selectedLang.value, Translations.FORECAST_DOWNLOADED)} ${displayInfo.value.getLastDownloaded()}",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            textAlign = TextAlign.Right
+                        )
                     }
                 }
             }

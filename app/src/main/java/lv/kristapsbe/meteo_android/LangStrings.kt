@@ -141,5 +141,9 @@ class LangStrings {
                 Translations.FORECAST_DOWNLOADED to "prognoze lejupielādēta"
             )
         )
+
+        fun getTranslationString(lang: String, key: Translations): String {
+            return translationStrings[lang]?.get(key) ?: ""
+        }
     }
 }

@@ -4,16 +4,4 @@
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">This is an app widget description</string>
     <string name="weather_icon">weather icon</string>
-
-    <string name="rain_expected_today_en">Rain expected today at</string>
-    <string name="rain_expected_tomorrow_en">Rain expected tomorrow at</string>
-    <string name="feels_like_en">Feels like</string>
-    <string name="forecast_issued_en">forecast issued at</string>
-    <string name="forecast_downloaded_en">forecast downloaded at</string>
-
-    <string name="rain_expected_today_lv">Lietus gaidāms šodien plkst.</string>
-    <string name="rain_expected_tomorrow_lv">Lietus gaidāms rīt plkst.</string>
-    <string name="feels_like_lv">Jūtas kā</string>
-    <string name="forecast_issued_lv">prognoze atjaunināta</string>
-    <string name="forecast_downloaded_lv">prognoze lejupielādēta</string>
 </resources>
