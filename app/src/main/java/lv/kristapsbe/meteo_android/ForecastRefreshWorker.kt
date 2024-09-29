@@ -23,7 +23,6 @@ import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStri
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIF_ID
 import lv.kristapsbe.meteo_android.MainActivity.Companion.HAS_AURORA_NOTIFIED
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LAST_COORDINATES_FILE
 import kotlin.coroutines.resume
 
@@ -129,19 +128,11 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     } catch (e: Exception) {
                         Log.d("DEBUG", "Failed to parse aurora notification id: $e")
                     }
-                    var auroraNotifTitle = "Aurora"
-                    if (selectedLang != LANG_EN) {
-                        auroraNotifTitle = "Ziemeļblāzma"
-                    }
-                    var auroraNotifDescription = "Aurora probability has increased to ${displayInfo.aurora.prob}%."
-                    if (selectedLang != LANG_EN) {
-                        auroraNotifDescription = "Ziemeļblāzmas varbūtība ir palielinājusies līdz ${displayInfo.aurora.prob}%."
-                    }
                     showNotification(
                         MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
                         auroraNotifId,
-                        auroraNotifTitle,
-                        auroraNotifDescription,
+                        LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_TITLE),
+                        "${LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_DESCRIPTION)} ${displayInfo.aurora.prob}%.",
                         R.drawable.baseline_star_border_24,
                         R.drawable.baseline_star_border_green_24
                     )
