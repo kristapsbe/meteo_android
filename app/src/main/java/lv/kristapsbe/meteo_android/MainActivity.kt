@@ -158,9 +158,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences(PrefUtils.APP_PREFS, MODE_PRIVATE)
+        val prefs = AppPreferences(applicationContext)
 
-        val lastVersionCode = prefs.getInt("lastVersionCode", -1)
+        val lastVersionCode = prefs.getInt(Preferences.LAST_VERSION_CODE)
         isWidgetTransparent.value = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
         useAltLayout.value = loadStringFromStorage(applicationContext, USE_ALT_LAYOUT)
         doAlwaysShowAurora.value = loadStringFromStorage(applicationContext, DO_ALWAYS_SHOW_AURORA)
@@ -174,7 +174,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
 
                 // Save the current version code
-                prefs.edit().putInt("lastVersionCode", currentVersionCode).apply()
+                prefs.setInt(Preferences.LAST_VERSION_CODE, currentVersionCode)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()

@@ -200,7 +200,7 @@ class DisplayInfo() {
         fun updateWidget(context: Context, displayInfo: DisplayInfo) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
 
-            val prefs = context.getSharedPreferences(PrefUtils.APP_PREFS, MODE_PRIVATE)
+            val prefs = AppPreferences(context)
 
             val lang = loadStringFromStorage(context, SELECTED_LANG)
             val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
