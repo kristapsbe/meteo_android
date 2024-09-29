@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -12,6 +13,7 @@ import kotlinx.datetime.toLocalDateTime
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getDirectionString
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getShortenedDayString
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
+import lv.kristapsbe.meteo_android.MainActivity.Companion.CELSIUS
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
@@ -195,11 +197,11 @@ class DisplayInfo() {
 
             val prefs = AppPreferences(context)
 
-            val lang = prefs.getString(Preference.LANG)
-            val selectedTemp = prefs.getString(Preference.TEMP_UNIT)
-            val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT)
-            val isWidgetTransparent = prefs.getBoolean(Preference.USE_TRANSPARENT_WIDGET)
-            val doAlwaysShowAurora = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA)
+            val lang = prefs.getString(Preference.LANG, LANG_EN)
+            val selectedTemp = prefs.getString(Preference.TEMP_UNIT, CELSIUS)
+            val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
+            val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
+            val doAlwaysShowAurora = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false)
 
             // Retrieve the widget IDs
             val widget = ComponentName(context, ForecastWidget::class.java)
@@ -214,23 +216,16 @@ class DisplayInfo() {
             intent.putExtra("widget_location", displayInfo.city)
             intent.putExtra("widget_feelslike", "${LangStrings.getTranslationString(lang, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
 
-            intent.putExtra("is_widget_transparent", isWidgetTransparent)
+            intent.putExtra("do_show_widget_background", doShowWidgetBackground)
             intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
             intent.putExtra("warning_red", displayInfo.warnings.any { it.intensity == "Red" })
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
             intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
+            intent.putExtra("rain_image", displayInfo.getRainIconId())
             intent.putExtra("rain", displayInfo.getWhenRainExpected(lang))
+            intent.putExtra("do_show_aurora", (doAlwaysShowAurora || (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD)))
+            intent.putExtra("aurora", "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})")
             intent.putExtra("use_alt_layout", useAltLayout)
-
-            if (doAlwaysShowAurora || displayInfo.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
-                if (lang == LANG_EN) {
-                    intent.putExtra("aurora", "Aurora ${displayInfo.aurora.prob}% at ${displayInfo.aurora.time}")
-                } else {
-                    intent.putExtra("aurora", "Ziemeļblāzma ${displayInfo.aurora.prob}% plkst. ${displayInfo.aurora.time}")
-                }
-            } else {
-                intent.putExtra("aurora", "")
-            }
 
             context.sendBroadcast(intent)
         }
@@ -334,6 +329,15 @@ class DisplayInfo() {
             return currHourlyForecasts[0]
         }
         return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
+    }
+
+    fun getRainIconId(): Int {
+        val hForecasts = getHourlyForecasts()
+        val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
+        if (hourlyRain.isNotEmpty()) {
+            return hourlyRain[0].pictogram.getPictogram()
+        }
+        return -1
     }
 
     fun getWhenRainExpected(lang: String): String {

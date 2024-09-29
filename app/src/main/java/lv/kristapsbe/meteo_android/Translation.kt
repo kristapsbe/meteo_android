@@ -136,8 +136,8 @@ class LangStrings {
 
         private val translationStrings = hashMapOf(
             LANG_EN to hashMapOf(
-                Translation.RAIN_EXPECTED_TODAY to "Rain expected today at",
-                Translation.RAIN_EXPECTED_TOMORROW to "Rain expected tomorrow at",
+                Translation.RAIN_EXPECTED_TODAY to "today at",
+                Translation.RAIN_EXPECTED_TOMORROW to "tomorrow at",
                 Translation.FEELS_LIKE to "Feels like",
                 Translation.FORECAST_ISSUED to "forecast issued at",
                 Translation.FORECAST_DOWNLOADED to "forecast downloaded at",
@@ -150,8 +150,8 @@ class LangStrings {
                 Translation.NOTIFICATION_AURORA_DESCRIPTION to "Aurora probability has increased to"
             ),
             LANG_LV to hashMapOf(
-                Translation.RAIN_EXPECTED_TODAY to "Lietus gaidāms šodien plkst.",
-                Translation.RAIN_EXPECTED_TOMORROW to "Lietus gaidāms rīt plkst.",
+                Translation.RAIN_EXPECTED_TODAY to "šodien plkst.",
+                Translation.RAIN_EXPECTED_TOMORROW to "rīt plkst.",
                 Translation.FEELS_LIKE to "Jūtas kā",
                 Translation.FORECAST_ISSUED to "prognoze atjaunināta",
                 Translation.FORECAST_DOWNLOADED to "prognoze lejupielādēta",

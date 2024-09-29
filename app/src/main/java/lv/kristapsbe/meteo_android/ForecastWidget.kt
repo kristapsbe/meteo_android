@@ -34,7 +34,7 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, null, false, null, false)
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, "", false, null, false, false, -1)
         }
     }
 
@@ -51,8 +51,11 @@ class ForecastWidget : AppWidgetProvider() {
             val warningOrange = intent.getBooleanExtra("warning_orange", false)
             val warningYellow = intent.getBooleanExtra("warning_yellow", false)
             val rain = intent.getStringExtra("rain")
+            val rainImage = intent.getIntExtra("rain_image", R.drawable.clear1)
             val aurora = intent.getStringExtra("aurora")
-            val isWidgetTransparent = intent.getBooleanExtra("is_widget_transparent", false)
+            val doShowAurora = intent.getBooleanExtra("do_show_aurora", false)
+
+            val doShowWidgetBackground = intent.getBooleanExtra("do_show_widget_background", false)
             val useAltLayout = intent.getBooleanExtra("use_alt_layout", false)
 
             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -60,7 +63,7 @@ class ForecastWidget : AppWidgetProvider() {
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain, isWidgetTransparent, aurora, useAltLayout)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain ?: "", doShowWidgetBackground, aurora, useAltLayout, doShowAurora, rainImage)
             }
         }
     }
@@ -84,10 +87,12 @@ internal fun updateAppWidget(
     warningOrange: Boolean,
     warningYellow: Boolean,
     icon: Int?,
-    rain: String?,
-    isWidgetTransparent: Boolean,
+    rain: String,
+    doShowWidgetBackground: Boolean,
     aurora: String?,
-    useAltLayout: Boolean
+    useAltLayout: Boolean,
+    doShowAurora: Boolean,
+    rainImage: Int
 ) {
     // Create an Intent to launch the MainActivity when clicked
     val intent = Intent(context, MainActivity::class.java)
@@ -96,11 +101,7 @@ internal fun updateAppWidget(
     val views = RemoteViews(context.packageName, R.layout.forecast_widget)
     views.setOnClickPendingIntent(R.id.widget, pendingIntent)
 
-    if (isWidgetTransparent) {
-        views.setInt(R.id.widget, "setBackgroundColor", ContextCompat.getColor(context, R.color.transparent))
-    } else {
-        views.setInt(R.id.widget, "setBackgroundColor", ContextCompat.getColor(context, R.color.sky_blue))
-    }
+    views.setInt(R.id.widget, "setBackgroundColor", ContextCompat.getColor(context, if (doShowWidgetBackground) R.color.sky_blue else R.color.transparent))
     if (text != null) {
         views.setTextViewText(R.id.appwidget_text, text)
     }
@@ -110,8 +111,21 @@ internal fun updateAppWidget(
     if (feelsLikeText != null) {
         views.setTextViewText(R.id.appwidget_feelslike, feelsLikeText)
     }
-    views.setTextViewText(R.id.appwidget_rain, rain)
-    views.setTextViewText(R.id.appwidget_aurora, aurora)
+
+    if (rain == "") {
+        views.setViewVisibility(R.id.appwidget_rain_wrap, View.GONE)
+    } else {
+        views.setTextViewText(R.id.appwidget_rain, rain)
+        views.setImageViewResource(R.id.appwidget_rain_icon, rainImage)
+        views.setViewVisibility(R.id.appwidget_rain_wrap, View.VISIBLE)
+    }
+    if (doShowAurora) {
+        views.setTextViewText(R.id.appwidget_aurora, aurora)
+        views.setViewVisibility(R.id.appwidget_aurora_wrap, View.VISIBLE)
+    } else {
+        views.setViewVisibility(R.id.appwidget_aurora_wrap, View.GONE)
+    }
+
     if (icon != null) {
         views.setImageViewResource(R.id.icon_image, icon)
     }

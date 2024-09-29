@@ -135,7 +135,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     private lateinit var selectedLang: MutableState<String>
     private lateinit var selectedTempType: MutableState<String>
-    private lateinit var isWidgetTransparent: MutableState<Boolean>
+    private lateinit var showWidgetBackground: MutableState<Boolean>
     private lateinit var useAltLayout: MutableState<Boolean>
     private lateinit var doAlwaysShowAurora: MutableState<Boolean>
     private lateinit var customLocationName: MutableState<String>
@@ -157,9 +157,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         prefs = AppPreferences(applicationContext)
         selectedLang = mutableStateOf(prefs.getString(Preference.LANG, LANG_EN))
         selectedTempType = mutableStateOf(prefs.getString(Preference.TEMP_UNIT, CELSIUS))
-        isWidgetTransparent = mutableStateOf(prefs.getBoolean(Preference.USE_TRANSPARENT_WIDGET))
-        useAltLayout = mutableStateOf(prefs.getBoolean(Preference.USE_ALT_LAYOUT))
-        doAlwaysShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA))
+        showWidgetBackground = mutableStateOf(prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true))
+        useAltLayout = mutableStateOf(prefs.getBoolean(Preference.USE_ALT_LAYOUT, false))
+        doAlwaysShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false))
         customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
 
         val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
@@ -310,7 +310,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    painterResource(if (mutableState.value) R.drawable.baseline_check_box_outline_blank_24 else R.drawable.baseline_check_box_24),
+                    painterResource(if (mutableState.value) R.drawable.baseline_check_box_24 else R.drawable.baseline_check_box_outline_blank_24),
                     contentDescription = "",
                     contentScale = ContentScale.Fit,
                 )
@@ -383,7 +383,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
             if (doDisplaySettings.value) {
                 SettingsEntryString(Translation.SETTINGS_APP_LANGUAGE, Preference.LANG, selectedLang, nextLang, LANG_EN)
-                SettingsEntryBoolean(Translation.SETTINGS_WIDGET_TRANSPARENCY, Preference.USE_TRANSPARENT_WIDGET, isWidgetTransparent)
+                SettingsEntryBoolean(Translation.SETTINGS_WIDGET_TRANSPARENCY, Preference.DO_SHOW_WIDGET_BACKGROUND, showWidgetBackground)
                 SettingsEntryString(Translation.SETTINGS_TEMPERATURE_UNIT, Preference.TEMP_UNIT, selectedTempType, nextTemp, CELSIUS)
                 SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_DISPLAY_AURORA, Preference.DO_ALWAYS_SHOW_AURORA, doAlwaysShowAurora)
                 SettingsEntryBoolean(Translation.SETTINGS_USE_ALT_LAYOUT, Preference.USE_ALT_LAYOUT, useAltLayout)

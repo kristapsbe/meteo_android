@@ -42,9 +42,8 @@ data class CityForecastData(
 class CityForecastDataDownloader {
     companion object {
         const val RESPONSE_FILE = "response.json"
-        // local ip 10.0.2.2
-        private const val BASE_URL = "http://10.0.2.2:8000/api/v1/forecast/cities"
-        //private const val BASE_URL = "https://meteo.kristapsbe.lv/api/v1/forecast/cities"
+        //private const val BASE_URL = "http://10.0.2.2:8000/api/v1/forecast/cities"
+        private const val BASE_URL = "https://meteo.kristapsbe.lv/api/v1/forecast/cities"
 
         private fun downloadData(ctx: Context, urlString: String, doDL: Boolean): CityForecastData? {
             var cityForecast: CityForecastData? = null

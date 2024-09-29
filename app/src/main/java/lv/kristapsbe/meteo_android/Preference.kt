@@ -8,7 +8,7 @@ enum class Preference {
     FORCE_DEFAULT_LOCATION,
     TEMP_UNIT,
     LANG,
-    USE_TRANSPARENT_WIDGET,
+    DO_SHOW_WIDGET_BACKGROUND,
     DO_ALWAYS_SHOW_AURORA,
     USE_ALT_LAYOUT,
     USE_ANIMATED_ICONS,
@@ -43,8 +43,8 @@ class AppPreferences(context: Context) {
         prefs.edit().putFloat(pref.toString(), value).apply()
     }
 
-    fun getBoolean(pref: Preference): Boolean {
-        return prefs.getBoolean(pref.toString(), defaultBoolean)
+    fun getBoolean(pref: Preference, overrideDefault: Boolean = defaultBoolean): Boolean {
+        return prefs.getBoolean(pref.toString(), overrideDefault)
     }
 
     fun setBoolean(pref: Preference, value: Boolean) {
