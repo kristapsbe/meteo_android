@@ -1,5 +1,7 @@
 # Meteo
 
+This should just run on `Android Studio` (development was done using `Android Studio Koala Feature Drop | 2024.1.2`)
+
 An android app intended to consume data from https://github.com/kristapsbe/meteo_server
 
 jetpack compose - helpful docs
