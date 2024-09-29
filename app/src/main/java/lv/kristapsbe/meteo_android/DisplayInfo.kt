@@ -138,7 +138,7 @@ class WeatherPictogram(
     }
 
     fun getPictogram(): Int {
-        return iconMapping[code] ?: R.drawable.clear1
+        return iconMapping[code] ?: R.drawable.unknown
     }
 }
 
