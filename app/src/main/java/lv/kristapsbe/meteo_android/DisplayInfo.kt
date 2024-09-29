@@ -1,5 +1,6 @@
 package lv.kristapsbe.meteo_android
 
+import android.app.Activity.MODE_PRIVATE
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -10,6 +11,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.LangStrings.Companion.getDirectionString
+import lv.kristapsbe.meteo_android.LangStrings.Companion.getShortenedDayString
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.DO_ALWAYS_SHOW_AURORA
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
@@ -155,32 +158,8 @@ class DailyForecast(
     val pictogramDay: WeatherPictogram,
     val pictogramNight: WeatherPictogram
 ) {
-    companion object {
-        val dayMapping = hashMapOf(
-            LANG_EN to hashMapOf(
-                "MONDAY" to "Mo",
-                "TUESDAY" to "Tu",
-                "WEDNESDAY" to "We",
-                "THURSDAY" to "Th",
-                "FRIDAY" to "Fr",
-                "SATURDAY" to "Sa",
-                "SUNDAY" to "Su"
-            ),
-            LANG_LV to hashMapOf(
-                "MONDAY" to "P.",
-                "TUESDAY" to "O.",
-                "WEDNESDAY" to "T.",
-                "THURSDAY" to "C.",
-                "FRIDAY" to "Pk.",
-                "SATURDAY" to "S.",
-                "SUNDAY" to "Sv."
-            )
-        )
-    }
-
     fun getDayOfWeek(lang: String): String {
-        val dow = date.dayOfWeek.toString()
-        return dayMapping[lang]?.get(dow) ?: dow
+        return getShortenedDayString(lang, date.dayOfWeek.toString())
     }
 }
 
@@ -195,96 +174,12 @@ class HourlyForecast(
     val feelsLikeTemp: Int,
     val pictogram: WeatherPictogram
 ) {
-    companion object {
-        //https://uni.edu/storm/Wind%20Direction%20slide.pdf
-        var directions = hashMapOf(
-            LANG_EN to hashMapOf(
-                35 to "N",
-                36 to "N",
-                0 to "N",
-                1 to "N",
-                2 to "N/NE",
-                3 to "N/NE",
-                4 to "NE",
-                5 to "NE",
-                6 to "E/NE",
-                7 to "E/NE",
-                8 to "E",
-                9 to "E",
-                10 to "E",
-                11 to "E/SE",
-                12 to "E/SE",
-                13 to "SE",
-                14 to "SE",
-                15 to "S/SE",
-                16 to "S/SE",
-                17 to "S",
-                18 to "S",
-                19 to "S",
-                20 to "S/SW",
-                21 to "S/SW",
-                22 to "SW",
-                23 to "SW",
-                24 to "W/SW",
-                25 to "W/SW",
-                26 to "W",
-                27 to "W",
-                28 to "W",
-                29 to "W/NW",
-                30 to "W/NW",
-                31 to "NW",
-                32 to "NW",
-                33 to "N/NW",
-                34 to "N/NW",
-            ),
-            LANG_LV to hashMapOf(
-                35 to "Z",
-                36 to "Z",
-                0 to "Z",
-                1 to "Z",
-                2 to "Z/ZA",
-                3 to "Z/ZA",
-                4 to "ZA",
-                5 to "ZA",
-                6 to "A/ZA",
-                7 to "A/ZA",
-                8 to "A",
-                9 to "A",
-                10 to "A",
-                11 to "A/DA",
-                12 to "A/DA",
-                13 to "DA",
-                14 to "DA",
-                15 to "D/DA",
-                16 to "D/DA",
-                17 to "D",
-                18 to "D",
-                19 to "D",
-                20 to "D/DR",
-                21 to "D/DR",
-                22 to "DR",
-                23 to "DR",
-                24 to "R/DR",
-                25 to "R/DR",
-                26 to "R",
-                27 to "R",
-                28 to "R",
-                29 to "R/ZR",
-                30 to "R/ZR",
-                31 to "ZR",
-                32 to "ZR",
-                33 to "Z/ZR",
-                34 to "Z/ZR",
-            )
-        )
-    }
-
     fun getDayOfWeek(): String {
         return date.dayOfWeek.toString()
     }
 
     fun getDirection(lang: String): String {
-        return directions[lang]?.get(windDirection/10) ?: ""
+        return getDirectionString(lang, windDirection/10)
     }
 }
 
@@ -305,6 +200,8 @@ class DisplayInfo() {
         fun updateWidget(context: Context, displayInfo: DisplayInfo) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
 
+            val prefs = context.getSharedPreferences(PrefUtils.APP_PREFS, MODE_PRIVATE)
+
             val lang = loadStringFromStorage(context, SELECTED_LANG)
             val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
             val useAltLayout = loadStringFromStorage(context, USE_ALT_LAYOUT)
@@ -322,18 +219,14 @@ class DisplayInfo() {
 
             intent.putExtra("widget_text", convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp))
             intent.putExtra("widget_location", displayInfo.city)
-            if (lang == LANG_EN) {
-                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
-            } else {
-                intent.putExtra("widget_feelslike", "${context.getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
-            }
+            intent.putExtra("widget_feelslike", "${LangStrings.getTranslationString(lang, Translations.FEELS_LIKE)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
 
             intent.putExtra("is_widget_transparent", (isWidgetTransparent != ""))
             intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
             intent.putExtra("warning_red", displayInfo.warnings.any { it.intensity == "Red" })
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
             intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
-            intent.putExtra("rain", displayInfo.getWhenRainExpected(context, lang))
+            intent.putExtra("rain", displayInfo.getWhenRainExpected(lang))
             intent.putExtra("use_alt_layout", (useAltLayout != ""))
 
             if (doAlwaysShowAurora != "" || displayInfo.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
@@ -401,12 +294,12 @@ class DisplayInfo() {
                     e.id,
                     e.intensity[1],
                     hashMapOf(
-                        "lv" to e.type[0],
-                        "en" to e.type[1]
+                        LANG_LV to e.type[0],
+                        LANG_EN to e.type[1]
                     ),
                     hashMapOf(
-                        "lv" to e.description[0],
-                        "en" to e.description[1]
+                        LANG_LV to e.description[0],
+                        LANG_EN to e.description[1]
                     )
                 )
             }
@@ -450,22 +343,14 @@ class DisplayInfo() {
         return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
     }
 
-    fun getWhenRainExpected(context: Context, lang: String): String {
+    fun getWhenRainExpected(lang: String): String {
         val hForecasts = getHourlyForecasts()
         val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
         if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
             return if (hourlyRain[0].date.dayOfMonth == getTodayForecast().date.dayOfMonth) {
-                if (lang == LANG_EN) {
-                    "${context.getString(R.string.rain_expected_today_en)} ${hourlyRain[0].date.hour}:00"
-                } else {
-                    "${context.getString(R.string.rain_expected_today_lv)} ${hourlyRain[0].date.hour}:00"
-                }
+                "${LangStrings.getTranslationString(lang, Translations.RAIN_EXPECTED_TODAY)} ${hourlyRain[0].date.hour}:00"
             } else {
-                if (lang == LANG_EN) {
-                    "${context.getString(R.string.rain_expected_tomorrow_en)} ${hourlyRain[0].date.hour}:00"
-                } else {
-                    "${context.getString(R.string.rain_expected_tomorrow_lv)} ${hourlyRain[0].date.hour}:00"
-                }
+                "${LangStrings.getTranslationString(lang, Translations.RAIN_EXPECTED_TOMORROW)} ${hourlyRain[0].date.hour}:00"
             }
         }
         return ""

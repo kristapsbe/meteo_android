@@ -13,15 +13,11 @@ class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters
 
         runBlocking {
             val cityForecast = CityForecastDataDownloader.downloadDataLatLon(applicationContext, doDL = false)
-
             callback?.onWorkerResult(cityForecast)
 
             if (cityForecast != null) {
                 val displayInfo = DisplayInfo(cityForecast)
-                DisplayInfo.updateWidget(
-                    applicationContext,
-                    displayInfo
-                )
+                DisplayInfo.updateWidget(applicationContext, displayInfo)
             }
         }
         return Result.success()

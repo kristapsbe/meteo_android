@@ -131,8 +131,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         fun convertFromCtoDisplayTemp(tempC: Int, toConvert: String): String {
             return when (toConvert) {
-                "F" -> "${((9.0f/5.0f)*tempC.toFloat()+32.0f).roundToInt()}°" // TODO: add F
-                "K" -> "${(tempC.toFloat()+273.15f).roundToInt()}°" // TODO: add K
+                "F" -> "${((9.0f/5.0f)*tempC.toFloat()+32.0f).roundToInt()}°"
+                "K" -> "${(tempC.toFloat()+273.15f).roundToInt()}°"
                 else -> "$tempC°"
             }
         }
@@ -158,7 +158,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val prefs = getSharedPreferences(PrefUtils.APP_PREFS, MODE_PRIVATE)
+
         val lastVersionCode = prefs.getInt("lastVersionCode", -1)
         isWidgetTransparent.value = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
         useAltLayout.value = loadStringFromStorage(applicationContext, USE_ALT_LAYOUT)
@@ -226,7 +227,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
-            when { // TODO: do I need to enqueue in both?
+            when { // TODO: do I need to enqueue in all?
                 permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
                     val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                     WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
@@ -235,7 +236,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                     WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                 } else -> {
-                    // No location access granted.
+                    val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                    WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                 }
             }
         }
@@ -301,6 +303,70 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             ShowWarningInfo()
             ShowDailyInfo()
             ShowMetadataInfo()
+        }
+    }
+
+    @Composable
+    fun settingsEntry() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 0.dp, 0.dp, 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+            ) {
+                if (selectedLang.value == LANG_EN) {
+                    Text(
+                        text = "Show widget background color",
+                        textAlign = TextAlign.Start,
+                        color = Color(resources.getColor(R.color.text_color)),
+                    )
+                } else {
+                    Text(
+                        text = "Rādīt logrīka fona krāsu",
+                        textAlign = TextAlign.Start,
+                        color = Color(resources.getColor(R.color.text_color)),
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (isWidgetTransparent.value != "") {
+                            isWidgetTransparent.value = ""
+                        } else {
+                            isWidgetTransparent.value = "true"
+                        }
+                        applicationContext
+                            .openFileOutput(WIDGET_TRANSPARENT, MODE_PRIVATE)
+                            .use { fos ->
+                                fos.write(isWidgetTransparent.value.toByteArray())
+                            }
+                        DisplayInfo.updateWidget(
+                            applicationContext,
+                            displayInfo.value
+                        )
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (isWidgetTransparent.value == "") {
+                    Image(
+                        painterResource(R.drawable.baseline_check_box_24),
+                        contentDescription = "",
+                        contentScale = ContentScale.Fit,
+                    )
+                } else {
+                    Image(
+                        painterResource(R.drawable.baseline_check_box_outline_blank_24),
+                        contentDescription = "",
+                        contentScale = ContentScale.Fit,
+                    )
+                }
+            }
         }
     }
 
@@ -550,7 +616,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(0.dp, 0.dp, 0.dp, 20.dp),
+                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
@@ -610,7 +676,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
                 HorizontalDivider(
                     modifier = Modifier
-                        .padding(0.dp, 0.dp, 0.dp, 20.dp),
+                        .padding(0.dp, 10.dp, 0.dp, 20.dp),
                     color = Color(resources.getColor(R.color.light_gray)),
                     thickness = 1.dp
                 )
@@ -746,28 +812,15 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (selectedLang.value == LANG_EN) {
-                        Text(
-                            text = "${getString(R.string.feels_like_en)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(0.dp, 0.dp, 20.dp, 0.dp),
-                        )
-                    } else {
-
-                        Text(
-                            text = "${getString(R.string.feels_like_lv)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(0.dp, 0.dp, 20.dp, 0.dp),
-                        )
-                    }
+                    Text(
+                        text = "${LangStrings.getTranslationString(selectedLang.value, Translations.FEELS_LIKE)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color(resources.getColor(R.color.text_color)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp, 0.dp, 20.dp, 0.dp),
+                    )
                 }
             }
             if (doAlwaysShowAurora.value != "" || displayInfo.value.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
@@ -1265,42 +1318,22 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row {
-                        if (selectedLang.value == LANG_EN) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                fontSize = 8.sp,
-                                text = "${getString(R.string.forecast_issued_en)} ${displayInfo.value.getLastUpdated()}",
-                                color = Color(resources.getColor(R.color.text_color)),
-                                textAlign = TextAlign.Right
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                fontSize = 8.sp,
-                                text = "${getString(R.string.forecast_issued_lv)} ${displayInfo.value.getLastUpdated()}",
-                                color = Color(resources.getColor(R.color.text_color)),
-                                textAlign = TextAlign.Right
-                            )
-                        }
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 8.sp,
+                            text = "${LangStrings.getTranslationString(selectedLang.value, Translations.FORECAST_ISSUED)} ${displayInfo.value.getLastUpdated()}",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            textAlign = TextAlign.Right
+                        )
                     }
                     Row {
-                        if (selectedLang.value == LANG_EN) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                fontSize = 8.sp,
-                                text = "${getString(R.string.forecast_downloaded_en)} ${displayInfo.value.getLastDownloaded()}",
-                                color = Color(resources.getColor(R.color.text_color)),
-                                textAlign = TextAlign.Right
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                fontSize = 8.sp,
-                                text = "${getString(R.string.forecast_downloaded_lv)} ${displayInfo.value.getLastDownloaded()}",
-                                color = Color(resources.getColor(R.color.text_color)),
-                                textAlign = TextAlign.Right
-                            )
-                        }
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 8.sp,
+                            text = "${LangStrings.getTranslationString(selectedLang.value, Translations.FORECAST_DOWNLOADED)} ${displayInfo.value.getLastDownloaded()}",
+                            color = Color(resources.getColor(R.color.text_color)),
+                            textAlign = TextAlign.Right
+                        )
                     }
                 }
             }
