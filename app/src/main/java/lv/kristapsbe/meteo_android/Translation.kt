@@ -1,8 +1,5 @@
 package lv.kristapsbe.meteo_android
 
-import androidx.compose.material3.Text
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 
@@ -15,7 +12,10 @@ enum class Translation {
     FORECAST_DOWNLOADED,
 
     SETTINGS_APP_LANGUAGE,
-    SETTINGS_WIDGET_TRANSPARENCY
+    SETTINGS_WIDGET_TRANSPARENCY,
+    SETTINGS_TEMPERATURE_UNIT,
+    SETTINGS_ALWAYS_DISPLAY_AURORA,
+    SETTINGS_USE_ALT_LAYOUT
 }
 
 class LangStrings {
@@ -139,7 +139,10 @@ class LangStrings {
                 Translation.FORECAST_ISSUED to "forecast issued at",
                 Translation.FORECAST_DOWNLOADED to "forecast downloaded at",
                 Translation.SETTINGS_APP_LANGUAGE to "App language",
-                Translation.SETTINGS_WIDGET_TRANSPARENCY to "Show widget background color"
+                Translation.SETTINGS_WIDGET_TRANSPARENCY to "Show widget background color",
+                Translation.SETTINGS_TEMPERATURE_UNIT to "Temperature unit",
+                Translation.SETTINGS_ALWAYS_DISPLAY_AURORA to "Always display aurora forecast",
+                Translation.SETTINGS_USE_ALT_LAYOUT to "Use alternative layout"
             ),
             LANG_LV to hashMapOf(
                 Translation.RAIN_EXPECTED_TODAY to "Lietus gaidāms šodien plkst.",
@@ -148,7 +151,10 @@ class LangStrings {
                 Translation.FORECAST_ISSUED to "prognoze atjaunināta",
                 Translation.FORECAST_DOWNLOADED to "prognoze lejupielādēta",
                 Translation.SETTINGS_APP_LANGUAGE to "Lietotnes valoda",
-                Translation.SETTINGS_WIDGET_TRANSPARENCY to "Rādīt logrīka fona krāsu"
+                Translation.SETTINGS_WIDGET_TRANSPARENCY to "Rādīt logrīka fona krāsu",
+                Translation.SETTINGS_TEMPERATURE_UNIT to "Temperatūras mērvienība",
+                Translation.SETTINGS_ALWAYS_DISPLAY_AURORA to "Vienmēr rādīt ziemeļblāzmas prognozi",
+                Translation.SETTINGS_USE_ALT_LAYOUT to "Lietot alternatīvo izkārtojumu"
             )
         )
 

@@ -24,6 +24,7 @@ class AppPreferences(context: Context) {
 
     val defaultString = ""
     val defaultInt = -1
+    val defaultBoolean = false
     val defaultFloat = -999f
 
     fun getInt(pref: Preference): Int {
@@ -43,7 +44,7 @@ class AppPreferences(context: Context) {
     }
 
     fun getBoolean(pref: Preference): Boolean {
-        return prefs.getBoolean(pref.toString(), false)
+        return prefs.getBoolean(pref.toString(), defaultBoolean)
     }
 
     fun setBoolean(pref: Preference, value: Boolean) {

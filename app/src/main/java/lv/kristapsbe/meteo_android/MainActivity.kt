@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -72,7 +73,6 @@ import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import java.util.concurrent.TimeUnit
-import java.util.prefs.Preferences
 import kotlin.math.roundToInt
 
 
@@ -117,6 +117,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             FAHRENHEIT to CELSIUS
         )
 
+        val nextLang = hashMapOf(
+            LANG_EN to LANG_LV,
+            LANG_LV to LANG_EN
+        )
+
         fun convertFromCtoDisplayTemp(tempC: Int, toConvert: String): String {
             return when (toConvert) {
                 FAHRENHEIT -> "${((9.0f/5.0f)*tempC.toFloat()+32.0f).roundToInt()}°"
@@ -126,7 +131,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         }
     }
 
-    private val prefs = AppPreferences(applicationContext)
+    private lateinit var prefs: AppPreferences
+
+    private lateinit var selectedLang: MutableState<String>
+    private lateinit var selectedTempType: MutableState<String>
+    private lateinit var isWidgetTransparent: MutableState<Boolean>
+    private lateinit var useAltLayout: MutableState<Boolean>
+    private lateinit var doAlwaysShowAurora: MutableState<Boolean>
+    private lateinit var customLocationName: MutableState<String>
 
     private var wasLastScrollNegative: Boolean = false
 
@@ -138,16 +150,17 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var locationSearchMode = mutableStateOf(false)
     private var doDisplaySettings = mutableStateOf(false)
 
-    private var selectedLang = mutableStateOf(prefs.getString(Preference.LANG, LANG_EN))
-    private var selectedTempType = mutableStateOf(prefs.getString(Preference.TEMP_UNIT))
-    private var isWidgetTransparent = mutableStateOf(prefs.getBoolean(Preference.USE_TRANSPARENT_WIDGET))
-    private var useAltLayout = mutableStateOf(prefs.getBoolean(Preference.USE_ALT_LAYOUT))
-    private var doAlwaysShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA))
-
-    private var customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        prefs = AppPreferences(applicationContext)
+        selectedLang = mutableStateOf(prefs.getString(Preference.LANG, LANG_EN))
+        selectedTempType = mutableStateOf(prefs.getString(Preference.TEMP_UNIT, CELSIUS))
+        isWidgetTransparent = mutableStateOf(prefs.getBoolean(Preference.USE_TRANSPARENT_WIDGET))
+        useAltLayout = mutableStateOf(prefs.getBoolean(Preference.USE_ALT_LAYOUT))
+        doAlwaysShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA))
+        customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
 
         val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
 
@@ -266,7 +279,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     @Composable
-    fun settingsEntry() {
+    fun SettingsEntryBoolean(translation: Translation, preference: Preference, mutableState: MutableState<Boolean>) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -277,26 +290,18 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 modifier = Modifier
                     .fillMaxWidth(0.85f)
             ) {
-                if (selectedLang.value == LANG_EN) {
-                    Text(
-                        text = "Show widget background color",
-                        textAlign = TextAlign.Start,
-                        color = Color(resources.getColor(R.color.text_color)),
-                    )
-                } else {
-                    Text(
-                        text = "Rādīt logrīka fona krāsu",
-                        textAlign = TextAlign.Start,
-                        color = Color(resources.getColor(R.color.text_color)),
-                    )
-                }
+                Text(
+                    text = LangStrings.getTranslationString(selectedLang.value, translation),
+                    textAlign = TextAlign.Start,
+                    color = Color(resources.getColor(R.color.text_color)),
+                )
             }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        isWidgetTransparent.value = !isWidgetTransparent.value
-                        prefs.setBoolean(Preference.USE_TRANSPARENT_WIDGET, isWidgetTransparent.value)
+                        mutableState.value = !mutableState.value
+                        prefs.setBoolean(preference, mutableState.value)
                         DisplayInfo.updateWidget(
                             applicationContext,
                             displayInfo.value
@@ -305,9 +310,52 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    painterResource(if (isWidgetTransparent.value) R.drawable.baseline_check_box_outline_blank_24 else R.drawable.baseline_check_box_24),
+                    painterResource(if (mutableState.value) R.drawable.baseline_check_box_outline_blank_24 else R.drawable.baseline_check_box_24),
                     contentDescription = "",
                     contentScale = ContentScale.Fit,
+                )
+            }
+        }
+    }
+
+
+    @Composable
+    fun SettingsEntryString(translation: Translation, preference: Preference, mutableState: MutableState<String>, nextEntry: HashMap<String, String>, defaultVal: String) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 0.dp, 0.dp, 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+            ) {
+                Text(
+                    text = LangStrings.getTranslationString(selectedLang.value, translation),
+                    textAlign = TextAlign.Start,
+                    color = Color(resources.getColor(R.color.text_color)),
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        mutableState.value = nextEntry[mutableState.value] ?: defaultVal
+                        prefs.setString(preference, mutableState.value)
+                        DisplayInfo.updateWidget(
+                            applicationContext,
+                            displayInfo.value
+                        )
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = mutableState.value,
+                    color = Color(resources.getColor(R.color.text_color)),
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -334,216 +382,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 )
             }
             if (doDisplaySettings.value) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(0.dp, 10.dp, 0.dp, 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                    ) {
-                        Text(
-                            text = LangStrings.getTranslationString(selectedLang.value, Translation.SETTINGS_APP_LANGUAGE),
-                            textAlign = TextAlign.Start,
-                            color = Color(resources.getColor(R.color.text_color)),
-                        )
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                if (selectedLang.value == LANG_EN) {
-                                    selectedLang.value = LANG_LV
-                                } else {
-                                    selectedLang.value = LANG_EN
-                                }
-                                prefs.setString(Preference.LANG, selectedLang.value)
-                                DisplayInfo.updateWidget(
-                                    applicationContext,
-                                    displayInfo.value
-                                )
-                            }
-                    ) {
-                        Text(
-                            text = selectedLang.value,
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            color = Color(resources.getColor(R.color.text_color)),
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                    ) {
-                        Text(
-                            text = LangStrings.getTranslationString(selectedLang.value, Translation.SETTINGS_WIDGET_TRANSPARENCY),
-                            textAlign = TextAlign.Start,
-                            color = Color(resources.getColor(R.color.text_color)),
-                        )
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                isWidgetTransparent.value = !isWidgetTransparent.value
-                                prefs.setBoolean(Preference.USE_TRANSPARENT_WIDGET, isWidgetTransparent.value)
-                                DisplayInfo.updateWidget(
-                                    applicationContext,
-                                    displayInfo.value
-                                )
-                            },
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painterResource(if (isWidgetTransparent.value) R.drawable.baseline_check_box_outline_blank_24 else R.drawable.baseline_check_box_24),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                    ) {
-                        if (selectedLang.value == LANG_EN) {
-                            Text(
-                                text = "Temperature unit",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        } else {
-                            Text(
-                                text = "Temperatūras mērvienība",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        }
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedTempType.value = nextTemp[selectedTempType.value] ?: CELSIUS
-                                prefs.setString(Preference.TEMP_UNIT, selectedTempType.value)
-                                DisplayInfo.updateWidget(
-                                    applicationContext,
-                                    displayInfo.value
-                                )
-                            }
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            text = selectedTempType.value,
-                            color = Color(resources.getColor(R.color.text_color)),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                    ) {
-                        if (selectedLang.value == LANG_EN) {
-                            Text(
-                                text = "Always display aurora forecast",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        } else {
-                            Text(
-                                text = "Vienmēr rādīt ziemeļblāzmas prognozi",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        }
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                doAlwaysShowAurora.value = !doAlwaysShowAurora.value
-                                prefs.setBoolean(Preference.DO_ALWAYS_SHOW_AURORA, doAlwaysShowAurora.value)
-                                DisplayInfo.updateWidget(
-                                    applicationContext,
-                                    displayInfo.value
-                                )
-                            },
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painterResource(if (doAlwaysShowAurora.value) R.drawable.baseline_check_box_24 else R.drawable.baseline_check_box_outline_blank_24),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(0.dp, 0.dp, 0.dp, 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                    ) {
-                        if (selectedLang.value == LANG_EN) {
-                            Text(
-                                text = "Use alternative layout",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        } else {
-                            Text(
-                                text = "Lietot alternatīvo izkārtojumu",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        }
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                useAltLayout.value = !useAltLayout.value
-                                prefs.setBoolean(Preference.USE_ALT_LAYOUT, useAltLayout.value)
-                                DisplayInfo.updateWidget(
-                                    applicationContext,
-                                    displayInfo.value
-                                )
-                            },
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painterResource(if (useAltLayout.value) R.drawable.baseline_check_box_24 else R.drawable.baseline_check_box_outline_blank_24),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                }
+                SettingsEntryString(Translation.SETTINGS_APP_LANGUAGE, Preference.LANG, selectedLang, nextLang, LANG_EN)
+                SettingsEntryBoolean(Translation.SETTINGS_WIDGET_TRANSPARENCY, Preference.USE_TRANSPARENT_WIDGET, isWidgetTransparent)
+                SettingsEntryString(Translation.SETTINGS_TEMPERATURE_UNIT, Preference.TEMP_UNIT, selectedTempType, nextTemp, CELSIUS)
+                SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_DISPLAY_AURORA, Preference.DO_ALWAYS_SHOW_AURORA, doAlwaysShowAurora)
+                SettingsEntryBoolean(Translation.SETTINGS_USE_ALT_LAYOUT, Preference.USE_ALT_LAYOUT, useAltLayout)
 
                 HorizontalDivider(
                     modifier = Modifier
