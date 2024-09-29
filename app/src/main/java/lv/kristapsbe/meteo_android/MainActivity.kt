@@ -66,14 +66,13 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import java.util.concurrent.TimeUnit
+import java.util.prefs.Preferences
 import kotlin.math.roundToInt
 
 
@@ -98,47 +97,37 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
         const val LAST_COORDINATES_FILE = "last_coordinates.json"
-        const val LOCKED_LOCATION_FILE = "locked_location"
-        const val SELECTED_TEMP_FILE = "selected_temp"
-        const val SELECTED_LANG = "selected_lang"
-        const val WIDGET_TRANSPARENT = "widget_transparent"
-        const val USE_ALT_LAYOUT = "use_alt_layout"
         const val HAS_AURORA_NOTIFIED = "aurora_notified"
-        const val DO_ALWAYS_SHOW_AURORA = "aurora_always_display"
         const val AURORA_NOTIF_ID = "aurora_notif_id"
 
         const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
         const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
-        const val SINGLE_FORECAST_NO_DL_NAME = "single_forecast_refresh_nodl"
+        const val SINGLE_FORECAST_NO_DL_NAME = "single_forecast_refresh_no_dl"
 
         const val LANG_EN = "en"
         const val LANG_LV = "lv"
 
-        val selectedTempFieldMapping = hashMapOf(
-            "C" to "C",
-            "" to "C", // default
-            "K" to "K",
-            "F" to "F",
-        )
+        const val CELSIUS = "C"
+        const val KELVIN = "K"
+        const val FAHRENHEIT = "F"
 
-        // TODO: do a linked list instead?
         val nextTemp = hashMapOf(
-            "C" to "K",
-            "" to "K", // default
-            "K" to "F",
-            "F" to "C"
+            CELSIUS to KELVIN,
+            KELVIN to FAHRENHEIT,
+            FAHRENHEIT to CELSIUS
         )
 
         fun convertFromCtoDisplayTemp(tempC: Int, toConvert: String): String {
             return when (toConvert) {
-                "F" -> "${((9.0f/5.0f)*tempC.toFloat()+32.0f).roundToInt()}°"
-                "K" -> "${(tempC.toFloat()+273.15f).roundToInt()}°"
+                FAHRENHEIT -> "${((9.0f/5.0f)*tempC.toFloat()+32.0f).roundToInt()}°"
+                KELVIN -> "${(tempC.toFloat()+273.15f).roundToInt()}°"
                 else -> "$tempC°"
             }
         }
     }
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val prefs = AppPreferences(applicationContext)
+
     private var wasLastScrollNegative: Boolean = false
 
     private var displayInfo = mutableStateOf(DisplayInfo())
@@ -147,47 +136,39 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var showFullDaily = mutableStateOf(listOf<LocalDateTime>())
     private var showFullWarnings = mutableStateOf(false)
     private var locationSearchMode = mutableStateOf(false)
-    private var customLocationName = mutableStateOf("")
-    private var selectedTempType = mutableStateOf("")
-    private var selectedLang = mutableStateOf("")
-    private var isWidgetTransparent = mutableStateOf("")
     private var doDisplaySettings = mutableStateOf(false)
-    private var useAltLayout = mutableStateOf("")
-    private var doAlwaysShowAurora = mutableStateOf("")
+
+    private var selectedLang = mutableStateOf(prefs.getString(Preference.LANG, LANG_EN))
+    private var selectedTempType = mutableStateOf(prefs.getString(Preference.TEMP_UNIT))
+    private var isWidgetTransparent = mutableStateOf(prefs.getBoolean(Preference.USE_TRANSPARENT_WIDGET))
+    private var useAltLayout = mutableStateOf(prefs.getBoolean(Preference.USE_ALT_LAYOUT))
+    private var doAlwaysShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA))
+
+    private var customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = AppPreferences(applicationContext)
-
-        val lastVersionCode = prefs.getInt(Preferences.LAST_VERSION_CODE)
-        isWidgetTransparent.value = loadStringFromStorage(applicationContext, WIDGET_TRANSPARENT)
-        useAltLayout.value = loadStringFromStorage(applicationContext, USE_ALT_LAYOUT)
-        doAlwaysShowAurora.value = loadStringFromStorage(applicationContext, DO_ALWAYS_SHOW_AURORA)
+        val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
 
         try {
-            val packageInfo = packageManager.getPackageInfo(packageName, 0)
-            val currentVersionCode = packageInfo.versionCode
+            val currentVersionCode = packageManager.getPackageInfo(packageName, 0).versionCode
 
             if (lastVersionCode != currentVersionCode) {
                 val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                 WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-
-                // Save the current version code
-                prefs.setInt(Preferences.LAST_VERSION_CODE, currentVersionCode)
+                prefs.setInt(Preference.LAST_VERSION_CODE, currentVersionCode)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
         }
 
-        // Register a callback for back button press
+        // Fixing the back button / gesture
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Minimize the app by moving it to the background
                 moveTaskToBack(true)
             }
         }
-        // Add the callback to the dispatcher
         onBackPressedDispatcher.addCallback(this, callback)
 
         val content = loadStringFromStorage(applicationContext, RESPONSE_FILE)
@@ -198,17 +179,38 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Log.e("ERROR", "Failed to load data from storage: $e")
             }
         }
-        customLocationName.value = loadStringFromStorage(applicationContext, LOCKED_LOCATION_FILE)
-        selectedTempType.value = loadStringFromStorage(applicationContext, SELECTED_TEMP_FILE)
-        selectedLang.value = loadStringFromStorage(applicationContext, SELECTED_LANG)
-        if (selectedLang.value == "") { // default to EN if nothing's selected
-            selectedLang.value = LANG_EN
-            applicationContext.openFileOutput(SELECTED_LANG, MODE_PRIVATE).use { fos ->
-                fos.write(selectedLang.value.toByteArray())
-            }
+
+        val app = applicationContext as MyApplication
+        app.workerCallback = this
+
+        val locationPermissionRequest = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { _ ->
+            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+            WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
         }
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        if (
+            prefs.getBoolean(Preference.DID_ALREADY_ASK_FOR_LOCATION) &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) {
+            locationPermissionRequest.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+            prefs.setBoolean(Preference.DID_ALREADY_ASK_FOR_LOCATION, true)
+        }
+        createNotificationChannel(applicationContext, WEATHER_WARNINGS_CHANNEL_ID, WEATHER_WARNINGS_CHANNEL_NAME, WEATHER_WARNINGS_CHANNEL_DESCRIPTION)
+        createNotificationChannel(applicationContext, AURORA_NOTIFICATION_CHANNEL_ID, AURORA_NOTIFICATION_CHANNEL_NAME, AURORA_NOTIFICATION_CHANNEL_DESCRIPTION)
+
+        // TODO: revisit interval
+        val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(20, TimeUnit.MINUTES).build()
+        val workManager = WorkManager.getInstance(this)
+        workManager.enqueueUniquePeriodicWork(PERIODIC_FORECAST_DL_NAME, ExistingPeriodicWorkPolicy.UPDATE, workRequest)
+
         enableEdgeToEdge()
         setContent {
             Meteo_androidTheme {
@@ -220,49 +222,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 }
             }
         }
-
-        val app = applicationContext as MyApplication
-        app.workerCallback = this
-
-        val locationPermissionRequest = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            when { // TODO: do I need to enqueue in all?
-                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                    val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                    WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-                }
-                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                    val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                    WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-                } else -> {
-                    val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                    WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-                }
-            }
-        }
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            locationPermissionRequest.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
-        createNotificationChannel(applicationContext, WEATHER_WARNINGS_CHANNEL_ID, WEATHER_WARNINGS_CHANNEL_NAME, WEATHER_WARNINGS_CHANNEL_DESCRIPTION)
-        createNotificationChannel(applicationContext, AURORA_NOTIFICATION_CHANNEL_ID, AURORA_NOTIFICATION_CHANNEL_NAME, AURORA_NOTIFICATION_CHANNEL_DESCRIPTION)
-
-        val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(15, TimeUnit.MINUTES).build()
-        val workManager = WorkManager.getInstance(this)
-        workManager.enqueueUniquePeriodicWork(PERIODIC_FORECAST_DL_NAME, ExistingPeriodicWorkPolicy.UPDATE, workRequest)
     }
 
     @Composable
@@ -336,16 +295,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        if (isWidgetTransparent.value != "") {
-                            isWidgetTransparent.value = ""
-                        } else {
-                            isWidgetTransparent.value = "true"
-                        }
-                        applicationContext
-                            .openFileOutput(WIDGET_TRANSPARENT, MODE_PRIVATE)
-                            .use { fos ->
-                                fos.write(isWidgetTransparent.value.toByteArray())
-                            }
+                        isWidgetTransparent.value = !isWidgetTransparent.value
+                        prefs.setBoolean(Preference.USE_TRANSPARENT_WIDGET, isWidgetTransparent.value)
                         DisplayInfo.updateWidget(
                             applicationContext,
                             displayInfo.value
@@ -353,19 +304,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (isWidgetTransparent.value == "") {
-                    Image(
-                        painterResource(R.drawable.baseline_check_box_24),
-                        contentDescription = "",
-                        contentScale = ContentScale.Fit,
-                    )
-                } else {
-                    Image(
-                        painterResource(R.drawable.baseline_check_box_outline_blank_24),
-                        contentDescription = "",
-                        contentScale = ContentScale.Fit,
-                    )
-                }
+                Image(
+                    painterResource(if (isWidgetTransparent.value) R.drawable.baseline_check_box_outline_blank_24 else R.drawable.baseline_check_box_24),
+                    contentDescription = "",
+                    contentScale = ContentScale.Fit,
+                )
             }
         }
     }
@@ -401,19 +344,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         modifier = Modifier
                             .fillMaxWidth(0.85f)
                     ) {
-                        if (selectedLang.value == LANG_EN) {
-                            Text(
-                                text = "App language",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        } else {
-                            Text(
-                                text = "Lietotnes valoda",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        }
+                        Text(
+                            text = LangStrings.getTranslationString(selectedLang.value, Translation.SETTINGS_APP_LANGUAGE),
+                            textAlign = TextAlign.Start,
+                            color = Color(resources.getColor(R.color.text_color)),
+                        )
                     }
                     Column(
                         modifier = Modifier
@@ -424,11 +359,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 } else {
                                     selectedLang.value = LANG_EN
                                 }
-                                applicationContext
-                                    .openFileOutput(SELECTED_LANG, MODE_PRIVATE)
-                                    .use { fos ->
-                                        fos.write(selectedLang.value.toByteArray())
-                                    }
+                                prefs.setString(Preference.LANG, selectedLang.value)
                                 DisplayInfo.updateWidget(
                                     applicationContext,
                                     displayInfo.value
@@ -454,34 +385,18 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         modifier = Modifier
                             .fillMaxWidth(0.85f)
                     ) {
-                        if (selectedLang.value == LANG_EN) {
-                            Text(
-                                text = "Show widget background color",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        } else {
-                            Text(
-                                text = "Rādīt logrīka fona krāsu",
-                                textAlign = TextAlign.Start,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
-                        }
+                        Text(
+                            text = LangStrings.getTranslationString(selectedLang.value, Translation.SETTINGS_WIDGET_TRANSPARENCY),
+                            textAlign = TextAlign.Start,
+                            color = Color(resources.getColor(R.color.text_color)),
+                        )
                     }
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                if (isWidgetTransparent.value != "") {
-                                    isWidgetTransparent.value = ""
-                                } else {
-                                    isWidgetTransparent.value = "true"
-                                }
-                                applicationContext
-                                    .openFileOutput(WIDGET_TRANSPARENT, MODE_PRIVATE)
-                                    .use { fos ->
-                                        fos.write(isWidgetTransparent.value.toByteArray())
-                                    }
+                                isWidgetTransparent.value = !isWidgetTransparent.value
+                                prefs.setBoolean(Preference.USE_TRANSPARENT_WIDGET, isWidgetTransparent.value)
                                 DisplayInfo.updateWidget(
                                     applicationContext,
                                     displayInfo.value
@@ -489,19 +404,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (isWidgetTransparent.value == "") {
-                            Image(
-                                painterResource(R.drawable.baseline_check_box_24),
-                                contentDescription = "",
-                                contentScale = ContentScale.Fit,
-                            )
-                        } else {
-                            Image(
-                                painterResource(R.drawable.baseline_check_box_outline_blank_24),
-                                contentDescription = "",
-                                contentScale = ContentScale.Fit,
-                            )
-                        }
+                        Image(
+                            painterResource(if (isWidgetTransparent.value) R.drawable.baseline_check_box_outline_blank_24 else R.drawable.baseline_check_box_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
                     }
                 }
                 Row(
@@ -532,12 +439,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                selectedTempType.value = nextTemp[selectedTempType.value] ?: ""
-                                applicationContext
-                                    .openFileOutput(SELECTED_TEMP_FILE, MODE_PRIVATE)
-                                    .use { fos ->
-                                        fos.write(selectedTempType.value.toByteArray())
-                                    }
+                                selectedTempType.value = nextTemp[selectedTempType.value] ?: CELSIUS
+                                prefs.setString(Preference.TEMP_UNIT, selectedTempType.value)
                                 DisplayInfo.updateWidget(
                                     applicationContext,
                                     displayInfo.value
@@ -547,7 +450,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth(),
-                            text = selectedTempFieldMapping[selectedTempType.value] ?: "",
+                            text = selectedTempType.value,
                             color = Color(resources.getColor(R.color.text_color)),
                             textAlign = TextAlign.Center
                         )
@@ -581,16 +484,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                if (doAlwaysShowAurora.value != "") {
-                                    doAlwaysShowAurora.value = ""
-                                } else {
-                                    doAlwaysShowAurora.value = "true"
-                                }
-                                applicationContext
-                                    .openFileOutput(DO_ALWAYS_SHOW_AURORA, MODE_PRIVATE)
-                                    .use { fos ->
-                                        fos.write(doAlwaysShowAurora.value.toByteArray())
-                                    }
+                                doAlwaysShowAurora.value = !doAlwaysShowAurora.value
+                                prefs.setBoolean(Preference.DO_ALWAYS_SHOW_AURORA, doAlwaysShowAurora.value)
                                 DisplayInfo.updateWidget(
                                     applicationContext,
                                     displayInfo.value
@@ -598,19 +493,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (doAlwaysShowAurora.value == "") {
-                            Image(
-                                painterResource(R.drawable.baseline_check_box_outline_blank_24),
-                                contentDescription = "",
-                                contentScale = ContentScale.Fit,
-                            )
-                        } else {
-                            Image(
-                                painterResource(R.drawable.baseline_check_box_24),
-                                contentDescription = "",
-                                contentScale = ContentScale.Fit,
-                            )
-                        }
+                        Image(
+                            painterResource(if (doAlwaysShowAurora.value) R.drawable.baseline_check_box_24 else R.drawable.baseline_check_box_outline_blank_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
                     }
                 }
                 Row(
@@ -641,16 +528,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                if (useAltLayout.value != "") {
-                                    useAltLayout.value = ""
-                                } else {
-                                    useAltLayout.value = "true"
-                                }
-                                applicationContext
-                                    .openFileOutput(USE_ALT_LAYOUT, MODE_PRIVATE)
-                                    .use { fos ->
-                                        fos.write(useAltLayout.value.toByteArray())
-                                    }
+                                useAltLayout.value = !useAltLayout.value
+                                prefs.setBoolean(Preference.USE_ALT_LAYOUT, useAltLayout.value)
                                 DisplayInfo.updateWidget(
                                     applicationContext,
                                     displayInfo.value
@@ -658,19 +537,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (useAltLayout.value == "") {
-                            Image(
-                                painterResource(R.drawable.baseline_check_box_outline_blank_24),
-                                contentDescription = "",
-                                contentScale = ContentScale.Fit,
-                            )
-                        } else {
-                            Image(
-                                painterResource(R.drawable.baseline_check_box_24),
-                                contentDescription = "",
-                                contentScale = ContentScale.Fit,
-                            )
-                        }
+                        Image(
+                            painterResource(if (useAltLayout.value) R.drawable.baseline_check_box_24 else R.drawable.baseline_check_box_outline_blank_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
                     }
                 }
 
@@ -779,9 +650,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         onDone = {
                                             locationSearchMode.value = false
                                             focusManager.clearFocus()
-                                            applicationContext.openFileOutput(LOCKED_LOCATION_FILE, MODE_PRIVATE).use { fos ->
-                                                fos.write(customLocationName.value.toByteArray())
-                                            }
+                                            prefs.setString(Preference.FORCE_CURRENT_LOCATION, customLocationName.value)
                                             val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                                             WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                                         }
@@ -798,9 +667,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     modifier = Modifier
                                         .clickable {
                                             customLocationName.value = ""
-                                            applicationContext.openFileOutput(LOCKED_LOCATION_FILE, MODE_PRIVATE).use { fos ->
-                                                fos.write(customLocationName.value.toByteArray())
-                                            }
+                                            prefs.setString(Preference.FORCE_CURRENT_LOCATION, customLocationName.value)
                                             val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                                             WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
                                         }
@@ -813,7 +680,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "${LangStrings.getTranslationString(selectedLang.value, Translations.FEELS_LIKE)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
+                        text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         color = Color(resources.getColor(R.color.text_color)),
@@ -823,7 +690,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     )
                 }
             }
-            if (doAlwaysShowAurora.value != "" || displayInfo.value.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
+            if (doAlwaysShowAurora.value || displayInfo.value.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
                 Row(
                     modifier = Modifier
                         .padding(20.dp, 0.dp)
@@ -875,19 +742,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             ) {
                 if (showFullHourly.value) {
                     Row {
-                        if (useAltLayout.value == "") {
-                            Text(
-                                "",
-                                fontSize = 10.sp,
-                            )
-                        } else {
-                            Text(
-                                "",
-                                fontSize = 20.sp,
-                                modifier = Modifier
-                                    .padding(0.dp, 0.dp, 0.dp, 5.dp)
-                            )
-                        }
+                        Text(
+                            "",
+                            fontSize = if (useAltLayout.value) 20.sp else 10.sp,
+                            modifier = Modifier
+                                .padding(0.dp, 0.dp, 0.dp, if (useAltLayout.value) 5.dp else 0.dp)
+                        )
                     }
                     Row(
                         modifier = Modifier
@@ -956,23 +816,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 .width(90.dp)
                                 .padding(10.dp, 0.dp, 10.dp, 0.dp)
                         ) {
-                            if (useAltLayout.value == "") {
-                                Text(
-                                    "${h.time.take(2)}:${h.time.takeLast(2)}",
-                                    fontSize = 10.sp,
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                            } else {
-                                Text(
-                                    "${h.time.take(2)}:${h.time.takeLast(2)}",
-                                    fontSize = 20.sp,
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                            }
+                            Text(
+                                "${h.time.take(2)}:${h.time.takeLast(2)}",
+                                fontSize = if (useAltLayout.value) 20.sp else 10.sp,
+                                color = Color(resources.getColor(R.color.text_color)),
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                            )
                             Image(
                                 painterResource(h.pictogram.getPictogram()),
                                 contentDescription = "",
@@ -1321,7 +1171,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
                             fontSize = 8.sp,
-                            text = "${LangStrings.getTranslationString(selectedLang.value, Translations.FORECAST_ISSUED)} ${displayInfo.value.getLastUpdated()}",
+                            text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_ISSUED)} ${displayInfo.value.getLastUpdated()}",
                             color = Color(resources.getColor(R.color.text_color)),
                             textAlign = TextAlign.Right
                         )
@@ -1330,7 +1180,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
                             fontSize = 8.sp,
-                            text = "${LangStrings.getTranslationString(selectedLang.value, Translations.FORECAST_DOWNLOADED)} ${displayInfo.value.getLastDownloaded()}",
+                            text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_DOWNLOADED)} ${displayInfo.value.getLastDownloaded()}",
                             color = Color(resources.getColor(R.color.text_color)),
                             textAlign = TextAlign.Right
                         )

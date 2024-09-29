@@ -25,8 +25,6 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIF_ID
 import lv.kristapsbe.meteo_android.MainActivity.Companion.HAS_AURORA_NOTIFIED
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LAST_COORDINATES_FILE
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LOCKED_LOCATION_FILE
-import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
 import kotlin.coroutines.resume
 
 
@@ -36,13 +34,9 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             LocationServices.getFusedLocationProviderClient(context)
 
         val lastLocation = suspendCancellableCoroutine { continuation ->
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
+            if (
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
             ) {
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location ->
@@ -75,9 +69,9 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val callback = app.workerCallback
 
         runBlocking {
-            val prefs = app.getSharedPreferences(PrefUtils.APP_PREFS, MODE_PRIVATE)
+            val prefs = AppPreferences(app)
 
-            val customLocationName = loadStringFromStorage(app, LOCKED_LOCATION_FILE)
+            val customLocationName = prefs.getString(Preference.FORCE_CURRENT_LOCATION)
             val cityForecast: CityForecastData?
             if (customLocationName != "") {
                 cityForecast = CityForecastDataDownloader.downloadDataCityName(app, customLocationName)
@@ -92,7 +86,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             callback?.onWorkerResult(cityForecast)
 
             if (cityForecast != null) {
-                val selectedLang = loadStringFromStorage(applicationContext, SELECTED_LANG)
+                val selectedLang = prefs.getString(Preference.LANG)
 
                 val displayInfo = DisplayInfo(cityForecast)
                 DisplayInfo.updateWidget(

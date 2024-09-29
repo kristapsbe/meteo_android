@@ -1,6 +1,5 @@
 package lv.kristapsbe.meteo_android
 
-import android.app.Activity.MODE_PRIVATE
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -10,17 +9,11 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
-import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getDirectionString
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getShortenedDayString
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
-import lv.kristapsbe.meteo_android.MainActivity.Companion.DO_ALWAYS_SHOW_AURORA
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
-import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_LANG
-import lv.kristapsbe.meteo_android.MainActivity.Companion.SELECTED_TEMP_FILE
-import lv.kristapsbe.meteo_android.MainActivity.Companion.USE_ALT_LAYOUT
-import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_TRANSPARENT
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.WeatherPictogram.Companion.rainPictograms
 import kotlin.math.roundToInt
@@ -202,11 +195,11 @@ class DisplayInfo() {
 
             val prefs = AppPreferences(context)
 
-            val lang = loadStringFromStorage(context, SELECTED_LANG)
-            val selectedTemp = loadStringFromStorage(context, SELECTED_TEMP_FILE)
-            val useAltLayout = loadStringFromStorage(context, USE_ALT_LAYOUT)
-            val isWidgetTransparent = loadStringFromStorage(context, WIDGET_TRANSPARENT)
-            val doAlwaysShowAurora = loadStringFromStorage(context, DO_ALWAYS_SHOW_AURORA)
+            val lang = prefs.getString(Preference.LANG)
+            val selectedTemp = prefs.getString(Preference.TEMP_UNIT)
+            val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT)
+            val isWidgetTransparent = prefs.getBoolean(Preference.USE_TRANSPARENT_WIDGET)
+            val doAlwaysShowAurora = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA)
 
             // Retrieve the widget IDs
             val widget = ComponentName(context, ForecastWidget::class.java)
@@ -219,17 +212,17 @@ class DisplayInfo() {
 
             intent.putExtra("widget_text", convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp))
             intent.putExtra("widget_location", displayInfo.city)
-            intent.putExtra("widget_feelslike", "${LangStrings.getTranslationString(lang, Translations.FEELS_LIKE)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
+            intent.putExtra("widget_feelslike", "${LangStrings.getTranslationString(lang, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
 
-            intent.putExtra("is_widget_transparent", (isWidgetTransparent != ""))
+            intent.putExtra("is_widget_transparent", isWidgetTransparent)
             intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
             intent.putExtra("warning_red", displayInfo.warnings.any { it.intensity == "Red" })
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
             intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
             intent.putExtra("rain", displayInfo.getWhenRainExpected(lang))
-            intent.putExtra("use_alt_layout", (useAltLayout != ""))
+            intent.putExtra("use_alt_layout", useAltLayout)
 
-            if (doAlwaysShowAurora != "" || displayInfo.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
+            if (doAlwaysShowAurora || displayInfo.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
                 if (lang == LANG_EN) {
                     intent.putExtra("aurora", "Aurora ${displayInfo.aurora.prob}% at ${displayInfo.aurora.time}")
                 } else {
@@ -348,9 +341,9 @@ class DisplayInfo() {
         val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
         if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
             return if (hourlyRain[0].date.dayOfMonth == getTodayForecast().date.dayOfMonth) {
-                "${LangStrings.getTranslationString(lang, Translations.RAIN_EXPECTED_TODAY)} ${hourlyRain[0].date.hour}:00"
+                "${LangStrings.getTranslationString(lang, Translation.RAIN_EXPECTED_TODAY)} ${hourlyRain[0].date.hour}:00"
             } else {
-                "${LangStrings.getTranslationString(lang, Translations.RAIN_EXPECTED_TOMORROW)} ${hourlyRain[0].date.hour}:00"
+                "${LangStrings.getTranslationString(lang, Translation.RAIN_EXPECTED_TOMORROW)} ${hourlyRain[0].date.hour}:00"
             }
         }
         return ""

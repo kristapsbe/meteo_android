@@ -1,15 +1,21 @@
 package lv.kristapsbe.meteo_android
 
+import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 
 
-enum class Translations {
+enum class Translation {
     RAIN_EXPECTED_TODAY,
     RAIN_EXPECTED_TOMORROW,
     FEELS_LIKE,
     FORECAST_ISSUED,
-    FORECAST_DOWNLOADED
+    FORECAST_DOWNLOADED,
+
+    SETTINGS_APP_LANGUAGE,
+    SETTINGS_WIDGET_TRANSPARENCY
 }
 
 class LangStrings {
@@ -127,22 +133,26 @@ class LangStrings {
 
         private val translationStrings = hashMapOf(
             LANG_EN to hashMapOf(
-                Translations.RAIN_EXPECTED_TODAY to "Rain expected today at",
-                Translations.RAIN_EXPECTED_TOMORROW to "Rain expected tomorrow at",
-                Translations.FEELS_LIKE to "Feels like",
-                Translations.FORECAST_ISSUED to "forecast issued at",
-                Translations.FORECAST_DOWNLOADED to "forecast downloaded at"
+                Translation.RAIN_EXPECTED_TODAY to "Rain expected today at",
+                Translation.RAIN_EXPECTED_TOMORROW to "Rain expected tomorrow at",
+                Translation.FEELS_LIKE to "Feels like",
+                Translation.FORECAST_ISSUED to "forecast issued at",
+                Translation.FORECAST_DOWNLOADED to "forecast downloaded at",
+                Translation.SETTINGS_APP_LANGUAGE to "App language",
+                Translation.SETTINGS_WIDGET_TRANSPARENCY to "Show widget background color"
             ),
             LANG_LV to hashMapOf(
-                Translations.RAIN_EXPECTED_TODAY to "Lietus gaidāms šodien plkst.",
-                Translations.RAIN_EXPECTED_TOMORROW to "Lietus gaidāms rīt plkst.",
-                Translations.FEELS_LIKE to "Jūtas kā",
-                Translations.FORECAST_ISSUED to "prognoze atjaunināta",
-                Translations.FORECAST_DOWNLOADED to "prognoze lejupielādēta"
+                Translation.RAIN_EXPECTED_TODAY to "Lietus gaidāms šodien plkst.",
+                Translation.RAIN_EXPECTED_TOMORROW to "Lietus gaidāms rīt plkst.",
+                Translation.FEELS_LIKE to "Jūtas kā",
+                Translation.FORECAST_ISSUED to "prognoze atjaunināta",
+                Translation.FORECAST_DOWNLOADED to "prognoze lejupielādēta",
+                Translation.SETTINGS_APP_LANGUAGE to "Lietotnes valoda",
+                Translation.SETTINGS_WIDGET_TRANSPARENCY to "Rādīt logrīka fona krāsu"
             )
         )
 
-        fun getTranslationString(lang: String, key: Translations): String {
+        fun getTranslationString(lang: String, key: Translation): String {
             return translationStrings[lang]?.get(key) ?: ""
         }
     }
