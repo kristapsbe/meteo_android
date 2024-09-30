@@ -5,7 +5,6 @@ import android.content.Context
 
 enum class Preference {
     FORCE_CURRENT_LOCATION,
-    FORCE_DEFAULT_LOCATION,
     TEMP_UNIT,
     LANG,
     DO_SHOW_WIDGET_BACKGROUND,

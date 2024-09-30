@@ -643,6 +643,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             }
                         }
                     }
+                    Row {
+                        Text("")
+                        Image(
+                            painterResource(R.drawable.uv),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
                 }
             }
             Column(
@@ -689,7 +697,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     textAlign = TextAlign.Center,
                                 )
                                 Text(
-                                    "${h.rainProb}%",
+                                    "${h.stormProb}%",
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
@@ -702,6 +710,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 )
                                 Text(
                                     h.getDirection(selectedLang.value),
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text (
+                                    h.uvIndex.toString(),
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,

@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -162,11 +161,12 @@ class HourlyForecast(
     val date: LocalDateTime,
     val time: String,
     val rainAmount: Int,
-    val rainProb: Int,
+    val stormProb: Int,
     val windSpeed: Int,
     private val windDirection: Int,
     val currentTemp: Int,
     val feelsLikeTemp: Int,
+    val uvIndex: Int,
     val pictogram: WeatherPictogram
 ) {
     fun getDayOfWeek(): String {
@@ -223,6 +223,7 @@ class DisplayInfo() {
             intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
             intent.putExtra("rain_image", displayInfo.getRainIconId())
             intent.putExtra("rain", displayInfo.getWhenRainExpected(lang))
+            intent.putExtra("uv_index", displayInfo.getTodayForecast().uvIndex.toString())
             intent.putExtra("do_show_aurora", (doAlwaysShowAurora || (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD)))
             intent.putExtra("aurora", "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})")
             intent.putExtra("use_alt_layout", useAltLayout)
@@ -260,6 +261,7 @@ class DisplayInfo() {
                     e.vals[4].roundToInt(),
                     e.vals[1].roundToInt(),
                     e.vals[2].roundToInt(),
+                    e.vals[7].roundToInt(),
                     WeatherPictogram(e.vals[0].toInt())
                 )
             }
@@ -328,7 +330,7 @@ class DisplayInfo() {
         if (currHourlyForecasts.isNotEmpty()) {
             return currHourlyForecasts[0]
         }
-        return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
+        return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
     }
 
     fun getRainIconId(): Int {

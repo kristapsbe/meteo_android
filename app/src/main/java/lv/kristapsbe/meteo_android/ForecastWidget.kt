@@ -34,7 +34,7 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, "", false, null, false, false, -1)
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, "", false, null, false, false, -1, "")
         }
     }
 
@@ -51,6 +51,7 @@ class ForecastWidget : AppWidgetProvider() {
             val warningOrange = intent.getBooleanExtra("warning_orange", false)
             val warningYellow = intent.getBooleanExtra("warning_yellow", false)
             val rain = intent.getStringExtra("rain")
+            val uvIndex = intent.getStringExtra("uv_index")
             val rainImage = intent.getIntExtra("rain_image", R.drawable.clear1)
             val aurora = intent.getStringExtra("aurora")
             val doShowAurora = intent.getBooleanExtra("do_show_aurora", false)
@@ -63,7 +64,7 @@ class ForecastWidget : AppWidgetProvider() {
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain ?: "", doShowWidgetBackground, aurora, useAltLayout, doShowAurora, rainImage)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain ?: "", doShowWidgetBackground, aurora, useAltLayout, doShowAurora, rainImage, uvIndex)
             }
         }
     }
@@ -92,7 +93,8 @@ internal fun updateAppWidget(
     aurora: String?,
     useAltLayout: Boolean,
     doShowAurora: Boolean,
-    rainImage: Int
+    rainImage: Int,
+    uvIndex: String?
 ) {
     // Create an Intent to launch the MainActivity when clicked
     val intent = Intent(context, MainActivity::class.java)
@@ -112,6 +114,7 @@ internal fun updateAppWidget(
         views.setTextViewText(R.id.appwidget_feelslike, feelsLikeText)
     }
 
+    views.setTextViewText(R.id.appwidget_uv, uvIndex)
     if (rain == "") {
         views.setViewVisibility(R.id.appwidget_rain_wrap, View.GONE)
     } else {
