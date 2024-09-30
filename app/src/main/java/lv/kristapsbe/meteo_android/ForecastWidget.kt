@@ -6,7 +6,9 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
@@ -163,15 +165,17 @@ internal fun updateAppWidget(
     }
     val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
     val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-
-    val heightThresholdDp = 120
-    // Check if the widget width is smaller than the threshold
-    if (minHeight < heightThresholdDp) {
-        views.setViewVisibility(R.id.top_widget, View.GONE)
-        views.setViewVisibility(R.id.bottom_widget, View.GONE)
-    } else {
+    val displayMetrics = Resources.getSystem().displayMetrics
+    val density = displayMetrics.density
+    val minHeightDp = (minHeight / density).toInt()
+    val cellSizeDp = 70
+    // TODO - this seems to be working on both the emulated pixel and a S22 ultra - the math is all sorts of messed up though - revisit
+    if ((minHeightDp + cellSizeDp + 25) / cellSizeDp > 1) {
         views.setViewVisibility(R.id.top_widget, View.VISIBLE)
         views.setViewVisibility(R.id.bottom_widget, View.VISIBLE)
+    } else {
+        views.setViewVisibility(R.id.top_widget, View.GONE)
+        views.setViewVisibility(R.id.bottom_widget, View.GONE)
     }
 
     // Instruct the widget manager to update the widget
