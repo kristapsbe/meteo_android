@@ -13,6 +13,7 @@ enum class Translation {
 
     SETTINGS_APP_LANGUAGE,
     SETTINGS_WIDGET_TRANSPARENCY,
+    SETTINGS_ALWAYS_SHOW_DETAILS,
     SETTINGS_TEMPERATURE_UNIT,
     SETTINGS_ALWAYS_DISPLAY_AURORA,
     SETTINGS_ALWAYS_DISPLAY_UV,
@@ -144,6 +145,7 @@ class LangStrings {
                 Translation.FORECAST_DOWNLOADED to "forecast downloaded at",
                 Translation.SETTINGS_APP_LANGUAGE to "App language",
                 Translation.SETTINGS_WIDGET_TRANSPARENCY to "Show widget background color",
+                Translation.SETTINGS_ALWAYS_SHOW_DETAILS to "Always show detailed widget",
                 Translation.SETTINGS_TEMPERATURE_UNIT to "Temperature unit",
                 Translation.SETTINGS_ALWAYS_DISPLAY_AURORA to "Always display aurora forecast",
                 Translation.SETTINGS_ALWAYS_DISPLAY_UV to "Always display UV index in widget",
@@ -159,6 +161,7 @@ class LangStrings {
                 Translation.FORECAST_DOWNLOADED to "prognoze lejupielādēta",
                 Translation.SETTINGS_APP_LANGUAGE to "Lietotnes valoda",
                 Translation.SETTINGS_WIDGET_TRANSPARENCY to "Rādīt logrīka fona krāsu",
+                Translation.SETTINGS_ALWAYS_SHOW_DETAILS to "Vienmēr rādīt detalizētu logrīku",
                 Translation.SETTINGS_TEMPERATURE_UNIT to "Temperatūras mērvienība",
                 Translation.SETTINGS_ALWAYS_DISPLAY_AURORA to "Vienmēr rādīt ziemeļblāzmas prognozi",
                 Translation.SETTINGS_ALWAYS_DISPLAY_UV to "Vienmēr logrīkā rādīt UV indeksu",
