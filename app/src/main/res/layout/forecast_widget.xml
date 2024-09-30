@@ -10,44 +10,43 @@
     <LinearLayout
         android:id="@+id/top_widget"
         android:layout_height="0dp"
-        android:layout_width="match_parent"
         android:layout_weight="1"
-        android:gravity="center_horizontal"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:id="@+id/appwidget_aurora_wrap"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/weather_icon"
-                android:src="@drawable/baseline_star_border_green_24"
-                android:paddingEnd="3dp"/>
-            <TextView
-                android:id="@+id/appwidget_aurora"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/appwidget_text"
-                android:textColor="@color/text_color"
-                android:textSize="10dp" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_height="0dp"
         android:layout_width="match_parent"
-        android:layout_weight="2"
+        android:gravity="bottom"
         android:orientation="vertical"
-        android:gravity="center_vertical">
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
+                android:id="@+id/appwidget_aurora_wrap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:padding="10dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/weather_icon"
+                    android:src="@drawable/baseline_star_border_green_24"/>
+                <TextView
+                    android:id="@+id/appwidget_aurora"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/appwidget_text"
+                    android:textColor="@color/text_color"
+                    android:textSize="10sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -61,8 +60,8 @@
                     android:layout_width="match_parent"
                     android:gravity="center_horizontal">
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="12dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
                         android:src="@drawable/uv" />
                     <TextView
                         android:id="@+id/appwidget_uv"
@@ -71,118 +70,136 @@
                         android:layout_height="wrap_content"
                         android:contentDescription="@string/appwidget_text"
                         android:gravity="center"
-                        android:textSize="10dp" />
+                        android:textSize="10sp" />
                 </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/main_warnings"
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
-                android:layout_weight="1"
-                android:gravity="center">
-                <ImageView
-                    android:id="@+id/red_warning"
-                    android:layout_width="20dp"
-                    android:layout_height="12dp"
-                    android:contentDescription="@string/weather_icon" />
-                <ImageView
-                    android:id="@+id/orange_warning"
-                    android:layout_width="20dp"
-                    android:layout_height="12dp"
-                    android:contentDescription="@string/weather_icon" />
-                <ImageView
-                    android:id="@+id/yellow_warning"
-                    android:layout_width="20dp"
-                    android:layout_height="12dp"
-                    android:contentDescription="@string/weather_icon" />
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/main_warnings"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:paddingEnd="10dp">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription=""
+                            android:textSize="10sp" />
+                        <ImageView
+                            android:id="@+id/red_warning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@string/weather_icon" />
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription=""
+                            android:textSize="10sp" />
+                        <ImageView
+                            android:id="@+id/orange_warning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@string/weather_icon" />
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription=""
+                            android:textSize="10sp" />
+                        <ImageView
+                            android:id="@+id/yellow_warning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@string/weather_icon" />
+
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_width="0dp"
+            android:layout_weight="8"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="8"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <ImageView
-                        android:id="@+id/icon_image"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="match_parent"
-                        android:contentDescription="@string/weather_icon"
-                        android:src="@drawable/clear1" />
-
-                    <TextView
-                        android:id="@+id/appwidget_text"
-                        android:textColor="@color/text_color"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/appwidget_text"
-                        android:gravity="center"
-                        android:textSize="28dp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:id="@+id/appwidget_location"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/appwidget_text"
-                        android:gravity="center"
-                        android:textColor="@color/text_color"
-                        android:textSize="10dp" />
-
-                    <TextView
-                        android:id="@+id/appwidget_feelslike"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/appwidget_text"
-                        android:textColor="@color/text_color"
-                        android:gravity="center"
-                        android:textSize="10dp" />
-                </LinearLayout>
-
-            </LinearLayout>
-            <LinearLayout
-                android:id="@+id/alt_warnings"
+            <ImageView
+                android:id="@+id/icon_image"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-                <ImageView
-                    android:id="@+id/red_warning_alt"
-                    android:layout_width="20dp"
-                    android:layout_height="12dp"
-                    android:contentDescription="@string/weather_icon" />
-                <ImageView
-                    android:id="@+id/orange_warning_alt"
-                    android:layout_width="20dp"
-                    android:layout_height="12dp"
-                    android:contentDescription="@string/weather_icon" />
-                <ImageView
-                    android:id="@+id/yellow_warning_alt"
-                    android:layout_width="20dp"
-                    android:layout_height="12dp"
-                    android:contentDescription="@string/weather_icon" />
+                android:layout_height="match_parent"
+                android:contentDescription="@string/weather_icon"
+                android:gravity="center"
+                android:src="@drawable/clear1"
+                android:padding="10dp" />
 
-            </LinearLayout>
+            <TextView
+                android:id="@+id/appwidget_text"
+                android:textColor="@color/text_color"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/appwidget_text"
+                android:gravity="center_vertical"
+                android:textAlignment="textEnd"
+                android:autoSizeTextType="uniform"
+                android:maxLines="1"
+                android:paddingEnd="10dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/alt_warnings"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <ImageView
+                android:id="@+id/red_warning_alt"
+                android:layout_width="20dp"
+                android:layout_height="12dp"
+                android:contentDescription="@string/weather_icon" />
+            <ImageView
+                android:id="@+id/orange_warning_alt"
+                android:layout_width="20dp"
+                android:layout_height="12dp"
+                android:contentDescription="@string/weather_icon" />
+            <ImageView
+                android:id="@+id/yellow_warning_alt"
+                android:layout_width="20dp"
+                android:layout_height="12dp"
+                android:contentDescription="@string/weather_icon" />
+
         </LinearLayout>
     </LinearLayout>
 
@@ -191,29 +208,63 @@
         android:layout_height="0dp"
         android:layout_width="match_parent"
         android:layout_weight="1"
-        android:gravity="center_horizontal"
+        android:gravity="top"
+        android:orientation="vertical"
         android:visibility="gone">
 
         <LinearLayout
-            android:id="@+id/appwidget_rain_wrap"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/appwidget_rain_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/weather_icon"
-                android:src="@drawable/rain0"
-                android:paddingEnd="3dp"/>
             <TextView
-                android:id="@+id/appwidget_rain"
-                android:layout_width="wrap_content"
+                android:id="@+id/appwidget_location"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/appwidget_text"
+                android:gravity="center"
+                android:textColor="@color/text_color"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/appwidget_feelslike"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/appwidget_text"
                 android:textColor="@color/text_color"
-                android:textSize="10dp" />
+                android:gravity="center"
+                android:textSize="10sp"
+                android:paddingEnd="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
+                android:id="@+id/appwidget_rain_wrap"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/appwidget_rain_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/weather_icon"
+                    android:src="@drawable/rain0"
+                    android:paddingEnd="3dp"/>
+                <TextView
+                    android:id="@+id/appwidget_rain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/appwidget_text"
+                    android:textColor="@color/text_color"
+                    android:textSize="10sp" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
