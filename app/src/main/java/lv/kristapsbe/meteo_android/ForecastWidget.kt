@@ -36,7 +36,7 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, "", false, null, false, false, -1, "")
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, "", false, null, false, false, false, -1, "")
         }
     }
 
@@ -57,6 +57,7 @@ class ForecastWidget : AppWidgetProvider() {
             val rainImage = intent.getIntExtra("rain_image", R.drawable.clear1)
             val aurora = intent.getStringExtra("aurora")
             val doShowAurora = intent.getBooleanExtra("do_show_aurora", false)
+            val doShowUV = intent.getBooleanExtra("do_show_uv", false)
 
             val doShowWidgetBackground = intent.getBooleanExtra("do_show_widget_background", false)
             val useAltLayout = intent.getBooleanExtra("use_alt_layout", false)
@@ -66,7 +67,7 @@ class ForecastWidget : AppWidgetProvider() {
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain ?: "", doShowWidgetBackground, aurora, useAltLayout, doShowAurora, rainImage, uvIndex)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain ?: "", doShowWidgetBackground, aurora, useAltLayout, doShowAurora, doShowUV, rainImage, uvIndex)
             }
         }
     }
@@ -95,6 +96,7 @@ internal fun updateAppWidget(
     aurora: String?,
     useAltLayout: Boolean,
     doShowAurora: Boolean,
+    doShowUV: Boolean,
     rainImage: Int,
     uvIndex: String?
 ) {
@@ -116,7 +118,6 @@ internal fun updateAppWidget(
         views.setTextViewText(R.id.appwidget_feelslike, feelsLikeText)
     }
 
-    views.setTextViewText(R.id.appwidget_uv, uvIndex)
     if (rain == "") {
         views.setViewVisibility(R.id.appwidget_rain_wrap, View.GONE)
     } else {
@@ -131,38 +132,32 @@ internal fun updateAppWidget(
         views.setViewVisibility(R.id.appwidget_aurora_wrap, View.GONE)
     }
 
+    if (doShowUV) {
+        views.setTextViewText(R.id.appwidget_uv, uvIndex)
+        views.setViewVisibility(R.id.appwidget_uv_wrap, View.VISIBLE)
+    } else {
+        views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
+    }
+
     if (icon != null) {
         views.setImageViewResource(R.id.icon_image, icon)
     }
     if (warningRed) {
         views.setImageViewResource(R.id.red_warning, R.drawable.baseline_warning_24_red)
-        views.setImageViewResource(R.id.red_warning_alt, R.drawable.baseline_warning_24_red)
     } else {
         views.setImageViewResource(R.id.red_warning, 0)
-        views.setImageViewResource(R.id.red_warning_alt, 0)
     }
     if (warningOrange) {
         views.setImageViewResource(R.id.orange_warning, R.drawable.baseline_warning_orange_24)
-        views.setImageViewResource(R.id.orange_warning_alt, R.drawable.baseline_warning_orange_24)
     } else {
         views.setImageViewResource(R.id.orange_warning, 0)
-        views.setImageViewResource(R.id.orange_warning_alt, 0)
     }
     if (warningYellow) {
         views.setImageViewResource(R.id.yellow_warning, R.drawable.baseline_warning_yellow_24)
-        views.setImageViewResource(R.id.yellow_warning_alt, R.drawable.baseline_warning_yellow_24)
     } else {
         views.setImageViewResource(R.id.yellow_warning, 0)
-        views.setImageViewResource(R.id.yellow_warning_alt, 0)
     }
 
-    if (useAltLayout) {
-        views.setViewVisibility(R.id.main_warnings, View.GONE)
-        views.setViewVisibility(R.id.alt_warnings, View.VISIBLE)
-    } else {
-        views.setViewVisibility(R.id.main_warnings, View.VISIBLE)
-        views.setViewVisibility(R.id.alt_warnings, View.GONE)
-    }
     val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
     val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
     val displayMetrics = Resources.getSystem().displayMetrics

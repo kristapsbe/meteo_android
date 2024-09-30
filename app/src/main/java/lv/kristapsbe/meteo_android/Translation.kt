@@ -15,6 +15,7 @@ enum class Translation {
     SETTINGS_WIDGET_TRANSPARENCY,
     SETTINGS_TEMPERATURE_UNIT,
     SETTINGS_ALWAYS_DISPLAY_AURORA,
+    SETTINGS_ALWAYS_DISPLAY_UV,
     SETTINGS_USE_ALT_LAYOUT,
 
     NOTIFICATION_AURORA_TITLE,
@@ -145,6 +146,7 @@ class LangStrings {
                 Translation.SETTINGS_WIDGET_TRANSPARENCY to "Show widget background color",
                 Translation.SETTINGS_TEMPERATURE_UNIT to "Temperature unit",
                 Translation.SETTINGS_ALWAYS_DISPLAY_AURORA to "Always display aurora forecast",
+                Translation.SETTINGS_ALWAYS_DISPLAY_UV to "Always display UV index in widget",
                 Translation.SETTINGS_USE_ALT_LAYOUT to "Use alternative layout",
                 Translation.NOTIFICATION_AURORA_TITLE to "Aurora",
                 Translation.NOTIFICATION_AURORA_DESCRIPTION to "Aurora probability has increased to"
@@ -159,6 +161,7 @@ class LangStrings {
                 Translation.SETTINGS_WIDGET_TRANSPARENCY to "Rādīt logrīka fona krāsu",
                 Translation.SETTINGS_TEMPERATURE_UNIT to "Temperatūras mērvienība",
                 Translation.SETTINGS_ALWAYS_DISPLAY_AURORA to "Vienmēr rādīt ziemeļblāzmas prognozi",
+                Translation.SETTINGS_ALWAYS_DISPLAY_UV to "Vienmēr logrīkā rādīt UV indeksu",
                 Translation.SETTINGS_USE_ALT_LAYOUT to "Lietot alternatīvo izkārtojumu",
                 Translation.NOTIFICATION_AURORA_TITLE to "Ziemeļblāzma",
                 Translation.NOTIFICATION_AURORA_DESCRIPTION to "Ziemeļblāzmas varbūtība ir palielinājusies līdz"

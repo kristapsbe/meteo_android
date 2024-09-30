@@ -202,6 +202,7 @@ class DisplayInfo() {
             val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
             val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
             val doAlwaysShowAurora = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false)
+            val doAlwaysShowUV = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_UV, false)
 
             // Retrieve the widget IDs
             val widget = ComponentName(context, ForecastWidget::class.java)
@@ -225,6 +226,7 @@ class DisplayInfo() {
             intent.putExtra("rain", displayInfo.getWhenRainExpected(lang))
             intent.putExtra("uv_index", displayInfo.getTodayForecast().uvIndex.toString())
             intent.putExtra("do_show_aurora", (doAlwaysShowAurora || (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD)))
+            intent.putExtra("do_show_uv", (doAlwaysShowUV || (displayInfo.getTodayForecast().uvIndex > 0)))
             intent.putExtra("aurora", "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})")
             intent.putExtra("use_alt_layout", useAltLayout)
 

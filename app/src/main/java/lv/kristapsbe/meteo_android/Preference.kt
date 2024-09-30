@@ -9,6 +9,7 @@ enum class Preference {
     LANG,
     DO_SHOW_WIDGET_BACKGROUND,
     DO_ALWAYS_SHOW_AURORA,
+    DO_ALWAYS_SHOW_UV,
     USE_ALT_LAYOUT,
     USE_ANIMATED_ICONS,
     LAST_LAT,
