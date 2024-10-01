@@ -379,6 +379,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     .clickable {
                         doDisplaySettings.value = !doDisplaySettings.value
                     }
+                    .padding(0.dp, 0.dp, 0.dp, 10.dp)
             ) {
                 Image(
                     painterResource(R.drawable.baseline_settings_24),
