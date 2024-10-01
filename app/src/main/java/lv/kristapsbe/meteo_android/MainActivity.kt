@@ -58,6 +58,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -479,6 +480,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 Text(
                                     text = displayInfo.value.city,
                                     fontSize = 20.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     textAlign = TextAlign.Left,
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier
@@ -493,6 +496,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     keyboardOptions = KeyboardOptions.Default.copy(
                                         imeAction = ImeAction.Done
                                     ),
+                                    maxLines = 1,
                                     textStyle = TextStyle(fontSize = 20.sp, color = Color(resources.getColor(R.color.text_color))),
                                     cursorBrush = SolidColor(Color(resources.getColor(R.color.text_color))),
                                     keyboardActions = KeyboardActions(
@@ -1022,32 +1026,22 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             modifier = Modifier
                 .padding(20.dp, 0.dp, 20.dp, (5+navigationBarHeight).dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 8.sp,
-                            text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_ISSUED)} ${displayInfo.value.getLastUpdated()}",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            textAlign = TextAlign.Right
-                        )
-                    }
-                    Row {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 8.sp,
-                            text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_DOWNLOADED)} ${displayInfo.value.getLastDownloaded()}",
-                            color = Color(resources.getColor(R.color.text_color)),
-                            textAlign = TextAlign.Right
-                        )
-                    }
-                }
-            }
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 8.sp,
+                lineHeight = 10.sp,
+                text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_ISSUED)} ${displayInfo.value.getLastUpdated()}",
+                color = Color(resources.getColor(R.color.text_color)),
+                textAlign = TextAlign.Right
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 8.sp,
+                lineHeight = 10.sp,
+                text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_DOWNLOADED)} ${displayInfo.value.getLastDownloaded()}",
+                color = Color(resources.getColor(R.color.text_color)),
+                textAlign = TextAlign.Right
+            )
         }
     }
 
