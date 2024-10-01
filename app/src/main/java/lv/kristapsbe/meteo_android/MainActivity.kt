@@ -593,9 +593,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     Row {
                         Text(
                             "",
-                            fontSize = if (useAltLayout.value) 20.sp else 10.sp,
-                            modifier = Modifier
-                                .padding(0.dp, 0.dp, 0.dp, if (useAltLayout.value) 5.dp else 0.dp)
+                            fontSize = if (useAltLayout.value) 16.sp else 10.sp,
                         )
                     }
                     Row(

@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
@@ -115,6 +114,7 @@ internal fun updateAppWidget(
     }
     if (locationText != null) {
         views.setTextViewText(R.id.appwidget_location, locationText)
+        views.setTextViewText(R.id.appwidget_location_small, locationText)
     }
     if (feelsLikeText != null) {
         views.setTextViewText(R.id.appwidget_feelslike, feelsLikeText)
@@ -146,18 +146,24 @@ internal fun updateAppWidget(
     }
     if (warningRed) {
         views.setImageViewResource(R.id.red_warning, R.drawable.baseline_warning_24_red)
+        views.setImageViewResource(R.id.red_warning_small, R.drawable.baseline_warning_24_red)
     } else {
         views.setImageViewResource(R.id.red_warning, 0)
+        views.setImageViewResource(R.id.red_warning_small, 0)
     }
     if (warningOrange) {
         views.setImageViewResource(R.id.orange_warning, R.drawable.baseline_warning_orange_24)
+        views.setImageViewResource(R.id.orange_warning_small, R.drawable.baseline_warning_orange_24)
     } else {
         views.setImageViewResource(R.id.orange_warning, 0)
+        views.setImageViewResource(R.id.orange_warning_small, 0)
     }
     if (warningYellow) {
         views.setImageViewResource(R.id.yellow_warning, R.drawable.baseline_warning_yellow_24)
+        views.setImageViewResource(R.id.yellow_warning_small, R.drawable.baseline_warning_yellow_24)
     } else {
         views.setImageViewResource(R.id.yellow_warning, 0)
+        views.setImageViewResource(R.id.yellow_warning_small, 0)
     }
 
     val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
@@ -165,14 +171,19 @@ internal fun updateAppWidget(
     val displayMetrics = Resources.getSystem().displayMetrics
     val density = displayMetrics.density
     val minHeightDp = (minHeight / density).toInt()
-    val cellSizeDp = 70
     // TODO - this seems to be working on both the emulated pixel and a S22 ultra - the math is all sorts of messed up though - revisit
-    if (forceShowDetailed || ((minHeightDp + cellSizeDp + 25) / cellSizeDp > 1)) {
+    if (forceShowDetailed || (minHeightDp > 45)) {
         views.setViewVisibility(R.id.top_widget, View.VISIBLE)
         views.setViewVisibility(R.id.bottom_widget, View.VISIBLE)
+
+        views.setViewVisibility(R.id.appwidget_location_small, View.GONE)
+        views.setViewVisibility(R.id.main_warnings_small, View.GONE)
     } else {
         views.setViewVisibility(R.id.top_widget, View.GONE)
         views.setViewVisibility(R.id.bottom_widget, View.GONE)
+
+        views.setViewVisibility(R.id.appwidget_location_small, View.VISIBLE)
+        views.setViewVisibility(R.id.main_warnings_small, View.VISIBLE)
     }
 
     // Instruct the widget manager to update the widget
