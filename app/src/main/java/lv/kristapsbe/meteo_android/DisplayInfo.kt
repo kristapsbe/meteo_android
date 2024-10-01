@@ -201,7 +201,7 @@ class DisplayInfo() {
             val selectedTemp = prefs.getString(Preference.TEMP_UNIT, CELSIUS)
             val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
             val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
-            val forceShowDetailedWidget = prefs.getBoolean(Preference.DO_SHOW_DETAILED_WIDGET, false)
+            val forceShowDetailedWidget = prefs.getBoolean(Preference.DO_FORCE_SHOW_DETAILED_WIDGET, false)
             val doAlwaysShowAurora = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false)
             val doAlwaysShowUV = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_UV, false)
 

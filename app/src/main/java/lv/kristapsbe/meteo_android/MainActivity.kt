@@ -161,7 +161,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         selectedLang = mutableStateOf(prefs.getString(Preference.LANG, LANG_EN))
         selectedTempType = mutableStateOf(prefs.getString(Preference.TEMP_UNIT, CELSIUS))
         showWidgetBackground = mutableStateOf(prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true))
-        forceShowDetailedWidget = mutableStateOf(prefs.getBoolean(Preference.DO_SHOW_DETAILED_WIDGET, false))
+        forceShowDetailedWidget = mutableStateOf(prefs.getBoolean(Preference.DO_FORCE_SHOW_DETAILED_WIDGET, false))
         useAltLayout = mutableStateOf(prefs.getBoolean(Preference.USE_ALT_LAYOUT, false))
         doAlwaysShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false))
         doAlwaysShowUV = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_UV, false))
@@ -390,7 +390,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             if (doDisplaySettings.value) {
                 SettingsEntryString(Translation.SETTINGS_APP_LANGUAGE, Preference.LANG, selectedLang, nextLang, LANG_EN)
                 SettingsEntryBoolean(Translation.SETTINGS_WIDGET_TRANSPARENCY, Preference.DO_SHOW_WIDGET_BACKGROUND, showWidgetBackground)
-                SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_SHOW_DETAILS, Preference.DO_SHOW_DETAILED_WIDGET, forceShowDetailedWidget)
+                SettingsEntryBoolean(Translation.SETTINGS_FORCE_ALWAYS_SHOW_DETAILS, Preference.DO_FORCE_SHOW_DETAILED_WIDGET, forceShowDetailedWidget)
                 SettingsEntryString(Translation.SETTINGS_TEMPERATURE_UNIT, Preference.TEMP_UNIT, selectedTempType, nextTemp, CELSIUS)
                 SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_DISPLAY_AURORA, Preference.DO_ALWAYS_SHOW_AURORA, doAlwaysShowAurora)
                 SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_DISPLAY_UV, Preference.DO_ALWAYS_SHOW_UV, doAlwaysShowUV)
