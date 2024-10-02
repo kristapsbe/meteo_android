@@ -136,8 +136,13 @@ internal fun updateAppWidget(
 
     if (doShowUV) {
         views.setTextViewText(R.id.appwidget_uv, uvIndex)
-        views.setViewVisibility(R.id.appwidget_uv_wrap, View.VISIBLE)
-        views.setImageViewResource(R.id.uv_alt, R.drawable.uv)
+        if (useAltLayout) {
+            views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
+            views.setImageViewResource(R.id.uv_alt, R.drawable.uv)
+        } else {
+            views.setViewVisibility(R.id.appwidget_uv_wrap, View.VISIBLE)
+            views.setImageViewResource(R.id.uv_alt, 0)
+        }
     } else {
         views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
         views.setImageViewResource(R.id.uv_alt, 0)
@@ -186,11 +191,9 @@ internal fun updateAppWidget(
 
         if (useAltLayout) {
             views.setViewVisibility(R.id.main_warnings_small_alt, View.VISIBLE)
-            views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
             views.setViewVisibility(R.id.main_warnings, View.GONE)
         } else {
             views.setViewVisibility(R.id.main_warnings_small_alt, View.GONE)
-            views.setViewVisibility(R.id.appwidget_uv_wrap, View.VISIBLE)
             views.setViewVisibility(R.id.main_warnings, View.VISIBLE)
         }
 
