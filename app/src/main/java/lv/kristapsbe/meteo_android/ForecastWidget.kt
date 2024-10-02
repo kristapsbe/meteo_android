@@ -134,36 +134,44 @@ internal fun updateAppWidget(
         views.setViewVisibility(R.id.appwidget_aurora_wrap, View.GONE)
     }
 
-    if (doShowUV) {
+    if (true) {
         views.setTextViewText(R.id.appwidget_uv, uvIndex)
         views.setViewVisibility(R.id.appwidget_uv_wrap, View.VISIBLE)
+        views.setImageViewResource(R.id.uv_alt, R.drawable.uv)
     } else {
         views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
+        views.setImageViewResource(R.id.uv_alt, 0)
     }
 
     if (icon != null) {
         views.setImageViewResource(R.id.icon_image, icon)
     }
-    if (warningRed) {
+    if (true) {
         views.setImageViewResource(R.id.red_warning, R.drawable.baseline_warning_24_red)
         views.setImageViewResource(R.id.red_warning_small, R.drawable.baseline_warning_24_red)
+        views.setImageViewResource(R.id.red_warning_small_alt, R.drawable.baseline_warning_24_red)
     } else {
         views.setImageViewResource(R.id.red_warning, 0)
         views.setImageViewResource(R.id.red_warning_small, 0)
+        views.setImageViewResource(R.id.red_warning_small_alt, 0)
     }
-    if (warningOrange) {
+    if (true) {
         views.setImageViewResource(R.id.orange_warning, R.drawable.baseline_warning_orange_24)
         views.setImageViewResource(R.id.orange_warning_small, R.drawable.baseline_warning_orange_24)
+        views.setImageViewResource(R.id.orange_warning_small_alt, R.drawable.baseline_warning_orange_24)
     } else {
         views.setImageViewResource(R.id.orange_warning, 0)
         views.setImageViewResource(R.id.orange_warning_small, 0)
+        views.setImageViewResource(R.id.orange_warning_small_alt, 0)
     }
-    if (warningYellow) {
+    if (true) {
         views.setImageViewResource(R.id.yellow_warning, R.drawable.baseline_warning_yellow_24)
         views.setImageViewResource(R.id.yellow_warning_small, R.drawable.baseline_warning_yellow_24)
+        views.setImageViewResource(R.id.yellow_warning_small_alt, R.drawable.baseline_warning_yellow_24)
     } else {
         views.setImageViewResource(R.id.yellow_warning, 0)
         views.setImageViewResource(R.id.yellow_warning_small, 0)
+        views.setImageViewResource(R.id.yellow_warning_small_alt, 0)
     }
 
     val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
@@ -176,16 +184,32 @@ internal fun updateAppWidget(
         views.setViewVisibility(R.id.top_widget, View.VISIBLE)
         views.setViewVisibility(R.id.bottom_widget, View.VISIBLE)
 
+        if (useAltLayout) {
+            views.setViewVisibility(R.id.main_warnings_small_alt, View.VISIBLE)
+            views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
+            views.setViewVisibility(R.id.main_warnings, View.GONE)
+        } else {
+            views.setViewVisibility(R.id.main_warnings_small_alt, View.GONE)
+            views.setViewVisibility(R.id.appwidget_uv_wrap, View.VISIBLE)
+            views.setViewVisibility(R.id.main_warnings, View.VISIBLE)
+        }
+
         views.setViewVisibility(R.id.appwidget_location_small, View.GONE)
         views.setViewVisibility(R.id.main_warnings_small, View.GONE)
     } else {
         views.setViewVisibility(R.id.top_widget, View.GONE)
         views.setViewVisibility(R.id.bottom_widget, View.GONE)
 
-        views.setViewVisibility(R.id.appwidget_location_small, View.VISIBLE)
-        views.setViewVisibility(R.id.main_warnings_small, View.VISIBLE)
-    }
+        if (useAltLayout) {
+            views.setViewVisibility(R.id.main_warnings_small_alt, View.VISIBLE)
+            views.setViewVisibility(R.id.main_warnings_small, View.GONE)
+        } else {
+            views.setViewVisibility(R.id.main_warnings_small_alt, View.GONE)
+            views.setViewVisibility(R.id.main_warnings_small, View.VISIBLE)
+        }
 
+        views.setViewVisibility(R.id.appwidget_location_small, View.VISIBLE)
+    }
     // Instruct the widget manager to update the widget
     appWidgetManager.updateAppWidget(appWidgetId, views)
 }
