@@ -18,6 +18,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -26,6 +27,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -472,60 +475,72 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth(0.47f),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Row {
-                        Column(
-                            modifier = Modifier
-                                .padding(0.dp, 0.dp, 5.dp, 0.dp)
-                        ) {
-                            if (!locationSearchMode.value) {
-                                Text(
-                                    text = displayInfo.value.city,
-                                    fontSize = 20.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    textAlign = TextAlign.Left,
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier
-                                        .clickable {
-                                            locationSearchMode.value = !locationSearchMode.value
-                                        }
-                                )
-                            } else {
-                                BasicTextField(
-                                    value = customLocationName.value,
-                                    onValueChange = { customLocationName.value = it },
-                                    keyboardOptions = KeyboardOptions.Default.copy(
-                                        imeAction = ImeAction.Done
-                                    ),
-                                    maxLines = 1,
-                                    textStyle = TextStyle(fontSize = 20.sp, color = Color(resources.getColor(R.color.text_color))),
-                                    cursorBrush = SolidColor(Color(resources.getColor(R.color.text_color))),
-                                    keyboardActions = KeyboardActions(
-                                        onDone = {
-                                            locationSearchMode.value = false
-                                            focusManager.clearFocus()
-                                            prefs.setString(Preference.FORCE_CURRENT_LOCATION, customLocationName.value)
-                                            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                                            WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-                                        }
-                                    ),
-                                    modifier = Modifier.focusRequester(focusRequester)
-                                )
+                    BoxWithConstraints(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        val maxWidth = maxWidth
+
+                        Row {
+                            Column(
+                                modifier = Modifier
+                                    .padding(0.dp, 0.dp, 5.dp, 0.dp)
+                                    .widthIn(max = maxWidth * 0.85f)
+                                    .wrapContentWidth()
+                            ) {
+                                if (!locationSearchMode.value) {
+                                    Text(
+                                        text = displayInfo.value.city,
+                                        fontSize = 20.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        textAlign = TextAlign.Left,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier
+                                            .clickable {
+                                                locationSearchMode.value = !locationSearchMode.value
+                                            }
+                                    )
+                                } else {
+                                    BasicTextField(
+                                        value = customLocationName.value,
+                                        onValueChange = { customLocationName.value = it },
+                                        keyboardOptions = KeyboardOptions.Default.copy(
+                                            imeAction = ImeAction.Done
+                                        ),
+                                        maxLines = 1,
+                                        textStyle = TextStyle(fontSize = 20.sp, color = Color(resources.getColor(R.color.text_color))),
+                                        cursorBrush = SolidColor(Color(resources.getColor(R.color.text_color))),
+                                        keyboardActions = KeyboardActions(
+                                            onDone = {
+                                                locationSearchMode.value = false
+                                                focusManager.clearFocus()
+                                                prefs.setString(Preference.FORCE_CURRENT_LOCATION, customLocationName.value)
+                                                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                                                WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+                                            }
+                                        ),
+                                        modifier = Modifier.focusRequester(focusRequester)
+                                    )
+                                }
                             }
-                        }
-                        Column {
-                            if (customLocationName.value != "") {
-                                Image(
-                                    painterResource(R.drawable.baseline_clear_24),
-                                    contentDescription = "",
-                                    modifier = Modifier
-                                        .clickable {
-                                            customLocationName.value = ""
-                                            prefs.setString(Preference.FORCE_CURRENT_LOCATION, customLocationName.value)
-                                            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                                            WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-                                        }
-                                )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                if (customLocationName.value != "") {
+                                    Image(
+                                        painterResource(R.drawable.baseline_clear_24),
+                                        contentDescription = "",
+                                        modifier = Modifier
+                                            .clickable {
+                                                customLocationName.value = ""
+                                                prefs.setString(Preference.FORCE_CURRENT_LOCATION, customLocationName.value)
+                                                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                                                WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+                                            }
+                                    )
+                                }
                             }
                         }
                     }
