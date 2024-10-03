@@ -156,7 +156,7 @@ class LangStrings {
             LANG_LV to hashMapOf(
                 Translation.RAIN_EXPECTED_TODAY to "šodien plkst.",
                 Translation.RAIN_EXPECTED_TOMORROW to "rīt plkst.",
-                Translation.FEELS_LIKE to "Jūtas kā",
+                Translation.FEELS_LIKE to "Sajūta",
                 Translation.FORECAST_ISSUED to "prognoze atjaunināta",
                 Translation.FORECAST_DOWNLOADED to "prognoze lejupielādēta",
                 Translation.SETTINGS_APP_LANGUAGE to "Lietotnes valoda",
