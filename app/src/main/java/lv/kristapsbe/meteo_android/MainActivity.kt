@@ -212,7 +212,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         }
 
         if (
-            prefs.getBoolean(Preference.DID_ALREADY_ASK_FOR_LOCATION) &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) {
@@ -222,7 +221,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 )
             )
-            prefs.setBoolean(Preference.DID_ALREADY_ASK_FOR_LOCATION, true)
         }
         createNotificationChannel(applicationContext, WEATHER_WARNINGS_CHANNEL_ID, WEATHER_WARNINGS_CHANNEL_NAME, WEATHER_WARNINGS_CHANNEL_DESCRIPTION)
         createNotificationChannel(applicationContext, AURORA_NOTIFICATION_CHANNEL_ID, AURORA_NOTIFICATION_CHANNEL_NAME, AURORA_NOTIFICATION_CHANNEL_DESCRIPTION)
