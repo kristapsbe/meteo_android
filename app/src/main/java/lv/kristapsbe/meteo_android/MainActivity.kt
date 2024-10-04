@@ -698,7 +698,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 ) {
                     var prevHDay: String? = null
                     for (h in displayInfo.value.getHourlyForecasts()) {
-                        calculate(h.date, 56.9730, 24.1327, 2)
+                        calculate(h.date, 56.9730, 24.1327, 3)
 
                         Column (
                             modifier = Modifier
