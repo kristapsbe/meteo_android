@@ -77,6 +77,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
@@ -697,6 +698,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 ) {
                     var prevHDay: String? = null
                     for (h in displayInfo.value.getHourlyForecasts()) {
+                        calculate(h.date, 56.9730, 24.1327, 2)
+
                         Column (
                             modifier = Modifier
                                 .width(90.dp)

@@ -1,0 +1,157 @@
+package lv.kristapsbe.meteo_android
+
+import android.util.Log
+import kotlinx.datetime.LocalDateTime
+import kotlin.math.PI
+import kotlin.math.acos
+import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.sin
+import kotlin.math.tan
+
+
+// https://gml.noaa.gov/grad/solcalc/main.js
+class SunriseSunsetUtils {
+    companion object {
+        private fun calcTimeJulianCent(jd: Double): Double {
+            return (jd - 2451545.0)/36525.0
+        }
+
+        private fun radToDeg(angleRad: Double): Double {
+            return (180.0 * angleRad / PI);
+        }
+
+        private fun degToRad(angleDeg: Double): Double {
+            return (PI * angleDeg / 180.0);
+        }
+
+        private fun calculateJulianDay(t: LocalDateTime): Double {
+            var year = t.year
+            var month = t.month.value
+            if (month <= 2) {
+                year -= 1
+                month += 12
+            }
+            val a = floor(((1.0f)*year)/100)
+            val b = 2 - a + floor(a/4)
+            return floor(365.25*(year + 4716)) + floor(30.6001 * (month+1)) + t.dayOfMonth + b - 1524.5
+        }
+
+        private fun calcMeanObliquityOfEcliptic(t: Double): Double {
+            val seconds = 21.448 - t*(46.8150 + t*(0.00059 - t*(0.001813)))
+            return 23.0 + (26.0 + (seconds/60.0))/60.0
+        }
+
+        private fun calcObliquityCorrection(t: Double): Double {
+            val e0 = calcMeanObliquityOfEcliptic(t)
+            val omega = 125.04 - 1934.136 * t
+            return e0 + 0.00256 * cos(degToRad(omega))
+        }
+
+        private fun calcGeomMeanLongSun(t: Double): Double {
+            var L0 = 280.46646 + t * (36000.76983 + t*(0.0003032))
+            while(L0 > 360.0) {
+                L0 -= 360.0
+            }
+            while(L0 < 0.0) {
+                L0 += 360.0
+            }
+            return L0
+        }
+
+        private fun calcEccentricityEarthOrbit(t: Double): Double {
+            return 0.016708634 - t * (0.000042037 + 0.0000001267 * t)
+        }
+
+        private fun calcGeomMeanAnomalySun(t: Double): Double {
+            return 357.52911 + t * (35999.05029 - 0.0001537 * t)
+        }
+
+        private fun calcEquationOfTime(t: Double): Double {
+            val epsilon = calcObliquityCorrection(t)
+            val l0 = calcGeomMeanLongSun(t)
+            val e = calcEccentricityEarthOrbit(t)
+            val m = calcGeomMeanAnomalySun(t)
+
+            var y = tan(degToRad(epsilon)/2.0)
+            y *= y
+
+            val sin2l0 = sin(2.0 * degToRad(l0))
+            val sinm   = sin(degToRad(m))
+            val cos2l0 = cos(2.0 * degToRad(l0))
+            val sin4l0 = sin(4.0 * degToRad(l0))
+            val sin2m  = sin(2.0 * degToRad(m))
+
+            val Etime = y * sin2l0 - 2.0 * e * sinm + 4.0 * e * y * sinm * cos2l0 - 0.5 * y * y * sin4l0 - 1.25 * e * e * sin2m
+            return radToDeg(Etime)*4.0
+        }
+
+        private fun calcSunEqOfCenter(t: Double): Double {
+            val m = calcGeomMeanAnomalySun(t)
+            val mrad = degToRad(m)
+            val sinm = sin(mrad)
+            val sin2m = sin(mrad+mrad)
+            val sin3m = sin(mrad+mrad+mrad)
+            val C = sinm * (1.914602 - t * (0.004817 + 0.000014 * t)) + sin2m * (0.019993 - 0.000101 * t) + sin3m * 0.000289
+            return C
+        }
+
+        private fun calcSunTrueLong(t: Double): Double {
+            val l0 = calcGeomMeanLongSun(t)
+            val c = calcSunEqOfCenter(t)
+            val O = l0 + c
+            return O
+        }
+
+        private fun calcSunApparentLong(t: Double): Double {
+            val o = calcSunTrueLong(t)
+            val omega = 125.04 - 1934.136 * t
+            val lambda = o - 0.00569 - 0.00478 * sin(degToRad(omega))
+            return lambda
+        }
+
+        private fun calcSunDeclination(t: Double): Double {
+            val e = calcObliquityCorrection(t)
+            val lambda = calcSunApparentLong(t)
+            val sint = sin(degToRad(e)) * sin(degToRad(lambda))
+            val theta = radToDeg(asin(sint))
+            return theta
+        }
+
+        private fun calcHourAngleSunrise(lat: Double, solarDec: Double): Double {
+            val latRad = degToRad(lat)
+            val sdRad  = degToRad(solarDec)
+            val HAarg = (cos(degToRad(90.833))/(cos(latRad)*cos(sdRad))-tan(latRad) * tan(sdRad))
+            val HA = acos(HAarg)
+            return HA
+        }
+
+        private fun calcSunriseSetUTC(rise: Boolean, julianDay: Double, lat: Double, lon: Double): Double {
+            val t = calcTimeJulianCent(julianDay)
+            val eqTime = calcEquationOfTime(t)
+            val solarDec = calcSunDeclination(t)
+            var hourAngle = calcHourAngleSunrise(lat, solarDec)
+            if (!rise) hourAngle = -hourAngle
+            val delta = lon + radToDeg(hourAngle)
+            val timeUTC = 720 - (4.0 * delta) - eqTime
+
+            return timeUTC
+        }
+
+        private fun calcSunriseSet(rise: Boolean, julianDay: Double, lat: Double, lon: Double, tz: Int): Double {
+            val timeUTC = calcSunriseSetUTC(rise, julianDay, lat, lon)
+            val newTimeUTC = calcSunriseSetUTC(rise, julianDay + timeUTC/1440.0, lat, lon)
+
+            return newTimeUTC + (tz * 60.0)
+        }
+
+        fun calculate(t: LocalDateTime, lat: Double, lon: Double, tz: Int) {
+            val julianDay = calculateJulianDay(t)
+            val rise = calcSunriseSet(true, julianDay, lat, lon, tz)
+            val set  = calcSunriseSet(false, julianDay, lat, lon, tz)
+
+            Log.d("SUNRISESET", "rise = ${rise/60} / set = ${set/60}")
+        }
+    }
+}
