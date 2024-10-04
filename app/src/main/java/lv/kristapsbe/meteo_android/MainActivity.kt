@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Paint.Align
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -79,7 +80,10 @@ import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
+import java.time.ZonedDateTime
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 
@@ -287,7 +291,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 .fillMaxSize()
                 .background(Color(resources.getColor(R.color.sky_blue)))
                 .verticalScroll(state = scrollState)
-                .padding((if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) navigationBarHeight else 0).dp, 0.dp)
+                .padding(
+                    (if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) navigationBarHeight else 0).dp,
+                    0.dp
+                )
         ) {
             ShowSettings()
             ShowCurrentInfo()
@@ -697,13 +704,30 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .horizontalScroll(rememberScrollState())
                 ) {
                     var prevHDay: String? = null
+                    var riseSet: List<Double> = emptyList()
                     for (h in displayInfo.value.getHourlyForecasts()) {
-                        calculate(h.date, 56.9730, 24.1327, 3)
-
+                        if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
+                            VerticalDivider(
+                                color = Color(resources.getColor(R.color.light_gray)),
+                                modifier = Modifier.height(80.dp),
+                                thickness = 1.dp
+                            )
+                        }
+                        if (riseSet.isEmpty() || prevHDay != h.getDayOfWeek()) {
+                            val coordContent = loadStringFromStorage(applicationContext, LAST_COORDINATES_FILE)
+                            if (coordContent != "") {
+                                val currentTime = ZonedDateTime.now()
+                                val offset = currentTime.offset
+                                val tmp = Json.decodeFromString<Set<Double>>(coordContent)
+                                riseSet = calculate(h.date, tmp.elementAt(0), tmp.elementAt(1), offset.totalSeconds / 3600)
+                            }
+                        }
+                        prevHDay = h.getDayOfWeek()
                         Column (
                             modifier = Modifier
                                 .width(90.dp)
-                                .padding(10.dp, 0.dp, 10.dp, 0.dp)
+                                .padding(10.dp, 0.dp, 10.dp, 0.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
                                 "${h.time.take(2)}:${h.time.takeLast(2)}",
@@ -752,22 +776,30 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
                                 )
-                                Text (
+                                Text(
                                     h.uvIndex.toString(),
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
                                 )
+                                if (h.date.hour == floor(riseSet[0]/60).toInt()) {
+                                    Image(
+                                        painterResource(R.drawable.sunrise),
+                                        modifier = Modifier.width(40.dp).height(40.dp),
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                    )
+                                }
+                                if (h.date.hour == floor(riseSet[1]/60).toInt()) {
+                                    Image(
+                                        painterResource(R.drawable.sunset),
+                                        modifier = Modifier.width(40.dp).height(40.dp),
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                    )
+                                }
                             }
                         }
-                        if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
-                            VerticalDivider(
-                                color = Color(resources.getColor(R.color.light_gray)),
-                                modifier = Modifier.height(80.dp),
-                                thickness = 1.dp
-                            )
-                        }
-                        prevHDay = h.getDayOfWeek()
                     }
                 }
             }

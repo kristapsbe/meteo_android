@@ -146,12 +146,12 @@ class SunriseSunsetUtils {
             return newTimeUTC + (tz * 60.0)
         }
 
-        fun calculate(t: LocalDateTime, lat: Double, lon: Double, tz: Int) {
+        fun calculate(t: LocalDateTime, lat: Double, lon: Double, tz: Int): List<Double> {
             val julianDay = calculateJulianDay(t)
             val rise = calcSunriseSet(true, julianDay, lat, lon, tz)
             val set  = calcSunriseSet(false, julianDay, lat, lon, tz)
 
-            Log.d("SUNRISESET", "rise = ${rise/60} / set = ${set/60}")
+            return listOf(rise, set)
         }
     }
 }
