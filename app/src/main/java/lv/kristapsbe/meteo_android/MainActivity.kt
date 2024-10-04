@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
@@ -55,6 +56,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -268,19 +270,30 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
         }
 
+
+        // Get the current configuration (including orientation)
+        val configuration = LocalConfiguration.current
+        var navigationBarHeight = 0
+        val resources = resources
+        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            val displayMetrics = Resources.getSystem().displayMetrics
+            navigationBarHeight = (resources.getDimensionPixelSize(resourceId)/displayMetrics.density).toInt()
+        }
         Column(
             modifier = Modifier
                 .nestedScroll(nestedScrollConnection)
                 .fillMaxSize()
                 .background(Color(resources.getColor(R.color.sky_blue)))
                 .verticalScroll(state = scrollState)
+                .padding((if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) navigationBarHeight else 0).dp, 0.dp)
         ) {
             ShowSettings()
             ShowCurrentInfo()
             ShowHourlyInfo()
             ShowWarningInfo()
             ShowDailyInfo()
-            ShowMetadataInfo()
+            ShowMetadataInfo(if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) navigationBarHeight else 0)
         }
     }
 
@@ -1027,15 +1040,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     @Composable
-    fun ShowMetadataInfo() {
-        var navigationBarHeight = 0
-        val resources = resources
-        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            val displayMetrics = Resources.getSystem().displayMetrics
-            navigationBarHeight = (resources.getDimensionPixelSize(resourceId)/displayMetrics.density).toInt()
-        }
-
+    fun ShowMetadataInfo(navigationBarHeight: Int) {
         Column(
             modifier = Modifier
                 .padding(20.dp, 0.dp, 20.dp, (5+navigationBarHeight).dp)
