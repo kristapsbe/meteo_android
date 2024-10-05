@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -476,7 +475,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 ) {
                     if (useAnimatedIcons.value) {
                         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
-                            if (doFixIconDayNight.value) hForecast.pictogram.getAnimatedPictogram(hForecast.date, sunTimes) else hForecast.pictogram.getAnimatedPictogram())
+                            if (doFixIconDayNight.value) hForecast.pictogram.getAlternateAnimatedPictogram(hForecast.date, sunTimes) else hForecast.pictogram.getAlternateAnimatedPictogram())
                         )
                         val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
                         LottieAnimation(
@@ -789,7 +788,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
                             if (useAnimatedIcons.value) {
                                 val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
-                                    if (doFixIconDayNight.value) h.pictogram.getAnimatedPictogram(h.date, sunTimes) else h.pictogram.getAnimatedPictogram())
+                                    if (doFixIconDayNight.value) h.pictogram.getAlternateAnimatedPictogram(h.date, sunTimes) else h.pictogram.getAlternateAnimatedPictogram())
                                 )
                                 val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
                                 LottieAnimation(
@@ -1113,7 +1112,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     ) {
                                         if (useAnimatedIcons.value) {
                                             val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
-                                                d.pictogramDay.getAnimatedPictogram()
+                                                d.pictogramDay.getAlternateAnimatedPictogram()
                                             ))
                                             val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
                                             LottieAnimation(
@@ -1142,7 +1141,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     ) {
                                         if (useAnimatedIcons.value) {
                                             val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
-                                                d.pictogramNight.getAnimatedPictogram()
+                                                d.pictogramNight.getAlternateAnimatedPictogram()
                                             ))
                                             val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
                                             LottieAnimation(
