@@ -782,22 +782,55 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
                                 )
-                                if (h.date.hour == floor(riseSet[0]/60).toInt()) {
-                                    Image(
-                                        painterResource(R.drawable.sunrise),
-                                        modifier = Modifier.width(40.dp).height(40.dp),
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Fit,
-                                    )
-                                }
-                                if (h.date.hour == floor(riseSet[1]/60).toInt()) {
-                                    Image(
-                                        painterResource(R.drawable.sunset),
-                                        modifier = Modifier.width(40.dp).height(40.dp),
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Fit,
-                                    )
-                                }
+                            }
+                        }
+                        if (h.date.hour == floor(riseSet[0]/60).toInt()) {
+                            Column (
+                                modifier = Modifier
+                                    .width(90.dp)
+                                    .padding(10.dp, 0.dp, 10.dp, 0.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    "${h.time.take(2)}:${riseSet[0].mod(60.0).toInt().toString().padStart(2, '0')}",
+                                    fontSize = if (useAltLayout.value) 20.sp else 10.sp,
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Image(
+                                    painterResource(R.drawable.sunrise),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .width(70.dp)
+                                        .height(40.dp)
+                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                )
+                            }
+                        } else if (h.date.hour == floor(riseSet[1]/60).toInt()) {
+                            Column (
+                                modifier = Modifier
+                                    .width(90.dp)
+                                    .padding(10.dp, 0.dp, 10.dp, 0.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    "${h.time.take(2)}:${riseSet[1].mod(60.0).toInt().toString().padStart(2, '0')}",
+                                    fontSize = if (useAltLayout.value) 20.sp else 10.sp,
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                )
+                                Image(
+                                    painterResource(R.drawable.sunset),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .width(70.dp)
+                                        .height(40.dp)
+                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                )
                             }
                         }
                     }
@@ -1029,7 +1062,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 if (showFullDaily.value.contains(d.date)) {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .clickable {
+                                val tmp = self.showFullDaily.value.toMutableList()
+                                if (tmp.contains(d.date)) {
+                                    tmp.remove(d.date)
+                                } else {
+                                    tmp.add(d.date)
+                                }
+                                self.showFullDaily.value = tmp.toList()
+                            },
                         verticalAlignment = Alignment.Top
                     ) {
                         Column(
