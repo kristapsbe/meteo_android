@@ -142,7 +142,7 @@ class WeatherPictogram(
             2609 to R.drawable.snow0, // cloud, sun, more snow and wind
         )
 
-        val animatedIconMapping: HashMap<Int, Int> = hashMapOf(
+        val alternativeIconMapping: HashMap<Int, Int> = hashMapOf(
             1101 to R.raw.clear_day,
             1102 to R.raw.partly_cloudy_day,
             1103 to R.raw.overcast_day, // single fulled out cloud with sun
@@ -393,11 +393,11 @@ class WeatherPictogram(
     }
 
     fun getAlternateAnimatedPictogram(): Int {
-        return animatedIconMapping[code] ?: R.raw.not_available
+        return alternateAnimatedIconMapping[code] ?: R.raw.not_available
     }
 
     private fun getAlternateAnimatedPictogram(currH: Int, riseH: Int, setH: Int): Int {
-        return animatedIconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)] ?: R.raw.not_available
+        return alternateAnimatedIconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)] ?: R.raw.not_available
     }
 
     fun getAlternateAnimatedPictogram(t: LocalDateTime, sunTimes: SunRiseSunSet): Int {
