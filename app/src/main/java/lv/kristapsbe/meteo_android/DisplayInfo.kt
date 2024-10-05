@@ -253,9 +253,7 @@ class DisplayInfo() {
                 if (coordContent != "") {
                     try {
                         tmpCoords = Json.decodeFromString<Set<Double>>(coordContent)
-                    } catch (e: Exception) {
-
-                    }
+                    } catch (e: Exception) { }
                 }
                 var sunTimes: SunRiseSunSet = calculate(
                     displayInfo.getTodayForecast().date,

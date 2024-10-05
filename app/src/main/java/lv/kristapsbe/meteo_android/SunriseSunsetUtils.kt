@@ -7,6 +7,7 @@ import kotlin.math.acos
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.floor
+import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.tan
 
@@ -76,10 +77,7 @@ class SunriseSunsetUtils {
             val l0 = calcGeomMeanLongSun(t)
             val e = calcEccentricityEarthOrbit(t)
             val m = calcGeomMeanAnomalySun(t)
-
-            var y = tan(degToRad(epsilon)/2.0)
-            y *= y
-
+            val y = tan(degToRad(epsilon)/2.0).pow(2)
             val sin2l0 = sin(2.0 * degToRad(l0))
             val sinm = sin(degToRad(m))
             val cos2l0 = cos(2.0 * degToRad(l0))
