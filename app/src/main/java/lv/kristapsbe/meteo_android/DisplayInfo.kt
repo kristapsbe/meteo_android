@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -38,7 +37,14 @@ class WeatherPictogram(
             1104 to R.drawable.mcloudy, // single filled out cloud
             1105 to R.drawable.mcloudy, // two filled out clouds
 
-            // 12xx - sleet (?)
+            1201 to R.drawable.sleet, // two filled out cloud with sleet
+            1202 to R.drawable.sleet, // single filled out cloud with sleet
+            1203 to R.drawable.sleet1, // single filled out cloud with sun and sleet
+            1204 to R.drawable.sleet, // two filled out cloud with sleet
+            1205 to R.drawable.sleet, // single filled out cloud with sleet
+            1206 to R.drawable.sleet1, // single filled out cloud with sun and sleet
+            1207 to R.drawable.sleet, // single filled out cloud with sleet
+            1208 to R.drawable.sleet1, // single filled out cloud with sun and sleet
 
             1301 to R.drawable.tshower, // two filled out clouds, with lightning and rain
             1302 to R.drawable.tshower, // single filled out cloud, with lightning and rain
@@ -86,7 +92,14 @@ class WeatherPictogram(
             2104 to R.drawable.mcloudy,
             2105 to R.drawable.mcloudy,
 
-            // 22xx - sleet (?)
+            2201 to R.drawable.sleet, // two filled out cloud with sleet
+            2202 to R.drawable.sleet, // single filled out cloud with sleet
+            2203 to R.drawable.sleet0, // single filled out cloud with moon and sleet
+            2204 to R.drawable.sleet, // two filled out cloud with sleet
+            2205 to R.drawable.sleet, // single filled out cloud with sleet
+            2206 to R.drawable.sleet0, // single filled out cloud with moon and sleet
+            2207 to R.drawable.sleet, // single filled out cloud with sleet
+            2208 to R.drawable.sleet0, // single filled out cloud with moon and sleet
 
             2301 to R.drawable.tshower, // two filled out clouds, with lightning and rain
             2302 to R.drawable.tshower, // single filled out cloud, with lightning and rain
@@ -147,8 +160,12 @@ class WeatherPictogram(
         return iconMapping[code] ?: R.drawable.unknown
     }
 
-    fun getPictogram(currH: Int, riseH: Int, setH: Int): Int {
+    private fun getPictogram(currH: Int, riseH: Int, setH: Int): Int {
         return iconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)] ?: R.drawable.unknown
+    }
+
+    fun getPictogram(t: LocalDateTime, sunTimes: SunRiseSunSet): Int {
+        return getPictogram(t.hour, sunTimes.riseH, sunTimes.setH)
     }
 }
 
@@ -247,7 +264,7 @@ class DisplayInfo() {
                     ZonedDateTime.now().offset.totalSeconds / 3600
                 )
 
-                intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram(displayInfo.getTodayForecast().date.hour, sunTimes.riseH, sunTimes.setH))
+                intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram(displayInfo.getTodayForecast().date, sunTimes))
             } else {
                 intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
             }

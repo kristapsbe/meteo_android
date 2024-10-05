@@ -465,7 +465,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth(0.45f)
                 ) {
                     Image(
-                        painterResource(if (doFixIconDayNight.value) hForecast.pictogram.getPictogram(hForecast.date.hour, sunTimes.riseH, sunTimes.setH) else hForecast.pictogram.getPictogram()),
+                        painterResource(if (doFixIconDayNight.value) hForecast.pictogram.getPictogram(hForecast.date, sunTimes) else hForecast.pictogram.getPictogram()),
                         contentDescription = "",
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
@@ -765,7 +765,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 textAlign = TextAlign.Center,
                             )
                             Image(
-                                painterResource(if (doFixIconDayNight.value) h.pictogram.getPictogram(h.date.hour, sunTimes.riseH, sunTimes.setH) else h.pictogram.getPictogram()),
+                                painterResource(if (doFixIconDayNight.value) h.pictogram.getPictogram(h.date, sunTimes) else h.pictogram.getPictogram()),
                                 contentDescription = "",
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
