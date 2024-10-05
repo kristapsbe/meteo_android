@@ -19,6 +19,7 @@ enum class Translation {
     SETTINGS_ALWAYS_DISPLAY_UV,
     SETTINGS_FIX_ICON_DAY_NIGHT,
     SETTINGS_USE_ALT_LAYOUT,
+    SETTINGS_USE_ANIMATED_ICONS,
 
     NOTIFICATION_AURORA_TITLE,
     NOTIFICATION_AURORA_DESCRIPTION
@@ -153,7 +154,8 @@ class LangStrings {
                 Translation.SETTINGS_USE_ALT_LAYOUT to "Use alternative layout",
                 Translation.NOTIFICATION_AURORA_TITLE to "Aurora",
                 Translation.NOTIFICATION_AURORA_DESCRIPTION to "Aurora probability has increased to",
-                Translation.SETTINGS_FIX_ICON_DAY_NIGHT to "Match icons to sunrise and sunset"
+                Translation.SETTINGS_FIX_ICON_DAY_NIGHT to "Match icons to sunrise and sunset",
+                Translation.SETTINGS_USE_ANIMATED_ICONS to "Use animated icons"
             ),
             LANG_LV to hashMapOf(
                 Translation.RAIN_EXPECTED_TODAY to "šodien plkst.",
@@ -170,7 +172,8 @@ class LangStrings {
                 Translation.SETTINGS_USE_ALT_LAYOUT to "Lietot alternatīvo izkārtojumu",
                 Translation.NOTIFICATION_AURORA_TITLE to "Ziemeļblāzma",
                 Translation.NOTIFICATION_AURORA_DESCRIPTION to "Ziemeļblāzmas varbūtība ir palielinājusies līdz",
-                Translation.SETTINGS_FIX_ICON_DAY_NIGHT to "Likt ikonām sakrist ar saullēktu un saulrietu"
+                Translation.SETTINGS_FIX_ICON_DAY_NIGHT to "Likt ikonām sakrist ar saullēktu un saulrietu",
+                Translation.SETTINGS_USE_ANIMATED_ICONS to "Lietot animētas ikonas"
             )
         )
 

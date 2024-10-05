@@ -15,7 +15,7 @@ enum class Preference {
     USE_ANIMATED_ICONS,
     LAST_LAT,
     LAST_LON,
-    LAST_VERSION_CODE
+    LAST_VERSION_CODE,
 }
 
 class AppPreferences(context: Context) {

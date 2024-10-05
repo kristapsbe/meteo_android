@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -43,6 +44,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -73,6 +75,11 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
@@ -150,6 +157,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private lateinit var doAlwaysShowAurora: MutableState<Boolean>
     private lateinit var doAlwaysShowUV: MutableState<Boolean>
     private lateinit var doFixIconDayNight: MutableState<Boolean>
+    private lateinit var useAnimatedIcons: MutableState<Boolean>
     private lateinit var customLocationName: MutableState<String>
 
     private var wasLastScrollNegative: Boolean = false
@@ -174,6 +182,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         doAlwaysShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false))
         doAlwaysShowUV = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_UV, false))
         doFixIconDayNight = mutableStateOf(prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true))
+        useAnimatedIcons = mutableStateOf(prefs.getBoolean(Preference.USE_ANIMATED_ICONS, false))
         customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
 
         val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
@@ -416,6 +425,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_DISPLAY_UV, Preference.DO_ALWAYS_SHOW_UV, doAlwaysShowUV)
                 SettingsEntryBoolean(Translation.SETTINGS_FIX_ICON_DAY_NIGHT, Preference.DO_FIX_ICON_DAY_NIGHT, doFixIconDayNight)
                 SettingsEntryBoolean(Translation.SETTINGS_USE_ALT_LAYOUT, Preference.USE_ALT_LAYOUT, useAltLayout)
+                SettingsEntryBoolean(Translation.SETTINGS_USE_ANIMATED_ICONS, Preference.USE_ANIMATED_ICONS, useAnimatedIcons)
 
                 HorizontalDivider(
                     modifier = Modifier
@@ -464,14 +474,26 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Column(
                     modifier = Modifier.fillMaxWidth(0.45f)
                 ) {
-                    Image(
-                        painterResource(if (doFixIconDayNight.value) hForecast.pictogram.getPictogram(hForecast.date, sunTimes) else hForecast.pictogram.getPictogram()),
-                        contentDescription = "",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(0.8f)
-                    )
+                    if (useAnimatedIcons.value) {
+                        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
+                            if (doFixIconDayNight.value) hForecast.pictogram.getAnimatedPictogram(hForecast.date, sunTimes) else hForecast.pictogram.getAnimatedPictogram())
+                        )
+                        val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+                        LottieAnimation(
+                            composition = composition,
+                            progress = progress,
+                            modifier = Modifier.fillMaxWidth().fillMaxHeight()
+                        )
+                    } else {
+                        Image(
+                            painterResource(if (doFixIconDayNight.value) hForecast.pictogram.getPictogram(hForecast.date, sunTimes) else hForecast.pictogram.getPictogram()),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(0.8f)
+                        )
+                    }
                 }
                 Column(
                     modifier = Modifier.fillMaxWidth()
@@ -764,15 +786,32 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                             )
-                            Image(
-                                painterResource(if (doFixIconDayNight.value) h.pictogram.getPictogram(h.date, sunTimes) else h.pictogram.getPictogram()),
-                                contentDescription = "",
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .width(70.dp)
-                                    .height(40.dp)
-                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
-                            )
+
+                            if (useAnimatedIcons.value) {
+                                val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
+                                    if (doFixIconDayNight.value) h.pictogram.getAnimatedPictogram(h.date, sunTimes) else h.pictogram.getAnimatedPictogram())
+                                )
+                                val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+                                LottieAnimation(
+                                    composition = composition,
+                                    progress = progress,
+                                    modifier = Modifier
+                                        .width(70.dp)
+                                        .height(40.dp)
+                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                )
+                            } else {
+                                Image(
+                                    painterResource(if (doFixIconDayNight.value) h.pictogram.getPictogram(h.date, sunTimes) else h.pictogram.getPictogram()),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .width(70.dp)
+                                        .height(40.dp)
+                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                )
+                            }
+
                             Text(
                                 convertFromCtoDisplayTemp(h.currentTemp, selectedTempType.value),
                                 color = Color(resources.getColor(R.color.text_color)),
@@ -826,15 +865,30 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
                                 )
-                                Image(
-                                    painterResource(R.drawable.sunrise),
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier
-                                        .width(70.dp)
-                                        .height(40.dp)
-                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
-                                )
+                                if (useAnimatedIcons.value) {
+                                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
+                                        R.raw.sunrise
+                                    ))
+                                    val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+                                    LottieAnimation(
+                                        composition = composition,
+                                        progress = progress,
+                                        modifier = Modifier
+                                            .width(70.dp)
+                                            .height(40.dp)
+                                            .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                    )
+                                } else {
+                                    Image(
+                                        painterResource(R.drawable.sunrise),
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier
+                                            .width(70.dp)
+                                            .height(40.dp)
+                                            .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                    )
+                                }
                             }
                         } else if (h.date.hour == sunTimes.setH) {
                             Column (
@@ -850,15 +904,31 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
                                 )
-                                Image(
-                                    painterResource(R.drawable.sunset),
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier
-                                        .width(70.dp)
-                                        .height(40.dp)
-                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
-                                )
+
+                                if (useAnimatedIcons.value) {
+                                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
+                                        R.raw.sunset
+                                    ))
+                                    val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+                                    LottieAnimation(
+                                        composition = composition,
+                                        progress = progress,
+                                        modifier = Modifier
+                                            .width(70.dp)
+                                            .height(40.dp)
+                                            .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                    )
+                                } else {
+                                    Image(
+                                        painterResource(R.drawable.sunset),
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier
+                                            .width(70.dp)
+                                            .height(40.dp)
+                                            .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -1041,29 +1111,59 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         modifier = Modifier
                                             .fillMaxWidth(0.5f)
                                     ) {
-                                        Image(
-                                            painterResource(d.pictogramDay.getPictogram()),
-                                            contentDescription = "",
-                                            contentScale = ContentScale.Fit,
-                                            modifier = Modifier
-                                                .width(70.dp)
-                                                .height(40.dp)
-                                                .padding(3.dp, 3.dp, 3.dp, 0.dp)
-                                        )
+                                        if (useAnimatedIcons.value) {
+                                            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
+                                                d.pictogramDay.getAnimatedPictogram()
+                                            ))
+                                            val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+                                            LottieAnimation(
+                                                composition = composition,
+                                                progress = progress,
+                                                modifier = Modifier
+                                                    .width(70.dp)
+                                                    .height(40.dp)
+                                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                            )
+                                        } else {
+                                            Image(
+                                                painterResource(d.pictogramDay.getPictogram()),
+                                                contentDescription = "",
+                                                contentScale = ContentScale.Fit,
+                                                modifier = Modifier
+                                                    .width(70.dp)
+                                                    .height(40.dp)
+                                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                            )
+                                        }
                                     }
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                     ) {
-                                        Image(
-                                            painterResource(d.pictogramNight.getPictogram()),
-                                            contentDescription = "",
-                                            contentScale = ContentScale.Fit,
-                                            modifier = Modifier
-                                                .width(70.dp)
-                                                .height(40.dp)
-                                                .padding(3.dp, 3.dp, 3.dp, 0.dp)
-                                        )
+                                        if (useAnimatedIcons.value) {
+                                            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
+                                                d.pictogramNight.getAnimatedPictogram()
+                                            ))
+                                            val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+                                            LottieAnimation(
+                                                composition = composition,
+                                                progress = progress,
+                                                modifier = Modifier
+                                                    .width(70.dp)
+                                                    .height(40.dp)
+                                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                            )
+                                        } else {
+                                            Image(
+                                                painterResource(d.pictogramNight.getPictogram()),
+                                                contentDescription = "",
+                                                contentScale = ContentScale.Fit,
+                                                modifier = Modifier
+                                                    .width(70.dp)
+                                                    .height(40.dp)
+                                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
