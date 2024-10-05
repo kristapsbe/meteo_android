@@ -24,6 +24,7 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_TH
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIF_ID
 import lv.kristapsbe.meteo_android.MainActivity.Companion.HAS_AURORA_NOTIFIED
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LAST_COORDINATES_FILE
+import lv.kristapsbe.meteo_android.MainActivity.Companion.defaultCoords
 import kotlin.coroutines.resume
 
 
@@ -58,7 +59,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             return if (coordContent != "") {
                 Json.decodeFromString<Set<Double>>(coordContent)
             } else {
-                setOf(56.9730, 24.1327)
+                defaultCoords
             }
         }
     }

@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.graphics.Paint.Align
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -81,9 +80,7 @@ import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStri
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import java.time.ZonedDateTime
-import java.util.TimeZone
 import java.util.concurrent.TimeUnit
-import kotlin.math.floor
 import kotlin.math.roundToInt
 
 
@@ -140,6 +137,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 else -> "$tempC°"
             }
         }
+
+        val defaultCoords = setOf(56.9730, 24.1327)
     }
 
     private lateinit var prefs: AppPreferences
@@ -147,10 +146,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private lateinit var selectedLang: MutableState<String>
     private lateinit var selectedTempType: MutableState<String>
     private lateinit var showWidgetBackground: MutableState<Boolean>
-    private lateinit var forceShowDetailedWidget: MutableState<Boolean>
     private lateinit var useAltLayout: MutableState<Boolean>
     private lateinit var doAlwaysShowAurora: MutableState<Boolean>
     private lateinit var doAlwaysShowUV: MutableState<Boolean>
+    private lateinit var doFixIconDayNight: MutableState<Boolean>
     private lateinit var customLocationName: MutableState<String>
 
     private var wasLastScrollNegative: Boolean = false
@@ -171,10 +170,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         selectedLang = mutableStateOf(prefs.getString(Preference.LANG, LANG_EN))
         selectedTempType = mutableStateOf(prefs.getString(Preference.TEMP_UNIT, CELSIUS))
         showWidgetBackground = mutableStateOf(prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true))
-        forceShowDetailedWidget = mutableStateOf(prefs.getBoolean(Preference.DO_FORCE_SHOW_DETAILED_WIDGET, false))
         useAltLayout = mutableStateOf(prefs.getBoolean(Preference.USE_ALT_LAYOUT, false))
         doAlwaysShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false))
         doAlwaysShowUV = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_UV, false))
+        doFixIconDayNight = mutableStateOf(prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true))
         customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
 
         val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
@@ -412,10 +411,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             if (doDisplaySettings.value) {
                 SettingsEntryString(Translation.SETTINGS_APP_LANGUAGE, Preference.LANG, selectedLang, nextLang, LANG_EN)
                 SettingsEntryBoolean(Translation.SETTINGS_WIDGET_TRANSPARENCY, Preference.DO_SHOW_WIDGET_BACKGROUND, showWidgetBackground)
-                SettingsEntryBoolean(Translation.SETTINGS_FORCE_ALWAYS_SHOW_DETAILS, Preference.DO_FORCE_SHOW_DETAILED_WIDGET, forceShowDetailedWidget)
                 SettingsEntryString(Translation.SETTINGS_TEMPERATURE_UNIT, Preference.TEMP_UNIT, selectedTempType, nextTemp, CELSIUS)
                 SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_DISPLAY_AURORA, Preference.DO_ALWAYS_SHOW_AURORA, doAlwaysShowAurora)
                 SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_DISPLAY_UV, Preference.DO_ALWAYS_SHOW_UV, doAlwaysShowUV)
+                SettingsEntryBoolean(Translation.SETTINGS_FIX_ICON_DAY_NIGHT, Preference.DO_FIX_ICON_DAY_NIGHT, doFixIconDayNight)
                 SettingsEntryBoolean(Translation.SETTINGS_USE_ALT_LAYOUT, Preference.USE_ALT_LAYOUT, useAltLayout)
 
                 HorizontalDivider(
@@ -439,6 +438,22 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
         }
 
+        val coordContent = loadStringFromStorage(applicationContext, LAST_COORDINATES_FILE)
+        var tmpCoords = defaultCoords
+        if (coordContent != "") {
+            try {
+                tmpCoords = Json.decodeFromString<Set<Double>>(coordContent)
+            } catch (e: Exception) {
+
+            }
+        }
+        var sunTimes: SunRiseSunSet = calculate(
+            displayInfo.value.getTodayForecast().date,
+            tmpCoords.elementAt(0),
+            tmpCoords.elementAt(1),
+            ZonedDateTime.now().offset.totalSeconds / 3600
+        )
+
         Column {
             val hForecast: HourlyForecast = displayInfo.value.getTodayForecast()
             Row (
@@ -450,7 +465,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxWidth(0.45f)
                 ) {
                     Image(
-                        painterResource(hForecast.pictogram.getPictogram()),
+                        painterResource(if (doFixIconDayNight.value) hForecast.pictogram.getPictogram(hForecast.date.hour, sunTimes.riseH, sunTimes.setH) else hForecast.pictogram.getPictogram()),
                         contentDescription = "",
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
@@ -704,7 +719,21 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .horizontalScroll(rememberScrollState())
                 ) {
                     var prevHDay: String? = null
-                    var riseSet: List<Double> = emptyList()
+                    val coordContent = loadStringFromStorage(applicationContext, LAST_COORDINATES_FILE)
+                    var tmpCoords = defaultCoords
+                    if (coordContent != "") {
+                        try {
+                            tmpCoords = Json.decodeFromString<Set<Double>>(coordContent)
+                        } catch (e: Exception) {
+
+                        }
+                    }
+                    var sunTimes: SunRiseSunSet = calculate(
+                        displayInfo.value.getTodayForecast().date,
+                        tmpCoords.elementAt(0),
+                        tmpCoords.elementAt(1),
+                        ZonedDateTime.now().offset.totalSeconds / 3600
+                    )
                     for (h in displayInfo.value.getHourlyForecasts()) {
                         if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
                             VerticalDivider(
@@ -713,14 +742,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 thickness = 1.dp
                             )
                         }
-                        if (riseSet.isEmpty() || prevHDay != h.getDayOfWeek()) {
-                            val coordContent = loadStringFromStorage(applicationContext, LAST_COORDINATES_FILE)
-                            if (coordContent != "") {
-                                val currentTime = ZonedDateTime.now()
-                                val offset = currentTime.offset
-                                val tmp = Json.decodeFromString<Set<Double>>(coordContent)
-                                riseSet = calculate(h.date, tmp.elementAt(0), tmp.elementAt(1), offset.totalSeconds / 3600)
-                            }
+                        if (prevHDay != h.getDayOfWeek()) {
+                            sunTimes = calculate(
+                                h.date,
+                                tmpCoords.elementAt(0),
+                                tmpCoords.elementAt(1),
+                                ZonedDateTime.now().offset.totalSeconds / 3600
+                            )
                         }
                         prevHDay = h.getDayOfWeek()
                         Column (
@@ -737,7 +765,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 textAlign = TextAlign.Center,
                             )
                             Image(
-                                painterResource(h.pictogram.getPictogram()),
+                                painterResource(if (doFixIconDayNight.value) h.pictogram.getPictogram(h.date.hour, sunTimes.riseH, sunTimes.setH) else h.pictogram.getPictogram()),
                                 contentDescription = "",
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
@@ -784,7 +812,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 )
                             }
                         }
-                        if (h.date.hour == floor(riseSet[0]/60).toInt()) {
+                        if (h.date.hour == sunTimes.riseH) {
                             Column (
                                 modifier = Modifier
                                     .width(90.dp)
@@ -792,7 +820,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    "${h.time.take(2)}:${riseSet[0].mod(60.0).toInt().toString().padStart(2, '0')}",
+                                    "${h.time.take(2)}:${sunTimes.riseMin}",
                                     fontSize = if (useAltLayout.value) 20.sp else 10.sp,
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
@@ -808,7 +836,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         .padding(3.dp, 3.dp, 3.dp, 0.dp)
                                 )
                             }
-                        } else if (h.date.hour == floor(riseSet[1]/60).toInt()) {
+                        } else if (h.date.hour == sunTimes.setH) {
                             Column (
                                 modifier = Modifier
                                     .width(90.dp)
@@ -816,7 +844,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    "${h.time.take(2)}:${riseSet[1].mod(60.0).toInt().toString().padStart(2, '0')}",
+                                    "${h.time.take(2)}:${sunTimes.setMin}",
                                     fontSize = if (useAltLayout.value) 20.sp else 10.sp,
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),

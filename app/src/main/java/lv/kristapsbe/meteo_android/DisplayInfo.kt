@@ -4,19 +4,26 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.json.Json
+import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getDirectionString
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getShortenedDayString
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.CELSIUS
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
+import lv.kristapsbe.meteo_android.MainActivity.Companion.LAST_COORDINATES_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
+import lv.kristapsbe.meteo_android.MainActivity.Companion.defaultCoords
+import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.WeatherPictogram.Companion.rainPictograms
+import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 
 
@@ -139,6 +146,10 @@ class WeatherPictogram(
     fun getPictogram(): Int {
         return iconMapping[code] ?: R.drawable.unknown
     }
+
+    fun getPictogram(currH: Int, riseH: Int, setH: Int): Int {
+        return iconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)] ?: R.drawable.unknown
+    }
 }
 
 class DailyForecast(
@@ -201,9 +212,9 @@ class DisplayInfo() {
             val selectedTemp = prefs.getString(Preference.TEMP_UNIT, CELSIUS)
             val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
             val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
-            val forceShowDetailedWidget = prefs.getBoolean(Preference.DO_FORCE_SHOW_DETAILED_WIDGET, false)
             val doAlwaysShowAurora = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false)
             val doAlwaysShowUV = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_UV, false)
+            val doFixIconDayNight = prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true)
 
             // Retrieve the widget IDs
             val widget = ComponentName(context, ForecastWidget::class.java)
@@ -219,8 +230,27 @@ class DisplayInfo() {
             intent.putExtra("widget_feelslike", "${LangStrings.getTranslationString(lang, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
 
             intent.putExtra("do_show_widget_background", doShowWidgetBackground)
-            intent.putExtra("force_show_detailed_widget", forceShowDetailedWidget)
-            intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
+            if (doFixIconDayNight) {
+                val coordContent = loadStringFromStorage(context, LAST_COORDINATES_FILE)
+                var tmpCoords = defaultCoords
+                if (coordContent != "") {
+                    try {
+                        tmpCoords = Json.decodeFromString<Set<Double>>(coordContent)
+                    } catch (e: Exception) {
+
+                    }
+                }
+                var sunTimes: SunRiseSunSet = calculate(
+                    displayInfo.getTodayForecast().date,
+                    tmpCoords.elementAt(0),
+                    tmpCoords.elementAt(1),
+                    ZonedDateTime.now().offset.totalSeconds / 3600
+                )
+
+                intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram(displayInfo.getTodayForecast().date.hour, sunTimes.riseH, sunTimes.setH))
+            } else {
+                intent.putExtra("icon_image", displayInfo.getTodayForecast().pictogram.getPictogram())
+            }
             intent.putExtra("warning_red", displayInfo.warnings.any { it.intensity == "Red" })
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
             intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })

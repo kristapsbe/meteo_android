@@ -11,6 +11,9 @@ import kotlin.math.sin
 import kotlin.math.tan
 
 
+class SunRiseSunSet(val riseH: Int, val riseMin: String, val setH: Int, val setMin: String)
+
+
 // https://gml.noaa.gov/grad/solcalc/main.js
 class SunriseSunsetUtils {
     companion object {
@@ -130,12 +133,17 @@ class SunriseSunsetUtils {
             return newTimeUTC + (tz * 60.0)
         }
 
-        fun calculate(t: LocalDateTime, lat: Double, lon: Double, tz: Int): List<Double> {
+        fun calculate(t: LocalDateTime, lat: Double, lon: Double, tz: Int): SunRiseSunSet {
             val julianDay = calculateJulianDay(t)
             val rise = calcSunriseSet(true, julianDay, lat, lon, tz)
             val set  = calcSunriseSet(false, julianDay, lat, lon, tz)
 
-            return listOf(rise, set)
+            return SunRiseSunSet(
+                floor(rise/60).toInt(),
+                rise.mod(60.0).toInt().toString().padStart(2, '0'),
+                floor(set/60).toInt(),
+                set.mod(60.0).toInt().toString().padStart(2, '0'),
+            )
         }
     }
 }

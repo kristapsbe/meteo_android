@@ -35,7 +35,7 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, "", false, null, false, false, false, -1, "", false)
+            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, "", false, null, false, false, false, -1, "")
         }
     }
 
@@ -59,7 +59,6 @@ class ForecastWidget : AppWidgetProvider() {
             val doShowUV = intent.getBooleanExtra("do_show_uv", false)
 
             val doShowWidgetBackground = intent.getBooleanExtra("do_show_widget_background", false)
-            val forceShowDetailed = intent.getBooleanExtra("force_show_detailed_widget", false)
             val useAltLayout = intent.getBooleanExtra("use_alt_layout", false)
 
             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -67,7 +66,7 @@ class ForecastWidget : AppWidgetProvider() {
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain ?: "", doShowWidgetBackground, aurora, useAltLayout, doShowAurora, doShowUV, rainImage, uvIndex, forceShowDetailed)
+                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain ?: "", doShowWidgetBackground, aurora, useAltLayout, doShowAurora, doShowUV, rainImage, uvIndex)
             }
         }
     }
@@ -98,8 +97,7 @@ internal fun updateAppWidget(
     doShowAurora: Boolean,
     doShowUV: Boolean,
     rainImage: Int,
-    uvIndex: String?,
-    forceShowDetailed: Boolean
+    uvIndex: String?
 ) {
     // Create an Intent to launch the MainActivity when clicked
     val intent = Intent(context, MainActivity::class.java)
@@ -184,8 +182,8 @@ internal fun updateAppWidget(
     val displayMetrics = Resources.getSystem().displayMetrics
     val density = displayMetrics.density
     val minHeightDp = (minHeight / density).toInt()
-    // TODO - this seems to be working on both the emulated pixel and a S22 ultra - the math is all sorts of messed up though - revisit
-    if (forceShowDetailed || (minHeightDp > 45)) {
+
+    if (minHeightDp > 45) {
         views.setViewVisibility(R.id.top_widget, View.VISIBLE)
         views.setViewVisibility(R.id.bottom_widget, View.VISIBLE)
 
