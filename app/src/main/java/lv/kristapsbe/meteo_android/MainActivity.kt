@@ -666,7 +666,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     Row(
                         modifier = Modifier
                             .height(40.dp)
-                            .padding(0.dp, 3.dp, 0.dp, 0.dp)
+                            .padding(0.dp, 2.dp, 0.dp, 0.dp)
                     ) {
                     }
                     Log.i("HEIGHT", "${Resources.getSystem().displayMetrics.scaledDensity} ${Resources.getSystem().displayMetrics.density}")
