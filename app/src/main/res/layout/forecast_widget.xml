@@ -73,7 +73,7 @@
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:src="@drawable/uv" />
+                            android:src="@drawable/mono_uv_index" />
                         <TextView
                             android:id="@+id/appwidget_uv"
                             android:textColor="@color/text_color"
