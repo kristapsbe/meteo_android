@@ -113,13 +113,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     }
                 }
                 val hasAuroraNotificationBeenDisplayed = (loadStringFromStorage(applicationContext, HAS_AURORA_NOTIFIED) != "")
-                if (hasAuroraNotificationBeenDisplayed) {
-                    if (displayInfo.aurora.prob < AURORA_NOTIFICATION_THRESHOLD) {
-                        applicationContext.openFileOutput(HAS_AURORA_NOTIFIED, MODE_PRIVATE).use { fos ->
-                            fos.write("".toByteArray())
-                        }
-                    }
-                } else if (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
+                if (true || displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
                     applicationContext.openFileOutput(HAS_AURORA_NOTIFIED, MODE_PRIVATE).use { fos ->
                         fos.write("true".toByteArray())
                     }
@@ -134,8 +128,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                         auroraNotifId,
                         LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_TITLE),
                         "${LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_DESCRIPTION)} ${displayInfo.aurora.prob}%.",
-                        R.drawable.aurora_borealis,
-                        R.drawable.aurora_borealis
+                        R.drawable.light,
+                        R.drawable.light
                     )
                     applicationContext.openFileOutput(AURORA_NOTIF_ID, MODE_PRIVATE).use { fos ->
                         fos.write((auroraNotifId+1).toString().toByteArray())
