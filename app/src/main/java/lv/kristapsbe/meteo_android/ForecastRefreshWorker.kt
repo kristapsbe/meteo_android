@@ -134,8 +134,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                         auroraNotifId,
                         LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_TITLE),
                         "${LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_DESCRIPTION)} ${displayInfo.aurora.prob}%.",
-                        R.drawable.baseline_star_border_24,
-                        R.drawable.baseline_star_border_green_24
+                        R.drawable.aurora_borealis,
+                        R.drawable.aurora_borealis
                     )
                     applicationContext.openFileOutput(AURORA_NOTIF_ID, MODE_PRIVATE).use { fos ->
                         fos.write((auroraNotifId+1).toString().toByteArray())

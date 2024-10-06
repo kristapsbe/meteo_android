@@ -122,6 +122,7 @@ internal fun updateAppWidget(
         views.setImageViewResource(R.id.appwidget_rain_icon, rainImage)
         views.setViewVisibility(R.id.appwidget_rain_wrap, View.VISIBLE)
     }
+
     if (doShowAurora) {
         views.setTextViewText(R.id.appwidget_aurora, aurora)
         views.setViewVisibility(R.id.appwidget_aurora_wrap, View.VISIBLE)
@@ -133,7 +134,7 @@ internal fun updateAppWidget(
         views.setTextViewText(R.id.appwidget_uv, uvIndex)
         if (useAltLayout) {
             views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
-            views.setImageViewResource(R.id.uv_alt, R.drawable.uv)
+            views.setImageViewResource(R.id.uv_alt, R.drawable.mono_uv_index)
         } else {
             views.setViewVisibility(R.id.appwidget_uv_wrap, View.VISIBLE)
             views.setImageViewResource(R.id.uv_alt, 0)

@@ -34,10 +34,10 @@
                     android:padding="10dp">
 
                     <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
                         android:contentDescription="@string/weather_icon"
-                        android:src="@drawable/baseline_star_border_green_24"/>
+                        android:src="@drawable/aurora_borealis"/>
                     <TextView
                         android:id="@+id/appwidget_aurora"
                         android:layout_width="wrap_content"
@@ -63,17 +63,17 @@
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:gravity="center_vertical">
+                    android:gravity="center_horizontal">
 
                     <LinearLayout
                         android:id="@+id/appwidget_uv_wrap"
                         android:layout_height="wrap_content"
-                        android:layout_width="match_parent"
-                        android:gravity="center_horizontal">
+                        android:layout_width="wrap_content"
+                        android:gravity="center_vertical">
                         <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:src="@drawable/mono_uv_index" />
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/mono_uv_index"/>
                         <TextView
                             android:id="@+id/appwidget_uv"
                             android:textColor="@color/text_color"
