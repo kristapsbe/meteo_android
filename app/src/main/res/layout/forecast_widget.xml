@@ -35,7 +35,7 @@
 
                     <ImageView
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:contentDescription="@string/weather_icon"
                         android:src="@drawable/baseline_star_border_green_24"
                         android:paddingEnd="3dp"/>
