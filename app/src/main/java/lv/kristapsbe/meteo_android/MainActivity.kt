@@ -674,6 +674,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
+                                // TODO: I've eyeballed the values here atm, should find a better solution
                                 .height((4f + 21f * rc.elementAt(0) * Resources.getSystem().displayMetrics.scaledDensity / Resources.getSystem().displayMetrics.density).toInt().dp)
                                 .width((4f + 21f * Resources.getSystem().displayMetrics.scaledDensity / Resources.getSystem().displayMetrics.density).toInt().dp)
                         ) {
