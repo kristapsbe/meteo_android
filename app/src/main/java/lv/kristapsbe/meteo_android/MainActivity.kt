@@ -677,58 +677,27 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             .padding(0.dp, 3.dp, 0.dp, 0.dp)
                     ) {
                     }
-                    Row {
-                        Text("")
-                        Image(
-                            painterResource(R.drawable.baseline_device_thermostat_24),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                    Row {
-                        Text("")
-                        Image(
-                            painterResource(R.drawable.baseline_umbrella_24),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                    Row {
-                        Text("")
-                        Image(
-                            painterResource(R.drawable.baseline_bolt_24),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Row {
-                                Text("")
+                    for (rc in listOf(setOf(1, R.drawable.baseline_device_thermostat_24), setOf(1, R.drawable.baseline_umbrella_24), setOf(1, R.drawable.baseline_bolt_24), setOf(2, R.drawable.baseline_air_24), setOf(1, R.drawable.uv))) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                for (cc in 1..rc.elementAt(0)) {
+                                    Row {
+                                        Text("")
+                                    }
+                                }
                             }
-                            Row {
-                                Text("")
+                            Column {
+                                Row {
+                                    Image(
+                                        painterResource(rc.elementAt(1)),
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                    )
+                                }
                             }
                         }
-                        Column {
-                            Row {
-                                Image(
-                                    painterResource(R.drawable.baseline_air_24),
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Fit,
-                                )
-                            }
-                        }
-                    }
-                    Row {
-                        Text("")
-                        Image(
-                            painterResource(R.drawable.uv),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                        )
                     }
                 }
             }
