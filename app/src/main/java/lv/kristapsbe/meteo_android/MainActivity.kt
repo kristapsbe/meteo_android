@@ -351,8 +351,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
         }
     }
-
-
+    
     @Composable
     fun SettingsEntryString(translation: Translation, preference: Preference, mutableState: MutableState<String>, nextEntry: HashMap<String, String>, defaultVal: String) {
         Row(
