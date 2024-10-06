@@ -37,7 +37,7 @@
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:contentDescription="@string/weather_icon"
-                        android:src="@drawable/light"
+                        android:src="@drawable/baseline_star_border_green_24"
                         android:paddingEnd="3dp"/>
                     <TextView
                         android:id="@+id/appwidget_aurora"
