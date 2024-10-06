@@ -10,6 +10,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -65,6 +66,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -480,7 +482,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         LottieAnimation(
                             composition = composition,
                             progress = progress,
-                            modifier = Modifier.fillMaxWidth().fillMaxHeight()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight()
                         )
                     } else {
                         Image(
@@ -619,25 +623,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .padding(20.dp, 0.dp)
                         .fillMaxWidth()
                 ) {
-                    if (selectedLang.value == LANG_EN) {
-                        Text(
-                            text = "Aurora ${displayInfo.value.aurora.prob}% at ${displayInfo.value.aurora.time}",
-                            textAlign = TextAlign.Center,
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(0.dp, 10.dp, 0.dp, 0.dp)
-                        )
-                    } else {
-                        Text(
-                            text = "Ziemeļblāzma ${displayInfo.value.aurora.prob}% plkst. ${displayInfo.value.aurora.time}",
-                            textAlign = TextAlign.Center,
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(0.dp, 10.dp, 0.dp, 0.dp)
-                        )
-                    }
+                    Text(
+                        text = if (selectedLang.value == LANG_EN) "Aurora ${displayInfo.value.aurora.prob}% at ${displayInfo.value.aurora.time}" else "Ziemeļblāzma ${displayInfo.value.aurora.prob}% plkst. ${displayInfo.value.aurora.time}",
+                        textAlign = TextAlign.Center,
+                        color = Color(resources.getColor(R.color.text_color)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                    )
                 }
             }
         }
@@ -676,26 +669,19 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             .padding(0.dp, 3.dp, 0.dp, 0.dp)
                     ) {
                     }
-                    for (rc in listOf(setOf(1, R.drawable.baseline_device_thermostat_24), setOf(1, R.drawable.baseline_umbrella_24), setOf(1, R.drawable.baseline_bolt_24), setOf(2, R.drawable.baseline_air_24), setOf(1, R.drawable.uv))) {
+                    Log.i("HEIGHT", "${Resources.getSystem().displayMetrics.scaledDensity} ${Resources.getSystem().displayMetrics.density}")
+                    for (rc in listOf(setOf(1, R.drawable.mono_thermometer), setOf(1, R.drawable.mono_umbrella), setOf(1, R.drawable.mono_thunderstorms), setOf(2, R.drawable.mono_wind), setOf(1, R.drawable.mono_uv_index))) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .height((4f + 21f * rc.elementAt(0) * Resources.getSystem().displayMetrics.scaledDensity / Resources.getSystem().displayMetrics.density).toInt().dp)
+                                .width((4f + 21f * Resources.getSystem().displayMetrics.scaledDensity / Resources.getSystem().displayMetrics.density).toInt().dp)
                         ) {
-                            Column {
-                                for (cc in 1..rc.elementAt(0)) {
-                                    Row {
-                                        Text("")
-                                    }
-                                }
-                            }
-                            Column {
-                                Row {
-                                    Image(
-                                        painterResource(rc.elementAt(1)),
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Fit,
-                                    )
-                                }
-                            }
+                            Image(
+                                painterResource(rc.elementAt(1)),
+                                contentDescription = "",
+                                contentScale = ContentScale.Fit,
+                            )
                         }
                     }
                 }
@@ -790,6 +776,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     Text(
                                         tVal,
                                         color = Color(resources.getColor(R.color.text_color)),
+                                        fontSize = 16.sp,
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = TextAlign.Center,
                                     )
