@@ -818,36 +818,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 textAlign = TextAlign.Center,
                             )
                             if (showFullHourly.value) {
-                                Text(
-                                    "${h.rainAmount} mm",
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                                Text(
-                                    "${h.stormProb}%",
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                                Text(
-                                    "${h.windSpeed} m/s",
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                                Text(
-                                    h.getDirection(selectedLang.value),
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
-                                Text(
-                                    h.uvIndex.toString(),
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                )
+                                for (tVal in listOf("${h.rainAmount} mm", "${h.stormProb}%", "${h.windSpeed} m/s", h.getDirection(selectedLang.value), h.uvIndex.toString())) {
+                                    Text(
+                                        tVal,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
                             }
                         }
                         if (h.date.hour == sunTimes.riseH) {
