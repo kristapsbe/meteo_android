@@ -17,9 +17,6 @@ import androidx.work.WorkManager
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_NO_DL_NAME
 
 
-/**
- * Implementation of App Widget functionality.
- */
 class ForecastWidget : AppWidgetProvider() {
     override fun onAppWidgetOptionsChanged(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, newOptions: Bundle) {
         val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>().build()

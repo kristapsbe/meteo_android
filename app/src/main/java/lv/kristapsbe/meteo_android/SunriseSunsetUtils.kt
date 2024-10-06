@@ -1,6 +1,5 @@
 package lv.kristapsbe.meteo_android
 
-
 import kotlinx.datetime.LocalDateTime
 import kotlin.math.PI
 import kotlin.math.acos
@@ -13,7 +12,6 @@ import kotlin.math.tan
 
 
 class SunRiseSunSet(val riseH: Int, val riseMin: String, val setH: Int, val setMin: String)
-
 
 // https://gml.noaa.gov/grad/solcalc/main.js
 class SunriseSunsetUtils {

@@ -108,7 +108,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                             w.type[selectedLang] ?: "",
                             w.description[selectedLang] ?: "",
                             R.drawable.baseline_warning_24,
-                            WeatherPictogram.warningIconMapping[w.intensity] ?: R.drawable.baseline_warning_yellow_24
+                            IconMapping.warningIconMapping[w.intensity] ?: R.drawable.baseline_warning_yellow_24
                         )
                     }
                 }

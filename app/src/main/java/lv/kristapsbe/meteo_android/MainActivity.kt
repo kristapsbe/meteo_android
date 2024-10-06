@@ -972,7 +972,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             ) {
                                 Image(
                                     painterResource(
-                                        WeatherPictogram.warningIconMapping[w.intensity]
+                                        IconMapping.warningIconMapping[w.intensity]
                                             ?: R.drawable.baseline_warning_yellow_24
                                     ),
                                     contentDescription = "",

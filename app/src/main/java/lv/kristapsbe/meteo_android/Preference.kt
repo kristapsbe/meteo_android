@@ -3,6 +3,7 @@ package lv.kristapsbe.meteo_android
 import android.app.Activity.MODE_PRIVATE
 import android.content.Context
 
+
 enum class Preference {
     FORCE_CURRENT_LOCATION,
     TEMP_UNIT,
