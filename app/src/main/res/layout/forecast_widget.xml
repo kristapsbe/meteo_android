@@ -34,8 +34,8 @@
                     android:padding="10dp">
 
                     <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:contentDescription="@string/weather_icon"
                         android:src="@drawable/baseline_star_border_green_24"
                         android:paddingEnd="3dp"/>
@@ -72,9 +72,9 @@
                         android:layout_width="wrap_content"
                         android:gravity="center_vertical">
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/mono_uv_index"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/uv"
                             android:paddingEnd="3dp"/>
                         <TextView
                             android:id="@+id/appwidget_uv"
