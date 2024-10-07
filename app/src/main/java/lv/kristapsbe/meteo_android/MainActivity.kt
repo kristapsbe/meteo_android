@@ -721,7 +721,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 if (showFullHourly.value) {
                     Row(
                         modifier = Modifier
-                            .height((24f * Resources.getSystem().displayMetrics.scaledDensity / Resources.getSystem().displayMetrics.density).dp)
+                            .height((23f * Resources.getSystem().displayMetrics.scaledDensity / Resources.getSystem().displayMetrics.density).dp)
                     ) { }
                     Row(
                         modifier = Modifier
