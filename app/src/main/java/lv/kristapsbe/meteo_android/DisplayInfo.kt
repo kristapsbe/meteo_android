@@ -17,7 +17,7 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
-import lv.kristapsbe.meteo_android.IconMapping.Companion.rainPictograms
+import lv.kristapsbe.meteo_android.IconMapping.Companion.rainCodes
 import lv.kristapsbe.meteo_android.IconMapping.Companion.iconMapping
 import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateIconMapping
 import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateAnimatedIconMapping
@@ -28,7 +28,7 @@ import kotlin.math.roundToInt
 
 
 class WeatherPictogram(
-    private val code: Int
+    val code: Int
 ) {
     fun getPictogram(): Int {
         return iconMapping[code] ?: R.drawable.unknown
@@ -276,7 +276,7 @@ class DisplayInfo() {
 
     fun getRainIconId(useAlternativeIcon: Boolean): Int {
         val hForecasts = getHourlyForecasts()
-        val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
+        val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }
         if (hourlyRain.isNotEmpty()) {
             return if (useAlternativeIcon) hourlyRain[0].pictogram.getAlternatePictogram() else hourlyRain[0].pictogram.getPictogram()
         }
@@ -285,7 +285,7 @@ class DisplayInfo() {
 
     fun getWhenRainExpected(lang: String): String {
         val hForecasts = getHourlyForecasts()
-        val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainPictograms.contains(it.pictogram.getPictogram()) }
+        val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }
         if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
             return if (hourlyRain[0].date.dayOfMonth == getTodayForecast().date.dayOfMonth) {
                 "${LangStrings.getTranslationString(lang, Translation.RAIN_EXPECTED_TODAY)} ${hourlyRain[0].date.hour}:00"

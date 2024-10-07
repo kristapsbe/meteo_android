@@ -339,10 +339,19 @@ class IconMapping {
             2609 to R.raw.partly_cloudy_night_snow, // cloud, sun, more snow and wind
         )
 
-        val rainPictograms: List<Int> = listOf(
-            R.drawable.tshower, R.drawable.tshower0, R.drawable.tshower1,
-            R.drawable.shower, R.drawable.shower0, R.drawable.shower1,
-            R.drawable.rain, R.drawable.rain0, R.drawable.rain1,
+        val rainCodes: List<Int> = listOf(
+            // day
+            1201, 1202, 1203, 1204, 1205, 1206, 1207, 1208, // sleet
+            1301, 1302, 1303, 1304, 1305, 1306, 1307, 1308, 1309, // rain and sleet
+            1405, 1406, 1407, 1408, 1409, // fog an drizzle, rain or sleet
+            1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, // rain
+            1601, 1602, 1603, 1604, 1605, 1606, 1607, 1608, 1609, // snow
+            // night
+            2201, 2202, 2203, 2204, 2205, 2206, 2207, 2208, // sleet
+            2301, 2302, 2303, 2304, 2305, 2306, 2307, 2308, 2309, // rain and sleet
+            2405, 2406, 2407, 2408, 2409, // fog an drizzle, rain or sleet
+            2501, 2502, 2503, 2504, 2505, 2506, 2507, 2508, 2509, // rain
+            2601, 2602, 2603, 2604, 2605, 2606, 2607, 2608, 2609, // snow
         )
 
         // TODO: make warning specific icons
