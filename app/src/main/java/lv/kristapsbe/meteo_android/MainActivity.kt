@@ -5,9 +5,11 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -31,7 +33,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -48,6 +52,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -60,11 +65,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -158,6 +166,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private lateinit var doFixIconDayNight: MutableState<Boolean>
     private lateinit var useAnimatedIcons: MutableState<Boolean>
     private lateinit var customLocationName: MutableState<String>
+    private lateinit var privacyPolicyAccepted: MutableState<Boolean>
 
     private var wasLastScrollNegative: Boolean = false
 
@@ -183,6 +192,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         doFixIconDayNight = mutableStateOf(prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true))
         useAnimatedIcons = mutableStateOf(prefs.getBoolean(Preference.USE_ANIMATED_ICONS, false))
         customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
+        privacyPolicyAccepted = mutableStateOf(prefs.getBoolean(Preference.PRIVACY_POLICY_ACCEPTED, false))
 
         val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
 
@@ -210,6 +220,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         if (content != "") {
             try {
                 displayInfo.value = DisplayInfo(Json.decodeFromString<CityForecastData>(content))
+                DisplayInfo.updateWidget(
+                    applicationContext,
+                    displayInfo.value
+                )
             } catch (e: Exception) {
                 Log.e("ERROR", "Failed to load data from storage: $e")
             }
@@ -251,8 +265,54 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AllForecasts()
+                    if (privacyPolicyAccepted.value) {
+                        AllForecasts()
+                    } else {
+                        PrivacyPolicy()
+                    }
                 }
+            }
+        }
+    }
+
+    @Composable
+    fun PrivacyPolicy() {
+        Column(
+            modifier = Modifier
+                .background(Color.Gray)
+                .padding(40.dp, 80.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(resources.getColor(R.color.sky_blue)))
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+            ) {
+                val annotatedText = buildAnnotatedString {
+                    append("Click here to visit ")
+                    // Add clickable part
+                    withStyle(style = SpanStyle(color = Color.Blue)) {
+                        pushStringAnnotation(tag = "URL", annotation = "https://meteo.kristapsbe.lv/privacy-policy")
+                        append("Example.com")
+                        pop()
+                    }
+                }
+
+                ClickableText(
+                    text = annotatedText,
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
+                    onClick = { offset ->
+                        annotatedText.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                            .firstOrNull()?.let { annotation ->
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                applicationContext.startActivity(intent)
+                            }
+                    }
+                )
             }
         }
     }

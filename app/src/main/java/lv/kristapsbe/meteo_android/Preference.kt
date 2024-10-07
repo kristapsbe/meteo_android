@@ -17,6 +17,7 @@ enum class Preference {
     LAST_LAT,
     LAST_LON,
     LAST_VERSION_CODE,
+    PRIVACY_POLICY_ACCEPTED,
 }
 
 class AppPreferences(context: Context) {
