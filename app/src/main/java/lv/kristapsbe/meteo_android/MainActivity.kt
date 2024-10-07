@@ -657,18 +657,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     .width(30.dp)
             ) {
                 if (showFullHourly.value) {
-                    Row {
-                        Text(
-                            "",
-                            fontSize = if (useAltLayout.value) 16.sp else 10.sp,
-                        )
-                    }
+                    Row(
+                        modifier = Modifier
+                            .height((24f * Resources.getSystem().displayMetrics.scaledDensity / Resources.getSystem().displayMetrics.density).dp)
+                    ) { }
                     Row(
                         modifier = Modifier
                             .height(40.dp)
-                    ) {
-                    }
-                    Log.i("HEIGHT", "${Resources.getSystem().displayMetrics.scaledDensity} ${Resources.getSystem().displayMetrics.density}")
+                    ) { }
                     for (rc in listOf(setOf(1, R.drawable.mono_thermometer), setOf(1, R.drawable.mono_umbrella), setOf(1, R.drawable.mono_thunderstorms), setOf(2, R.drawable.mono_wind), setOf(1, R.drawable.mono_uv_index))) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
