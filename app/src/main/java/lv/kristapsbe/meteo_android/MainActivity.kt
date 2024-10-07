@@ -110,7 +110,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val AURORA_NOTIFICATION_THRESHOLD = 1 // notify when the probability of an aurora is greater or equal than this
 
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
-        const val LAST_COORDINATES_FILE = "last_coordinates.json"
         const val HAS_AURORA_NOTIFIED = "aurora_notified"
         const val AURORA_NOTIF_ID = "aurora_notif_id"
 
@@ -144,7 +143,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
         }
 
-        val defaultCoords = setOf(56.9730, 24.1327)
+        const val DEFAULT_LAT = 56.9730f
+        const val DEFAULT_LON = 24.1327f
     }
 
     private lateinit var prefs: AppPreferences
@@ -446,19 +446,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
         }
 
-        val coordContent = loadStringFromStorage(applicationContext, LAST_COORDINATES_FILE)
-        var tmpCoords = defaultCoords
-        if (coordContent != "") {
-            try {
-                tmpCoords = Json.decodeFromString<Set<Double>>(coordContent)
-            } catch (e: Exception) {
-
-            }
-        }
-        var sunTimes: SunRiseSunSet = calculate(
+        val sunTimes: SunRiseSunSet = calculate(
             displayInfo.value.getTodayForecast().date,
-            tmpCoords.elementAt(0),
-            tmpCoords.elementAt(1),
+            prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble(),
+            prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble(),
             ZonedDateTime.now().offset.totalSeconds / 3600
         )
 
@@ -688,21 +679,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .horizontalScroll(rememberScrollState())
                 ) {
                     var prevHDay: String? = null
-                    val coordContent = loadStringFromStorage(applicationContext, LAST_COORDINATES_FILE)
-                    var tmpCoords = defaultCoords
-                    if (coordContent != "") {
-                        try {
-                            tmpCoords = Json.decodeFromString<Set<Double>>(coordContent)
-                        } catch (e: Exception) {
+                    val lat = prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble()
+                    val lon = prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble()
+                    val tz = ZonedDateTime.now().offset.totalSeconds / 3600
 
-                        }
-                    }
-                    var sunTimes: SunRiseSunSet = calculate(
-                        displayInfo.value.getTodayForecast().date,
-                        tmpCoords.elementAt(0),
-                        tmpCoords.elementAt(1),
-                        ZonedDateTime.now().offset.totalSeconds / 3600
-                    )
+                    var sunTimes: SunRiseSunSet = calculate(displayInfo.value.getTodayForecast().date, lat, lon, tz)
+
                     for (h in displayInfo.value.getHourlyForecasts()) {
                         if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
                             VerticalDivider(
@@ -712,12 +694,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             )
                         }
                         if (prevHDay != h.getDayOfWeek()) {
-                            sunTimes = calculate(
-                                h.date,
-                                tmpCoords.elementAt(0),
-                                tmpCoords.elementAt(1),
-                                ZonedDateTime.now().offset.totalSeconds / 3600
-                            )
+                            sunTimes = calculate(h.date, lat, lon, tz)
                         }
                         prevHDay = h.getDayOfWeek()
                         Column (

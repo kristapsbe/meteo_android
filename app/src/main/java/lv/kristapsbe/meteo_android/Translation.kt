@@ -178,11 +178,7 @@ class LangStrings {
         )
 
         fun getTranslationString(lang: String, key: Translation): String {
-            var currLang = lang
-            if (currLang == "") {
-                currLang = LANG_EN
-            }
-            return translationStrings[currLang]?.get(key) ?: ""
+            return translationStrings[if (lang == "") LANG_EN else lang]?.get(key) ?: ""
         }
     }
 }

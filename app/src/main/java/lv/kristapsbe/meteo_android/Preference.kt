@@ -36,8 +36,8 @@ class AppPreferences(context: Context) {
         prefs.edit().putInt(pref.toString(), value).apply()
     }
 
-    fun getFloat(pref: Preference): Float {
-        return prefs.getFloat(pref.toString(), defaultFloat)
+    fun getFloat(pref: Preference, overrideDefault: Float = defaultFloat): Float {
+        return prefs.getFloat(pref.toString(), overrideDefault)
     }
 
     fun setFloat(pref: Preference, value: Float) {

@@ -22,9 +22,9 @@ import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIF_ID
+import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LAT
+import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
 import lv.kristapsbe.meteo_android.MainActivity.Companion.HAS_AURORA_NOTIFIED
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LAST_COORDINATES_FILE
-import lv.kristapsbe.meteo_android.MainActivity.Companion.defaultCoords
 import kotlin.coroutines.resume
 
 
@@ -55,12 +55,11 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         if (lastLocation != null) {
             return setOf(lastLocation.latitude, lastLocation.longitude)
         } else {
-            val coordContent = loadStringFromStorage(applicationContext, LAST_COORDINATES_FILE)
-            return if (coordContent != "") {
-                Json.decodeFromString<Set<Double>>(coordContent)
-            } else {
-                defaultCoords
-            }
+            val prefs = AppPreferences(context)
+            return setOf(
+                prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble(),
+                prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble()
+            )
         }
     }
 
@@ -78,9 +77,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             } else {
                 val location = getLastLocation(app)
                 cityForecast = CityForecastDataDownloader.downloadDataLatLon(app, location.elementAt(0), location.elementAt(1))
-                app.openFileOutput(LAST_COORDINATES_FILE, MODE_PRIVATE).use { fos ->
-                    fos.write(location.toString().toByteArray())
-                }
+                prefs.setFloat(Preference.LAST_LAT, location.elementAt(0).toFloat())
+                prefs.setFloat(Preference.LAST_LON, location.elementAt(1).toFloat())
             }
 
             callback?.onWorkerResult(cityForecast)

@@ -9,22 +9,20 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.serialization.json.Json
-import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getDirectionString
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getShortenedDayString
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.CELSIUS
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LAST_COORDINATES_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
-import lv.kristapsbe.meteo_android.MainActivity.Companion.defaultCoords
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.IconMapping.Companion.rainPictograms
 import lv.kristapsbe.meteo_android.IconMapping.Companion.iconMapping
 import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateIconMapping
 import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateAnimatedIconMapping
+import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LAT
+import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
 import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 
@@ -149,15 +147,10 @@ class DisplayInfo() {
 
             intent.putExtra("do_show_widget_background", doShowWidgetBackground)
             if (doFixIconDayNight) {
-                val coordContent = loadStringFromStorage(context, LAST_COORDINATES_FILE)
-                var tmpCoords = defaultCoords
-                if (coordContent != "") {
-                    tmpCoords = Json.decodeFromString<Set<Double>>(coordContent)
-                }
                 val sunTimes: SunRiseSunSet = calculate(
                     displayInfo.getTodayForecast().date,
-                    tmpCoords.elementAt(0),
-                    tmpCoords.elementAt(1),
+                    prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble(),
+                    prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble(),
                     ZonedDateTime.now().offset.totalSeconds / 3600
                 )
 
