@@ -134,7 +134,7 @@ internal fun updateAppWidget(
         views.setTextViewText(R.id.appwidget_uv, uvIndex)
         if (useAltLayout) {
             views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
-            views.setImageViewResource(R.id.uv_alt, R.drawable.mono_uv_index)
+            views.setImageViewResource(R.id.uv_alt, R.drawable.uv)
         } else {
             views.setViewVisibility(R.id.appwidget_uv_wrap, View.VISIBLE)
             views.setImageViewResource(R.id.uv_alt, 0)
