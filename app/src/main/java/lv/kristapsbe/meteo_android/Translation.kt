@@ -135,7 +135,7 @@ class LangStrings {
         )
 
         fun getDirectionString(lang: String, deg: Int): String {
-            return directions[lang]?.get(deg) ?: ""
+            return directions[if (lang == "") LANG_EN else lang]?.get(deg) ?: ""
         }
 
         private val translationStrings = hashMapOf(
