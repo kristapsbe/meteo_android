@@ -39,6 +39,8 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -288,14 +290,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color(resources.getColor(R.color.sky_blue)))
                     .fillMaxWidth()
-                    .fillMaxHeight()
             ) {
                 val annotatedText = buildAnnotatedString {
-                    append("Click here to visit ")
+                    append("Privacy policy available ")
                     // Add clickable part
                     withStyle(style = SpanStyle(color = Color.Blue)) {
                         pushStringAnnotation(tag = "URL", annotation = "https://meteo.kristapsbe.lv/privacy-policy")
-                        append("Example.com")
+                        append("here")
                         pop()
                     }
                 }
@@ -309,10 +310,22 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         annotatedText.getStringAnnotations(tag = "URL", start = offset, end = offset)
                             .firstOrNull()?.let { annotation ->
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 applicationContext.startActivity(intent)
                             }
                     }
                 )
+            }
+            Row {
+                Button(
+                    onClick = {
+                        privacyPolicyAccepted.value = true
+                        prefs.setBoolean(Preference.PRIVACY_POLICY_ACCEPTED, privacyPolicyAccepted.value)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)  // Set button background color
+                ) {
+                    Text("Click Me", color = Color.White)  // Set text and its color
+                }
             }
         }
     }
