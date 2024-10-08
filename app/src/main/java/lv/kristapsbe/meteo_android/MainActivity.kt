@@ -179,6 +179,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var showFullWarnings = mutableStateOf(false)
     private var locationSearchMode = mutableStateOf(false)
     private var doDisplaySettings = mutableStateOf(false)
+    private var isPrivacyPolicyChecked = mutableStateOf(false)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -196,6 +197,28 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
         privacyPolicyAccepted = mutableStateOf(prefs.getBoolean(Preference.PRIVACY_POLICY_ACCEPTED, false))
 
+        if (privacyPolicyAccepted.value) {
+            setup()
+        }
+
+        enableEdgeToEdge()
+        setContent {
+            Meteo_androidTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    if (privacyPolicyAccepted.value) {
+                        AllForecasts()
+                    } else {
+                        PrivacyPolicy()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setup() {
         val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
 
         try {
@@ -259,72 +282,84 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(20, TimeUnit.MINUTES).build()
         val workManager = WorkManager.getInstance(this)
         workManager.enqueueUniquePeriodicWork(PERIODIC_FORECAST_DL_NAME, ExistingPeriodicWorkPolicy.UPDATE, workRequest)
-
-        enableEdgeToEdge()
-        setContent {
-            Meteo_androidTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    if (privacyPolicyAccepted.value) {
-                        AllForecasts()
-                    } else {
-                        PrivacyPolicy()
-                    }
-                }
-            }
-        }
     }
 
     @Composable
     fun PrivacyPolicy() {
-        Column(
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .background(Color.Gray)
                 .padding(40.dp, 80.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color(resources.getColor(R.color.sky_blue)))
                     .fillMaxWidth()
+                    .padding(20.dp)
             ) {
-                val annotatedText = buildAnnotatedString {
-                    append("Privacy policy available ")
-                    // Add clickable part
-                    withStyle(style = SpanStyle(color = Color.Blue)) {
-                        pushStringAnnotation(tag = "URL", annotation = "https://meteo.kristapsbe.lv/privacy-policy")
-                        append("here")
-                        pop()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.1f)
+                            .clickable {
+                                isPrivacyPolicyChecked.value = !isPrivacyPolicyChecked.value
+                            },
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painterResource(if (isPrivacyPolicyChecked.value) R.drawable.baseline_check_box_24 else R.drawable.baseline_check_box_outline_blank_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        val annotatedText = buildAnnotatedString {
+                            append("I have read and agree to the ")
+                            withStyle(style = SpanStyle(color = Color.Blue)) {
+                                pushStringAnnotation(tag = "URL", annotation = "https://meteo.kristapsbe.lv/privacy-policy")
+                                append("Privacy Policy")
+                                pop()
+                            }
+                        }
+
+                        ClickableText(
+                            text = annotatedText,
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .fillMaxWidth(),
+                            onClick = { offset ->
+                                annotatedText.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                                    .firstOrNull()?.let { annotation ->
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        applicationContext.startActivity(intent)
+                                    }
+                            }
+                        )
                     }
                 }
-
-                ClickableText(
-                    text = annotatedText,
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth(),
-                    onClick = { offset ->
-                        annotatedText.getStringAnnotations(tag = "URL", start = offset, end = offset)
-                            .firstOrNull()?.let { annotation ->
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                applicationContext.startActivity(intent)
+                Row {
+                    Button(
+                        onClick = {
+                            if (isPrivacyPolicyChecked.value) {
+                                privacyPolicyAccepted.value = true
+                                prefs.setBoolean(Preference.PRIVACY_POLICY_ACCEPTED, privacyPolicyAccepted.value)
+                                finish();
+                                startActivity(intent);
                             }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)  // Set button background color
+                    ) {
+                        Text("Continue", color = Color.White)  // Set text and its color
                     }
-                )
-            }
-            Row {
-                Button(
-                    onClick = {
-                        privacyPolicyAccepted.value = true
-                        prefs.setBoolean(Preference.PRIVACY_POLICY_ACCEPTED, privacyPolicyAccepted.value)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)  // Set button background color
-                ) {
-                    Text("Click Me", color = Color.White)  // Set text and its color
                 }
             }
         }
