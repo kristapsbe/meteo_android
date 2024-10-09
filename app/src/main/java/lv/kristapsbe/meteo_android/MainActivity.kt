@@ -217,19 +217,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     private fun setup() {
-        val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
-
-        try {
-            val currentVersionCode = packageManager.getPackageInfo(packageName, 0).versionCode
-
-            if (lastVersionCode != currentVersionCode) {
-                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-                prefs.setInt(Preference.LAST_VERSION_CODE, currentVersionCode)
-            }
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-        }
+        val app = applicationContext as MyApplication
+        app.workerCallback = this
 
         // Fixing the back button / gesture
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -250,10 +239,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             } catch (e: Exception) {
                 Log.e("ERROR", "Failed to load data from storage: $e")
             }
+        } else {
+            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+            WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
         }
-
-        val app = applicationContext as MyApplication
-        app.workerCallback = this
 
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
