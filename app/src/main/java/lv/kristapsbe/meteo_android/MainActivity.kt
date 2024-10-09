@@ -120,8 +120,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val AURORA_NOTIFICATION_THRESHOLD = 1 // notify when the probability of an aurora is greater or equal than this
 
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
-        const val HAS_AURORA_NOTIFIED = "aurora_notified"
-        const val AURORA_NOTIF_ID = "aurora_notif_id"
 
         const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
         const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"

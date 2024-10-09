@@ -18,6 +18,8 @@ enum class Preference {
     LAST_LON,
     LAST_VERSION_CODE,
     PRIVACY_POLICY_ACCEPTED,
+    HAS_AURORA_NOTIFIED,
+    AURORA_NOTIFICATION_ID,
 }
 
 class AppPreferences(context: Context) {
