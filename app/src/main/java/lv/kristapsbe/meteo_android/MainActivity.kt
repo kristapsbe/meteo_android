@@ -289,7 +289,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .background(Color.Gray)
+                .background(Color.LightGray)
                 .padding(40.dp, 80.dp)
         ) {
             Column(
