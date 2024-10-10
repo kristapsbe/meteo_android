@@ -25,10 +25,10 @@ class AppPreferences(context: Context) {
     private val prefName = "AppPrefs"
     private val prefs = context.getSharedPreferences(prefName, MODE_PRIVATE)
 
-    val defaultString = ""
-    val defaultInt = -1
-    val defaultBoolean = false
-    val defaultFloat = -999f
+    private val defaultString = ""
+    private val defaultInt = -1
+    private val defaultBoolean = false
+    private val defaultFloat = -999f
 
     fun getInt(pref: Preference): Int {
         return prefs.getInt(pref.toString(), defaultInt)
