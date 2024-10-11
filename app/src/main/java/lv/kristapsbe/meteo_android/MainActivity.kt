@@ -715,7 +715,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     )
                 }
             }
-            if (doAlwaysShowAurora.value || displayInfo.value.aurora.prob > AURORA_NOTIFICATION_THRESHOLD) {
+            if (doAlwaysShowAurora.value || displayInfo.value.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
                 Row(
                     modifier = Modifier
                         .padding(20.dp, 0.dp)
