@@ -95,6 +95,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     warnings = Json.decodeFromString<HashSet<Int>>(content)
                 }
 
+                // TODO: the file's just going to keep growing - I need to clear it out somehow
                 for (w in displayInfo.warnings) {
                     if (!warnings.contains(w.id)) {
                         warnings.add(w.id) // TODO: only add if allowed to push notifs
@@ -108,6 +109,10 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                         )
                     }
                 }
+                applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
+                    fos.write(warnings.toString().toByteArray())
+                }
+
                 val hasAuroraNotificationBeenDisplayed = prefs.getBoolean(Preference.HAS_AURORA_NOTIFIED)
                 if (hasAuroraNotificationBeenDisplayed) {
                     if (displayInfo.aurora.prob < AURORA_NOTIFICATION_THRESHOLD) {
@@ -125,9 +130,6 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                         R.drawable.baseline_star_border_green_24
                     )
                     prefs.setInt(Preference.AURORA_NOTIFICATION_ID, (auroraNotifId+1))
-                }
-                applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
-                    fos.write(warnings.toString().toByteArray())
                 }
             }
         }
