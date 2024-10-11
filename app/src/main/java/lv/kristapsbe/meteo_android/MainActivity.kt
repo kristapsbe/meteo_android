@@ -117,7 +117,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val AURORA_NOTIFICATION_CHANNEL_ID = "AURORA_NOTIFICATION"
         const val AURORA_NOTIFICATION_CHANNEL_NAME = "Aurora notifications"
         const val AURORA_NOTIFICATION_CHANNEL_DESCRIPTION = "Channel for receiving notifications about increases in the probability of observing an aurora"
-        const val AURORA_NOTIFICATION_THRESHOLD = 1 // notify when the probability of an aurora is greater or equal than this
+        const val AURORA_NOTIFICATION_THRESHOLD = 5 // notify when the probability of an aurora is greater or equal than this
 
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
 
@@ -161,8 +161,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private lateinit var selectedTempType: MutableState<String>
     private lateinit var showWidgetBackground: MutableState<Boolean>
     private lateinit var useAltLayout: MutableState<Boolean>
-    private lateinit var doAlwaysShowAurora: MutableState<Boolean>
-    private lateinit var doAlwaysShowUV: MutableState<Boolean>
+    private lateinit var doShowAurora: MutableState<Boolean>
     private lateinit var doFixIconDayNight: MutableState<Boolean>
     private lateinit var useAnimatedIcons: MutableState<Boolean>
     private lateinit var customLocationName: MutableState<String>
@@ -188,8 +187,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         selectedTempType = mutableStateOf(prefs.getString(Preference.TEMP_UNIT, CELSIUS))
         showWidgetBackground = mutableStateOf(prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true))
         useAltLayout = mutableStateOf(prefs.getBoolean(Preference.USE_ALT_LAYOUT, false))
-        doAlwaysShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false))
-        doAlwaysShowUV = mutableStateOf(prefs.getBoolean(Preference.DO_ALWAYS_SHOW_UV, false))
+        doShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_SHOW_AURORA, true))
         doFixIconDayNight = mutableStateOf(prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true))
         useAnimatedIcons = mutableStateOf(prefs.getBoolean(Preference.USE_ANIMATED_ICONS, false))
         customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
@@ -514,8 +512,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 SettingsEntryString(Translation.SETTINGS_APP_LANGUAGE, Preference.LANG, selectedLang, nextLang, LANG_EN)
                 SettingsEntryBoolean(Translation.SETTINGS_WIDGET_TRANSPARENCY, Preference.DO_SHOW_WIDGET_BACKGROUND, showWidgetBackground)
                 SettingsEntryString(Translation.SETTINGS_TEMPERATURE_UNIT, Preference.TEMP_UNIT, selectedTempType, nextTemp, CELSIUS)
-                SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_DISPLAY_AURORA, Preference.DO_ALWAYS_SHOW_AURORA, doAlwaysShowAurora)
-                SettingsEntryBoolean(Translation.SETTINGS_ALWAYS_DISPLAY_UV, Preference.DO_ALWAYS_SHOW_UV, doAlwaysShowUV)
+                SettingsEntryBoolean(Translation.SETTINGS_DISPLAY_AURORA, Preference.DO_SHOW_AURORA, doShowAurora)
                 SettingsEntryBoolean(Translation.SETTINGS_FIX_ICON_DAY_NIGHT, Preference.DO_FIX_ICON_DAY_NIGHT, doFixIconDayNight)
                 SettingsEntryBoolean(Translation.SETTINGS_USE_ALT_LAYOUT, Preference.USE_ALT_LAYOUT, useAltLayout)
                 SettingsEntryBoolean(Translation.SETTINGS_USE_ANIMATED_ICONS, Preference.USE_ANIMATED_ICONS, useAnimatedIcons)
@@ -715,7 +712,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     )
                 }
             }
-            if (doAlwaysShowAurora.value || displayInfo.value.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
+            if (doShowAurora.value && displayInfo.value.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
                 Row(
                     modifier = Modifier
                         .padding(20.dp, 0.dp)

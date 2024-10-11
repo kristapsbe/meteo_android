@@ -127,8 +127,7 @@ class DisplayInfo() {
             val selectedTemp = prefs.getString(Preference.TEMP_UNIT, CELSIUS)
             val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
             val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
-            val doAlwaysShowAurora = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_AURORA, false)
-            val doAlwaysShowUV = prefs.getBoolean(Preference.DO_ALWAYS_SHOW_UV, false)
+            val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, false)
             val doFixIconDayNight = prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true)
             val useAnimatedIcons = prefs.getBoolean(Preference.USE_ANIMATED_ICONS, false)
 
@@ -164,8 +163,8 @@ class DisplayInfo() {
             intent.putExtra("rain_image", displayInfo.getRainIconId(useAnimatedIcons))
             intent.putExtra("rain", displayInfo.getWhenRainExpected(lang))
             intent.putExtra("uv_index", displayInfo.getTodayForecast().uvIndex.toString())
-            intent.putExtra("do_show_aurora", (doAlwaysShowAurora || (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD)))
-            intent.putExtra("do_show_uv", (doAlwaysShowUV || (displayInfo.getTodayForecast().uvIndex > 0)))
+            intent.putExtra("do_show_aurora", (doShowAurora && (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD)))
+            intent.putExtra("do_show_uv", (displayInfo.getTodayForecast().uvIndex > 0))
             intent.putExtra("aurora", "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})")
             intent.putExtra("use_alt_layout", useAltLayout)
 
