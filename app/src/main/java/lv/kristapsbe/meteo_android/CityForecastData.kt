@@ -62,7 +62,6 @@ class CityForecastDataDownloader {
             }
 
             if (cityForecast == null || cityForecast.city == "") {
-                // download failed - try getting data from storage instead
                 try {
                     val content = loadStringFromStorage(ctx, RESPONSE_FILE)
                     cityForecast = Json.decodeFromString<CityForecastData>(content)

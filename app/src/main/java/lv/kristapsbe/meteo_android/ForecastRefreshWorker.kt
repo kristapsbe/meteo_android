@@ -120,6 +120,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     }
                 } else if (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
                     prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, true)
+                    // TODO: do I actually need to set a new id?
                     val auroraNotifId = prefs.getInt(Preference.AURORA_NOTIFICATION_ID)
                     showNotification(
                         MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,

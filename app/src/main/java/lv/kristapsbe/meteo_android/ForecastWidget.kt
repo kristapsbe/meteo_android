@@ -19,6 +19,7 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_NO_DL_
 
 class ForecastWidget : AppWidgetProvider() {
     override fun onAppWidgetOptionsChanged(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, newOptions: Bundle) {
+        // TODO: do I need to use a worker here?
         val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>().build()
         WorkManager.getInstance(context).enqueueUniqueWork(SINGLE_FORECAST_NO_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
 
@@ -69,6 +70,7 @@ class ForecastWidget : AppWidgetProvider() {
     }
 
     override fun onEnabled(context: Context) {
+        // TODO: do I need to use a worker here?
         val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>().build()
         WorkManager.getInstance(context).enqueueUniqueWork(SINGLE_FORECAST_NO_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
     }

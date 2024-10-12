@@ -273,6 +273,7 @@ class DisplayInfo() {
         return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
     }
 
+    // TODO: can this be merged into getWhenRainExpected (?)
     fun getRainIconId(useAlternativeIcon: Boolean): Int {
         val hForecasts = getHourlyForecasts()
         val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }

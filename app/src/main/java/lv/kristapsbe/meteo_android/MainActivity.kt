@@ -1030,12 +1030,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             ) {
                                 if (showFullDaily.value.contains(d.date)) {
                                     Row {
+                                        val dateStr = d.date.toString()
                                         Text( // TODO: don't use substrings to format
                                             text = "${
-                                                d.date.toString().take(10).takeLast(2)
+                                                dateStr.take(10).takeLast(2)
                                             }.${
-                                                d.date.toString().take(7).takeLast(2)
-                                            }.${d.date.toString().take(4)}",
+                                                dateStr.take(7).takeLast(2)
+                                            }.${dateStr.take(4)}",
                                             fontSize = 10.sp,
                                             textAlign = TextAlign.Center,
                                             color = Color(resources.getColor(R.color.text_color)),
