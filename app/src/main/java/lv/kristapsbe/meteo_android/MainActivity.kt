@@ -180,6 +180,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // TODO: there's some sort of duplicate splash screen issue - https://developer.android.com/develop/ui/views/launch/splash-screen/migrate
         super.onCreate(savedInstanceState)
 
         prefs = AppPreferences(applicationContext)
