@@ -24,6 +24,8 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_TH
 import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LAT
 import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
+import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
+import java.util.Locale
 import kotlin.coroutines.resume
 
 
@@ -83,7 +85,10 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             callback?.onWorkerResult(cityForecast)
 
             if (cityForecast != null) {
-                val selectedLang = prefs.getString(Preference.LANG, LANG_EN)
+                val currentLocale: Locale = Locale.getDefault()
+                val language: String = currentLocale.language
+
+                val selectedLang = prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
 
                 val displayInfo = DisplayInfo(cityForecast)
                 DisplayInfo.updateWidget(

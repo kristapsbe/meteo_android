@@ -96,6 +96,7 @@ import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStri
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import java.time.ZonedDateTime
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -186,8 +187,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         super.onCreate(savedInstanceState)
 
+        val currentLocale: Locale = Locale.getDefault()
+        val language: String = currentLocale.language
+        
         prefs = AppPreferences(applicationContext)
-        selectedLang = mutableStateOf(prefs.getString(Preference.LANG, LANG_EN))
+        selectedLang = mutableStateOf(prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN))
         selectedTempType = mutableStateOf(prefs.getString(Preference.TEMP_UNIT, CELSIUS))
         showWidgetBackground = mutableStateOf(prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true))
         useAltLayout = mutableStateOf(prefs.getBoolean(Preference.USE_ALT_LAYOUT, false))
@@ -310,11 +314,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
+                        // TODO: move translations to class
                         val annotatedText = buildAnnotatedString {
-                            append("I have read and agree to the ")
+                            append(if (selectedLang.value == LANG_LV) "Es esmu izlasījis un piekrītu " else "I have read and agree to the ")
                             withStyle(style = SpanStyle(color = Color.Blue)) {
-                                pushStringAnnotation(tag = "URL", annotation = "https://meteo.kristapsbe.lv/privacy-policy")
-                                append("Privacy Policy")
+                                pushStringAnnotation(tag = "URL", annotation = "https://meteo.kristapsbe.lv/privacy-policy?lang=${selectedLang.value}")
+                                append(if (selectedLang.value == LANG_LV) "Privātuma politikai" else "Privacy Policy")
                                 pop()
                             }
                         }
@@ -347,7 +352,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)  // Set button background color
                     ) {
-                        Text("Continue", color = Color.White)  // Set text and its color
+                        Text(if (selectedLang.value == LANG_LV) "Turpināt" else "Continue", color = Color.White)  // Set text and its color
                     }
                 }
             }
@@ -592,8 +597,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     ShowHourlyIcon(
                         hForecast,
                         sunTimes,
-                        Modifier.fillMaxWidth().fillMaxHeight(),
-                        Modifier.fillMaxWidth().fillMaxHeight(0.8f)
+                        Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.8f)
                     )
                 }
                 Column(
@@ -824,8 +833,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             ShowHourlyIcon(
                                 h,
                                 sunTimes,
-                                Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                Modifier
+                                    .width(70.dp)
+                                    .height(40.dp)
+                                    .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                Modifier
+                                    .width(70.dp)
+                                    .height(40.dp)
+                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
                             )
 
                             Text(
@@ -864,8 +879,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 ShowIcon(
                                     R.raw.sunrise,
                                     R.drawable.sunrise,
-                                    Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                    Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                    Modifier
+                                        .width(70.dp)
+                                        .height(40.dp)
+                                        .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                    Modifier
+                                        .width(70.dp)
+                                        .height(40.dp)
+                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
                                 )
                             }
                         } else if (h.date.hour == sunTimes.setH) {
@@ -886,8 +907,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 ShowIcon(
                                     R.raw.sunset,
                                     R.drawable.sunset,
-                                    Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                    Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                    Modifier
+                                        .width(70.dp)
+                                        .height(40.dp)
+                                        .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                    Modifier
+                                        .width(70.dp)
+                                        .height(40.dp)
+                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
                                 )
                             }
                         }
@@ -1075,8 +1102,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         ShowIcon(
                                             d.pictogramDay.getAlternateAnimatedPictogram(),
                                             d.pictogramDay.getPictogram(),
-                                            Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                            Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                            Modifier
+                                                .width(70.dp)
+                                                .height(40.dp)
+                                                .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                            Modifier
+                                                .width(70.dp)
+                                                .height(40.dp)
+                                                .padding(3.dp, 3.dp, 3.dp, 0.dp)
                                         )
                                     }
                                     Column(
@@ -1086,8 +1119,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         ShowIcon(
                                             d.pictogramNight.getAlternateAnimatedPictogram(),
                                             d.pictogramNight.getPictogram(),
-                                            Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                            Modifier.width(70.dp).height(40.dp).padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                            Modifier
+                                                .width(70.dp)
+                                                .height(40.dp)
+                                                .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                            Modifier
+                                                .width(70.dp)
+                                                .height(40.dp)
+                                                .padding(3.dp, 3.dp, 3.dp, 0.dp)
                                         )
                                     }
                                 }

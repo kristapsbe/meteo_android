@@ -24,6 +24,7 @@ import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateAnimatedIconMa
 import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LAT
 import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
 import java.time.ZonedDateTime
+import java.util.Locale
 import kotlin.math.roundToInt
 
 
@@ -123,7 +124,10 @@ class DisplayInfo() {
 
             val prefs = AppPreferences(context)
 
-            val lang = prefs.getString(Preference.LANG, LANG_EN)
+            val currentLocale: Locale = Locale.getDefault()
+            val language: String = currentLocale.language
+
+            val lang = prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
             val selectedTemp = prefs.getString(Preference.TEMP_UNIT, CELSIUS)
             val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
             val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
