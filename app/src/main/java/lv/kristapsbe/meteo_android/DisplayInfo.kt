@@ -287,7 +287,8 @@ class DisplayInfo() {
         val hForecasts = getHourlyForecasts()
         val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }
         if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
-            return if (hourlyRain[0].date.dayOfMonth == getTodayForecast().date.dayOfMonth) {
+            val dt = convertTimestampToLocalDateTime(System.currentTimeMillis())
+            return if (hourlyRain[0].date.dayOfMonth == dt.date.dayOfMonth) {
                 "${LangStrings.getTranslationString(lang, Translation.RAIN_EXPECTED_TODAY)} ${hourlyRain[0].date.hour}:00"
             } else {
                 "${LangStrings.getTranslationString(lang, Translation.RAIN_EXPECTED_TOMORROW)} ${hourlyRain[0].date.hour}:00"
