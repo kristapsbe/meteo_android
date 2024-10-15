@@ -316,10 +316,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     ) {
                         // TODO: move translations to class
                         val annotatedText = buildAnnotatedString {
-                            append(if (selectedLang.value == LANG_LV) "Es esmu izlasījis un piekrītu " else "I have read and agree to the ")
+                            append(LangStrings.getTranslationString(selectedLang.value, Translation.PRIVACY_I_HAVE_READ))
                             withStyle(style = SpanStyle(color = Color.Blue)) {
                                 pushStringAnnotation(tag = "URL", annotation = "https://meteo.kristapsbe.lv/privacy-policy?lang=${selectedLang.value}")
-                                append(if (selectedLang.value == LANG_LV) "Privātuma politikai" else "Privacy Policy")
+                                append(LangStrings.getTranslationString(selectedLang.value, Translation.PRIVACY_POLICY))
                                 pop()
                             }
                         }
@@ -352,7 +352,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)  // Set button background color
                     ) {
-                        Text(if (selectedLang.value == LANG_LV) "Turpināt" else "Continue", color = Color.White)  // Set text and its color
+                        Text(LangStrings.getTranslationString(selectedLang.value, Translation.PRIVACY_CONTINUE), color = Color.White)  // Set text and its color
                     }
                 }
             }

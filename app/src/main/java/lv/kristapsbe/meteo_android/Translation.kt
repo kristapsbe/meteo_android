@@ -21,7 +21,11 @@ enum class Translation {
     SETTINGS_USE_ANIMATED_ICONS,
 
     NOTIFICATION_AURORA_TITLE,
-    NOTIFICATION_AURORA_DESCRIPTION
+    NOTIFICATION_AURORA_DESCRIPTION,
+
+    PRIVACY_I_HAVE_READ,
+    PRIVACY_POLICY,
+    PRIVACY_CONTINUE,
 }
 
 class LangStrings {
@@ -153,7 +157,10 @@ class LangStrings {
                 Translation.NOTIFICATION_AURORA_TITLE to "Aurora",
                 Translation.NOTIFICATION_AURORA_DESCRIPTION to "Aurora probability has increased to",
                 Translation.SETTINGS_FIX_ICON_DAY_NIGHT to "Match icons to sunrise and sunset",
-                Translation.SETTINGS_USE_ANIMATED_ICONS to "Use animated icons"
+                Translation.SETTINGS_USE_ANIMATED_ICONS to "Use animated icons",
+                Translation.PRIVACY_I_HAVE_READ to "I have read and agree to the ",
+                Translation.PRIVACY_POLICY to "Privacy Policy",
+                Translation.PRIVACY_CONTINUE to "Continue"
             ),
             LANG_LV to hashMapOf(
                 Translation.RAIN_EXPECTED_TODAY to "šodien plkst.",
@@ -170,7 +177,10 @@ class LangStrings {
                 Translation.NOTIFICATION_AURORA_TITLE to "Ziemeļblāzma",
                 Translation.NOTIFICATION_AURORA_DESCRIPTION to "Ziemeļblāzmas varbūtība ir palielinājusies līdz",
                 Translation.SETTINGS_FIX_ICON_DAY_NIGHT to "Likt ikonām sakrist ar saullēktu un saulrietu",
-                Translation.SETTINGS_USE_ANIMATED_ICONS to "Lietot animētas ikonas"
+                Translation.SETTINGS_USE_ANIMATED_ICONS to "Lietot animētas ikonas",
+                Translation.PRIVACY_I_HAVE_READ to "Es esmu izlasījis un piekrītu ",
+                Translation.PRIVACY_POLICY to "Privātuma politikai",
+                Translation.PRIVACY_CONTINUE to "Turpināt"
             )
         )
 
