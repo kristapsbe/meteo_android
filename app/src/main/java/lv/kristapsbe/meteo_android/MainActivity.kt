@@ -870,7 +870,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             ) {
                                 Text(
                                     "${h.time.take(2)}:${sunTimes.riseMin}",
-                                    fontSize = if (useAltLayout.value) 20.sp else 10.sp,
+                                    fontSize = 20.sp,
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
@@ -898,7 +898,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             ) {
                                 Text(
                                     "${h.time.take(2)}:${sunTimes.setMin}",
-                                    fontSize = if (useAltLayout.value) 20.sp else 10.sp,
+                                    fontSize = 20.sp,
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
