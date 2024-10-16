@@ -824,7 +824,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         ) {
                             Text(
                                 "${h.time.take(2)}:${h.time.takeLast(2)}",
-                                fontSize = if (useAltLayout.value) 20.sp else 10.sp,
+                                fontSize = 20.sp,
                                 color = Color(resources.getColor(R.color.text_color)),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
