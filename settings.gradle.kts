@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "meteo_android"
+rootProject.name = "Meteo Latvia"
 include(":app")
