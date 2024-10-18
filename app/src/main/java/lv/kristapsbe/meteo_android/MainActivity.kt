@@ -187,6 +187,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         super.onCreate(savedInstanceState)
 
+        showFullWarnings.value = intent.getBooleanExtra("opened_from_notification", false)
+
         val currentLocale: Locale = Locale.getDefault()
         val language: String = currentLocale.language
         
