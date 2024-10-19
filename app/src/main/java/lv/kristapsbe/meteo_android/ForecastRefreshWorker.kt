@@ -3,7 +3,6 @@ package lv.kristapsbe.meteo_android
 import android.Manifest
 import android.app.Activity.MODE_PRIVATE
 import android.app.PendingIntent
-import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -143,18 +142,20 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
     }
 
     private fun showNotification(notifChannel: String, id: Int, title: String, description: String, smallIcon: Int, largeIcon: Int) {
-        val intent = Intent(applicationContext, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        
-        intent.putExtra("opened_from_notification", true)
+        val intent = Intent(applicationContext, MainActivity::class.java)
+        intent.putExtra(
+            "opened_from_notification",
+            true
+        )
 
-        val pendingIntent: PendingIntent = TaskStackBuilder.create(applicationContext).run {
-            addNextIntentWithParentStack(intent)
-            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        }
+        val pendingIntent = PendingIntent.getActivity(
+            applicationContext,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
-        val builder = NotificationCompat.Builder(applicationContext, notifChannel)
+        val builder: NotificationCompat.Builder = NotificationCompat.Builder(applicationContext, notifChannel)
             .setSmallIcon(smallIcon)
             .setLargeIcon(Icon.createWithResource(applicationContext, largeIcon))
             .setContentTitle(title)
