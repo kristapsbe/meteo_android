@@ -13,4 +13,3 @@ Release checklist
 - [ ] Update long description in store listing, so that it contains more details, on what's the apps value prop
 - [ ] fix https://github.com/kristapsbe/meteo_android/issues/39
 - [ ] fix https://github.com/kristapsbe/meteo_android/issues/38
-- [ ] add https://github.com/kristapsbe/meteo_android/issues/29
