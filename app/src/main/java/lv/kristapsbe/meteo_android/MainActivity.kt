@@ -47,11 +47,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +68,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -79,6 +82,8 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -89,6 +94,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
@@ -753,6 +759,23 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     @Composable
+    fun ObserveLifecycle(onEvent: (Lifecycle.Event) -> Unit) {
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                onEvent(event)
+            }
+
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+    }
+
+    @Composable
     fun ShowHourlyInfo() {
         val self = this
         Row (
@@ -795,9 +818,20 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                val scrollState = rememberScrollState()
+                val coroutineScope = rememberCoroutineScope()
+
+                ObserveLifecycle { event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        coroutineScope.launch {
+                            scrollState.scrollTo(0)
+                        }
+                    }
+                }
+
                 Row(
                     modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
+                        .horizontalScroll(scrollState)
                 ) {
                     var prevHDay: String? = null
                     val lat = prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble()
