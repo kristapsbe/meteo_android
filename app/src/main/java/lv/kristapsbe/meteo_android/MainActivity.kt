@@ -821,6 +821,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 val scrollState = rememberScrollState()
                 val coroutineScope = rememberCoroutineScope()
 
+                // TODO: check dependency versions
                 ObserveLifecycle { event ->
                     if (event == Lifecycle.Event.ON_RESUME) {
                         coroutineScope.launch {
