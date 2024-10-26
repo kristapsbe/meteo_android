@@ -866,7 +866,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    "${h.time.take(2)}:${sunTimes.riseMin}",
+                                    "${sunTimes.riseH}:${sunTimes.riseMin}",
                                     fontSize = 20.sp,
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
@@ -894,7 +894,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    "${h.time.take(2)}:${sunTimes.setMin}",
+                                    "${sunTimes.setH}:${sunTimes.setMin}",
                                     fontSize = 20.sp,
                                     color = Color(resources.getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
