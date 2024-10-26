@@ -59,6 +59,17 @@ class IconMapping {
             1608 to R.drawable.snow1, // cloud, sun, snow and wind
             1609 to R.drawable.snow, // cloud, sun, more snow and wind
 
+            1610 to R.drawable.sleet1, // cloud, sun, sleet and wind
+            1611 to R.drawable.snow, // two clouds, snow and wind
+            1612 to R.drawable.snow, // cloud, snow and wind
+            1613 to R.drawable.snow1, // cloud, sun, snow and wind
+            1614 to R.drawable.sleet, // two clouds, and sleet
+            1615 to R.drawable.sleet, // cloud, and sleet
+            1616 to R.drawable.sleet1, // cloud, sun, and sleet
+            1617 to R.drawable.sleet, // two clouds, and sleet
+            1618 to R.drawable.sleet, // cloud, and sleet
+            1619 to R.drawable.sleet1, // cloud, sun, and sleet
+
             2101 to R.drawable.clear0,
             2102 to R.drawable.pcloudy0,
             2103 to R.drawable.mcloudy0,
@@ -113,6 +124,17 @@ class IconMapping {
             2607 to R.drawable.snow, // two clouds, snow and wind
             2608 to R.drawable.snow, // cloud, moon, snow and wind
             2609 to R.drawable.snow0, // cloud, sun, more snow and wind
+
+            2610 to R.drawable.sleet0, // cloud, moon, sleet and wind
+            2611 to R.drawable.snow, // two clouds, snow and wind
+            2612 to R.drawable.snow, // cloud, snow and wind
+            2613 to R.drawable.snow0, // cloud, moon, snow and wind
+            2614 to R.drawable.sleet, // two clouds, and sleet
+            2615 to R.drawable.sleet, // cloud, and sleet
+            2616 to R.drawable.sleet0, // cloud, moon, and sleet
+            2617 to R.drawable.sleet, // two clouds, and sleet
+            2618 to R.drawable.sleet, // cloud, and sleet
+            2619 to R.drawable.sleet0, // cloud, moon, and sleet
         )
 
         val alternateIconMapping: HashMap<Int, Int> = hashMapOf(
@@ -171,6 +193,17 @@ class IconMapping {
             1608 to R.drawable.overcast_snow, // cloud, sun, snow and wind
             1609 to R.drawable.partly_cloudy_day_snow, // cloud, sun, more snow and wind
 
+            1610 to R.drawable.partly_cloudy_day_sleet, // cloud, sun, sleet and wind
+            1611 to R.drawable.extreme_snow, // two clouds, snow and wind
+            1612 to R.drawable.overcast_snow, // cloud, snow and wind
+            1613 to R.drawable.partly_cloudy_day_snow, // cloud, sun, snow and wind
+            1614 to R.drawable.extreme_sleet, // two clouds, and sleet
+            1615 to R.drawable.overcast_sleet, // cloud, and sleet
+            1616 to R.drawable.partly_cloudy_day_sleet, // cloud, sun, and sleet
+            1617 to R.drawable.extreme_sleet, // two clouds, and sleet
+            1618 to R.drawable.overcast_sleet, // cloud, and sleet
+            1619 to R.drawable.partly_cloudy_day_sleet, // cloud, sun, and sleet
+
             2101 to R.drawable.clear_night,
             2102 to R.drawable.partly_cloudy_night,
             2103 to R.drawable.overcast_night, // single fulled out cloud with sun
@@ -225,6 +258,17 @@ class IconMapping {
             2607 to R.drawable.extreme_snow, // two clouds, snow and wind
             2608 to R.drawable.overcast_snow, // cloud, sun, snow and wind
             2609 to R.drawable.partly_cloudy_night_snow, // cloud, sun, more snow and wind
+
+            2610 to R.drawable.partly_cloudy_night_sleet, // cloud, moon, sleet and wind
+            2611 to R.drawable.extreme_snow, // two clouds, snow and wind
+            2612 to R.drawable.overcast_snow, // cloud, snow and wind
+            2613 to R.drawable.partly_cloudy_night_snow, // cloud, moon, snow and wind
+            2614 to R.drawable.extreme_sleet, // two clouds, and sleet
+            2615 to R.drawable.overcast_sleet, // cloud, and sleet
+            2616 to R.drawable.partly_cloudy_night_sleet, // cloud, moon, and sleet
+            2617 to R.drawable.extreme_sleet, // two clouds, and sleet
+            2618 to R.drawable.overcast_sleet, // cloud, and sleet
+            2619 to R.drawable.partly_cloudy_night_sleet, // cloud, moon, and sleet
         )
 
         val alternateAnimatedIconMapping: HashMap<Int, Int> = hashMapOf(
@@ -283,6 +327,17 @@ class IconMapping {
             1608 to R.raw.overcast_snow, // cloud, sun, snow and wind
             1609 to R.raw.partly_cloudy_day_snow, // cloud, sun, more snow and wind
 
+            1610 to R.raw.partly_cloudy_day_sleet, // cloud, sun, sleet and wind
+            1611 to R.raw.extreme_snow, // two clouds, snow and wind
+            1612 to R.raw.overcast_snow, // cloud, snow and wind
+            1613 to R.raw.partly_cloudy_day_snow, // cloud, sun, snow and wind
+            1614 to R.raw.extreme_sleet, // two clouds, and sleet
+            1615 to R.raw.overcast_sleet, // cloud, and sleet
+            1616 to R.raw.partly_cloudy_day_sleet, // cloud, sun, and sleet
+            1617 to R.raw.extreme_sleet, // two clouds, and sleet
+            1618 to R.raw.overcast_sleet, // cloud, and sleet
+            1619 to R.raw.partly_cloudy_day_sleet, // cloud, sun, and sleet
+
             2101 to R.raw.clear_night,
             2102 to R.raw.partly_cloudy_night,
             2103 to R.raw.overcast_night, // single fulled out cloud with sun
@@ -337,6 +392,17 @@ class IconMapping {
             2607 to R.raw.extreme_snow, // two clouds, snow and wind
             2608 to R.raw.overcast_snow, // cloud, sun, snow and wind
             2609 to R.raw.partly_cloudy_night_snow, // cloud, sun, more snow and wind
+
+            2610 to R.raw.partly_cloudy_night_sleet, // cloud, sun, sleet and wind
+            2611 to R.raw.extreme_snow, // two clouds, snow and wind
+            2612 to R.raw.overcast_snow, // cloud, snow and wind
+            2613 to R.raw.partly_cloudy_night_snow, // cloud, sun, snow and wind
+            2614 to R.raw.extreme_sleet, // two clouds, and sleet
+            2615 to R.raw.overcast_sleet, // cloud, and sleet
+            2616 to R.raw.partly_cloudy_night_sleet, // cloud, sun, and sleet
+            2617 to R.raw.extreme_sleet, // two clouds, and sleet
+            2618 to R.raw.overcast_sleet, // cloud, and sleet
+            2619 to R.raw.partly_cloudy_night_sleet, // cloud, sun, and sleet
         )
 
         val rainCodes: List<Int> = listOf(
@@ -346,12 +412,14 @@ class IconMapping {
             1405, 1406, 1407, 1408, 1409, // fog an drizzle, rain or sleet
             1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, // rain
             1601, 1602, 1603, 1604, 1605, 1606, 1607, 1608, 1609, // snow
+            1610, 1611, 1612, 1613, 1614, 1615, 1616, 1617, 1618, 1619, // sleet or snow
             // night
             2201, 2202, 2203, 2204, 2205, 2206, 2207, 2208, // sleet
             2301, 2302, 2303, 2304, 2305, 2306, 2307, 2308, 2309, // rain and sleet
             2405, 2406, 2407, 2408, 2409, // fog an drizzle, rain or sleet
             2501, 2502, 2503, 2504, 2505, 2506, 2507, 2508, 2509, // rain
             2601, 2602, 2603, 2604, 2605, 2606, 2607, 2608, 2609, // snow
+            2610, 2611, 2612, 2613, 2614, 2615, 2616, 2617, 2618, 2619, // sleet or snow
         )
 
         // TODO: make warning specific icons
