@@ -10,6 +10,7 @@ enum class Translation {
     FEELS_LIKE,
     FORECAST_ISSUED,
     FORECAST_DOWNLOADED,
+    FORECAST_DOWNLOADED_NO_SKIP,
 
     SETTINGS_APP_LANGUAGE,
     SETTINGS_WIDGET_TRANSPARENCY,
@@ -148,6 +149,7 @@ class LangStrings {
                 Translation.FEELS_LIKE to "Feels like",
                 Translation.FORECAST_ISSUED to "forecast issued at",
                 Translation.FORECAST_DOWNLOADED to "forecast downloaded at",
+                Translation.FORECAST_DOWNLOADED_NO_SKIP to "full forecast downloaded at",
                 Translation.SETTINGS_APP_LANGUAGE to "App language",
                 Translation.SETTINGS_WIDGET_TRANSPARENCY to "Show widget background color",
                 Translation.SETTINGS_FORCE_ALWAYS_SHOW_DETAILS to "Always force widget into detailed mode",
@@ -168,6 +170,7 @@ class LangStrings {
                 Translation.FEELS_LIKE to "Sajūta",
                 Translation.FORECAST_ISSUED to "prognoze atjaunināta",
                 Translation.FORECAST_DOWNLOADED to "prognoze lejupielādēta",
+                Translation.FORECAST_DOWNLOADED_NO_SKIP to "pilna prognoze lejupielādēta",
                 Translation.SETTINGS_APP_LANGUAGE to "Lietotnes valoda",
                 Translation.SETTINGS_WIDGET_TRANSPARENCY to "Rādīt logrīka fona krāsu",
                 Translation.SETTINGS_FORCE_ALWAYS_SHOW_DETAILS to "Piespiest logrīku vienmēr rādīt detalizēto izkārtojumu",

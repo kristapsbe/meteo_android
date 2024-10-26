@@ -1267,6 +1267,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 color = Color(resources.getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
             )
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 8.sp,
+                lineHeight = 10.sp,
+                text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_DOWNLOADED_NO_SKIP)} ${displayInfo.value.getLastDownloadedNoSkip()}",
+                color = Color(resources.getColor(R.color.text_color)),
+                textAlign = TextAlign.Right
+            )
         }
     }
 

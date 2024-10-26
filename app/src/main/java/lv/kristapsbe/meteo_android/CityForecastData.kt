@@ -35,7 +35,8 @@ data class CityForecastData(
     val warnings: List<WarningData>,
     val last_updated: String,
     val last_downloaded: String,
-    val aurora_probs: AuroraProbs
+    val aurora_probs: AuroraProbs,
+    val last_downloaded_no_skip: String
 )
 
 
@@ -73,11 +74,11 @@ class CityForecastDataDownloader {
         }
 
         fun downloadDataLatLon(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327, doDL: Boolean = true): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon&add_params=false&add_aurora=true", doDL)
+            return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon&add_params=false&add_aurora=true&add_last_no_skip=true", doDL)
         }
 
         fun downloadDataCityName(ctx: Context, locationName: String = "Riga", doDL: Boolean = true): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL/name?city_name=$locationName&add_params=false&add_aurora=true", doDL)
+            return downloadData(ctx, "$BASE_URL/name?city_name=$locationName&add_params=false&add_aurora=true&add_last_no_skip=true", doDL)
         }
 
         fun loadStringFromStorage(ctx: Context, fileName: String): String {

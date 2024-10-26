@@ -183,8 +183,9 @@ class DisplayInfo() {
     var dailyForecasts: List<DailyForecast> = emptyList()
 
     private val format = LocalDateTime.Format { byUnicodePattern("yyyy.MM.dd HH:mm") }
-    private var lastUpdated: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
-    private var lastDownloaded: LocalDateTime = LocalDateTime(1972, 1, 1, 0, 0)
+    private var lastUpdated: LocalDateTime = LocalDateTime(1970, 1, 1, 0, 0)
+    private var lastDownloaded: LocalDateTime = LocalDateTime(1970, 1, 1, 0, 0)
+    private var lastDownloadedNoSkip: LocalDateTime = LocalDateTime(1970, 1, 1, 0, 0)
 
     var warnings: List<Warning> = emptyList()
     var aurora: Aurora = Aurora(0, "")
@@ -193,6 +194,7 @@ class DisplayInfo() {
         if (cityForecastData != null) {
             lastUpdated = stringToDatetime(cityForecastData.last_updated)
             lastDownloaded = stringToDatetime(cityForecastData.last_downloaded)
+            lastDownloadedNoSkip = stringToDatetime(cityForecastData.last_downloaded_no_skip)
             city = cityForecastData.city
             // TODO: I should get the ids dynamically
             hourlyForecasts = cityForecastData.hourly_forecast.map { e ->
@@ -274,7 +276,7 @@ class DisplayInfo() {
         if (currHourlyForecasts.isNotEmpty()) {
             return currHourlyForecasts[0]
         }
-        return HourlyForecast(LocalDateTime(1972, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
+        return HourlyForecast(LocalDateTime(1970, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
     }
 
     // TODO: can this be merged into getWhenRainExpected (?)
@@ -307,5 +309,9 @@ class DisplayInfo() {
 
     fun getLastDownloaded(): String {
         return format.format(lastDownloaded)
+    }
+
+    fun getLastDownloadedNoSkip(): String {
+        return format.format(lastDownloadedNoSkip)
     }
 }
