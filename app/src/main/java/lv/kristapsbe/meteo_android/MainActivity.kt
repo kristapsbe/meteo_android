@@ -805,6 +805,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     val tz = ZonedDateTime.now().offset.totalSeconds / 3600
 
                     var sunTimes: SunRiseSunSet = calculate(displayInfo.value.getTodayForecast().date, lat, lon, tz)
+                    var sunriseShown = false
+                    var sunsetShown = false
 
                     for (h in displayInfo.value.getHourlyForecasts()) {
                         if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
@@ -813,6 +815,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 modifier = Modifier.height(80.dp),
                                 thickness = 1.dp
                             )
+                            sunriseShown = false
+                            sunsetShown = false
                         }
                         if (prevHDay != h.getDayOfWeek()) {
                             sunTimes = calculate(h.date, lat, lon, tz)
@@ -863,7 +867,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 }
                             }
                         }
-                        if (h.date.hour == sunTimes.riseH) {
+                        if (!sunriseShown && h.date.hour <= sunTimes.riseH) {
+                            sunriseShown = true
                             Column (
                                 modifier = Modifier
                                     .width(90.dp)
@@ -891,7 +896,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         .padding(3.dp, 3.dp, 3.dp, 0.dp)
                                 )
                             }
-                        } else if (h.date.hour == sunTimes.setH) {
+                        } else if (!sunsetShown && h.date.hour <= sunTimes.setH) {
+                            sunsetShown = true
                             Column (
                                 modifier = Modifier
                                     .width(90.dp)
