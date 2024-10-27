@@ -8,3 +8,5 @@ jetpack compose - helpful docs
 https://developer.android.com/develop/ui/compose/mental-model
 
 weather icons https://github.com/kristapsbe/WeatherNowIcons
+
+The app is available for download on GooglePlay - https://play.google.com/store/apps/details?id=lv.kristapsbe.meteo_android&hl=lv
