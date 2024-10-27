@@ -886,7 +886,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         .padding(3.dp, 3.dp, 3.dp, 0.dp)
                                 )
                             }
-                        } else if (sunTimes.riseH >= prevH && sunTimes.setH < h.date.hour) {
+                        } else if (sunTimes.setH >= prevH && sunTimes.setH < h.date.hour) {
                             Column (
                                 modifier = Modifier
                                     .width(90.dp)
