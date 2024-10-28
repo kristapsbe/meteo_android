@@ -175,13 +175,14 @@
                 android:layout_weight="1"
                 android:contentDescription="@string/weather_icon"
                 android:gravity="center"
-                android:src="@drawable/clear1"
+                android:src="@drawable/mcloudy1"
                 android:padding="10dp" />
             <TextView
                 android:id="@+id/appwidget_location_small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/appwidget_text"
+                android:text="@string/click_the_widget_to_refresh"
                 android:gravity="center"
                 android:textColor="@color/text_color"
                 android:paddingBottom="10dp"
@@ -205,6 +206,7 @@
                 android:textAlignment="textEnd"
                 android:autoSizeTextType="uniform"
                 android:maxLines="1"
+                android:text="@string/no_temp"
                 android:paddingEnd="10dp" />
             <LinearLayout
                 android:id="@+id/main_warnings_small"
@@ -360,6 +362,7 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/appwidget_text"
                 android:gravity="center"
+                android:text="@string/click_the_widget_to_refresh"
                 android:textColor="@color/text_color"
                 android:textSize="10sp" />
 
