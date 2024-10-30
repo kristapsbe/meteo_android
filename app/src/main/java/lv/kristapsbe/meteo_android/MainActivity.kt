@@ -180,7 +180,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var isLoading = mutableStateOf(false)
     private var showFullHourly = mutableStateOf(false)
     private var showFullDaily = mutableStateOf(listOf<LocalDateTime>())
-    private var showFullWarnings = mutableStateOf(false)
+    private var showFullWarnings = mutableStateOf(setOf<Int>())
     private var locationSearchMode = mutableStateOf(false)
     private var doDisplaySettings = mutableStateOf(false)
     private var isPrivacyPolicyChecked = mutableStateOf(false)
@@ -193,7 +193,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         super.onCreate(savedInstanceState)
 
-        showFullWarnings.value = intent.getBooleanExtra("opened_from_notification", false)
+        //showFullWarnings.value = intent.getBooleanExtra("opened_from_notification", false)
 
         val currentLocale: Locale = Locale.getDefault()
         val language: String = currentLocale.language
@@ -980,77 +980,81 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             val displayMetrics = Resources.getSystem().displayMetrics
             val screenWidthPx = displayMetrics.widthPixels  // Get width in pixels
             val screenWidthDp = screenWidthPx / displayMetrics.density  // Convert to dp
-            Row (
-                modifier = Modifier
-                    .padding(20.dp, 20.dp, 20.dp, 0.dp)
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .clickable {
-                        self.showFullWarnings.value = !self.showFullWarnings.value
-                    }
-            ) {
-                for (w in displayInfo.value.warnings) {
-                    Column (
-                        modifier = Modifier
-                            .width((screenWidthDp - 40).dp)
-                            .padding(0.dp, 0.dp, 20.dp, 0.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(0.15f)
-                            ) {
-                                Image(
-                                    painterResource(
-                                        IconMapping.warningIconMapping[w.intensity]
-                                            ?: R.drawable.baseline_warning_yellow_24
-                                    ),
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier
-                                        .padding(10.dp)
-                                )
-                            }
-                            Column(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    w.type[selectedLang.value] ?: "",
-                                    fontSize = 20.sp,
-                                    color = Color(resources.getColor(R.color.text_color)),
-                                    modifier = Modifier
-                                        .padding(0.dp, 10.dp, 0.dp, 10.dp),
-                                )
-                            }
-                        }
 
-                        if (self.showFullWarnings.value) {
-                            Row {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(0.15f)
-                                ) {
-                                }
-                                Column(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(
-                                        w.description[selectedLang.value] ?: "",
-                                        fontSize = 15.sp,
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                    )
-                                }
+            for (w in displayInfo.value.warnings) {
+                Row(
+                    modifier = Modifier
+                        .padding(20.dp, 20.dp, 20.dp, 0.dp)
+                        .fillMaxWidth()
+                        .clickable {
+                            if (self.showFullWarnings.value.contains(w.id)) {
+                                self.showFullWarnings.value -= w.id
+                            } else {
+                                self.showFullWarnings.value += w.id
                             }
+                        },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(0.15f)
+                    ) {
+                        Image(
+                            painterResource(
+                                IconMapping.warningIconMapping[w.intensity]
+                                    ?: R.drawable.baseline_warning_yellow_24
+                            ),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .padding(10.dp)
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            w.type[selectedLang.value] ?: "",
+                            fontSize = 20.sp,
+                            color = Color(resources.getColor(R.color.text_color)),
+                            modifier = Modifier
+                                .padding(0.dp, 10.dp, 0.dp, 10.dp),
+                        )
+                    }
+                }
+
+                if (self.showFullWarnings.value.contains(w.id)) {
+                    Row(
+                        modifier = Modifier
+                            .clickable {
+                                if (self.showFullWarnings.value.contains(w.id)) {
+                                    self.showFullWarnings.value -= w.id
+                                } else {
+                                    self.showFullWarnings.value += w.id
+                                }
+                            },
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(0.15f)
+                        ) {
+                        }
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                w.description[selectedLang.value] ?: "",
+                                fontSize = 15.sp,
+                                color = Color(resources.getColor(R.color.text_color)),
+                            )
                         }
                     }
                 }
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(20.dp, 20.dp, 20.dp, 0.dp),
+                    color = Color(resources.getColor(R.color.light_gray)),
+                    thickness = 1.dp
+                )
             }
-            HorizontalDivider(
-                modifier = Modifier
-                    .padding(20.dp, 20.dp, 20.dp, 0.dp),
-                color = Color(resources.getColor(R.color.light_gray)),
-                thickness = 1.dp
-            )
         }
     }
 
