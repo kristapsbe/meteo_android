@@ -977,10 +977,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     fun ShowWarningInfo() {
         val self = this
         if (displayInfo.value.warnings.isNotEmpty()) {
-            val displayMetrics = Resources.getSystem().displayMetrics
-            val screenWidthPx = displayMetrics.widthPixels  // Get width in pixels
-            val screenWidthDp = screenWidthPx / displayMetrics.density  // Convert to dp
-
             for (w in displayInfo.value.warnings) {
                 Row(
                     modifier = Modifier
@@ -1048,13 +1044,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         }
                     }
                 }
-                HorizontalDivider(
-                    modifier = Modifier
-                        .padding(20.dp, 20.dp, 20.dp, 0.dp),
-                    color = Color(resources.getColor(R.color.light_gray)),
-                    thickness = 1.dp
-                )
             }
+            HorizontalDivider(
+                modifier = Modifier
+                    .padding(20.dp, 20.dp, 20.dp, 0.dp),
+                color = Color(resources.getColor(R.color.light_gray)),
+                thickness = 1.dp
+            )
         }
     }
 
