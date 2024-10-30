@@ -143,10 +143,12 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
     private fun showNotification(notifChannel: String, id: Int, title: String, description: String, smallIcon: Int, largeIcon: Int) {
         val intent = Intent(applicationContext, MainActivity::class.java)
-        intent.putExtra(
-            "opened_from_notification",
-            true
-        )
+        //if (notifChannel == MainActivity.WEATHER_WARNINGS_CHANNEL_ID) {
+        //    intent.putExtra(
+        //        "opened_from_notification",
+        //        id
+        //    )
+        //}
 
         val pendingIntent = PendingIntent.getActivity(
             applicationContext,
