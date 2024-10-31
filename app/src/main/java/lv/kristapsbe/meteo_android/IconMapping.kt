@@ -29,6 +29,23 @@ class IconMapping {
             1308 to R.drawable.tshower, // single filled out cloud, with lightning and snow or sleet
             1309 to R.drawable.tshower1, // single filled out cloud with sun, lightning and snow or sleet
 
+            1310 to R.drawable.tshower, // two clouds, thunder, and rain
+            1311 to R.drawable.tshower, // single cloud, thunder, and rain
+            1312 to R.drawable.tshower1, // single cloud, sun, thunder, and rain
+            1313 to R.drawable.sleet, // two clouds, thunder, snow, and rain
+            1314 to R.drawable.sleet1, // single cloud, sun, thunder, snow, and rain
+            1315 to R.drawable.sleet, // two clouds, thunder, snow, and rain
+            1316 to R.drawable.sleet1, // single cloud, sun, thunder, snow, and rain
+            1317 to R.drawable.sleet, // two clouds, sleet, and rain
+            1318 to R.drawable.sleet, // single cloud, sleet, and rain
+            1319 to R.drawable.sleet1, // single cloud, sun, sleet, and rain
+            1320 to R.drawable.sleet, // two clouds, sleet, and rain
+            1321 to R.drawable.sleet, // single cloud, sleet, and rain
+            1322 to R.drawable.sleet1, // single cloud, sun, sleet, and rain
+            1323 to R.drawable.tstorm, // two clouds, and thunder
+            1324 to R.drawable.tstorm, // single cloud, and thunder
+            1325 to R.drawable.tstorm1, // single cloud, sun, and thunder
+
             1401 to R.drawable.fog, // two clouds with fog
             1402 to R.drawable.fog, // cloud with fog
             1403 to R.drawable.fog1, // single filled out cloud with fog
@@ -95,7 +112,22 @@ class IconMapping {
             2308 to R.drawable.tshower, // single filled out cloud, with lightning and snow or sleet
             2309 to R.drawable.tshower0, // single filled out cloud with moon, and lightning
 
-            // 2314 is a thing that exists
+            2310 to R.drawable.tshower, // two clouds, thunder, and rain
+            2311 to R.drawable.tshower, // single cloud, thunder, and rain
+            2312 to R.drawable.tshower0, // single cloud, moon, thunder, and rain
+            2313 to R.drawable.sleet, // two clouds, thunder, snow, and rain
+            2314 to R.drawable.sleet0, // single cloud, moon, thunder, snow, and rain
+            2315 to R.drawable.sleet, // two clouds, thunder, snow, and rain
+            2316 to R.drawable.sleet0, // single cloud, moon, thunder, snow, and rain
+            2317 to R.drawable.sleet, // two clouds, sleet, and rain
+            2318 to R.drawable.sleet, // single cloud, sleet, and rain
+            2319 to R.drawable.sleet0, // single cloud, moon, sleet, and rain
+            2320 to R.drawable.sleet, // two clouds, sleet, and rain
+            2321 to R.drawable.sleet, // single cloud, sleet, and rain
+            2322 to R.drawable.sleet0, // single cloud, moon, sleet, and rain
+            2323 to R.drawable.tstorm, // two clouds, and thunder
+            2324 to R.drawable.tstorm, // single cloud, and thunder
+            2325 to R.drawable.tstorm0, // single cloud, moon, and thunder
 
             2401 to R.drawable.fog, // two clouds with fog
             2402 to R.drawable.fog, // cloud with fog
@@ -165,6 +197,23 @@ class IconMapping {
             1308 to R.drawable.thunderstorms_overcast_snow, // single filled out cloud, with lightning and snow or sleet
             1309 to R.drawable.thunderstorms_day_snow, // single filled out cloud with sun, lightning and snow or sleet
 
+            1310 to R.drawable.thunderstorms_extreme_rain, // two clouds, thunder, and rain
+            1311 to R.drawable.thunderstorms_overcast_rain, // single cloud, thunder, and rain
+            1312 to R.drawable.thunderstorms_day_rain, // single cloud, sun, thunder, and rain
+            1313 to R.drawable.thunderstorms_extreme_snow, // two clouds, thunder, snow, and rain
+            1314 to R.drawable.thunderstorms_day_snow, // single cloud, sun, thunder, snow, and rain
+            1315 to R.drawable.thunderstorms_extreme_snow, // two clouds, thunder, snow, and rain
+            1316 to R.drawable.thunderstorms_day_extreme_snow, // single cloud, sun, thunder, snow, and rain
+            1317 to R.drawable.extreme_sleet, // two clouds, sleet, and rain
+            1318 to R.drawable.overcast_sleet, // single cloud, sleet, and rain
+            1319 to R.drawable.partly_cloudy_day_sleet, // single cloud, sun, sleet, and rain
+            1320 to R.drawable.extreme_sleet, // two clouds, sleet, and rain
+            1321 to R.drawable.overcast_sleet, // single cloud, sleet, and rain
+            1322 to R.drawable.partly_cloudy_day_sleet, // single cloud, sun, sleet, and rain
+            1323 to R.drawable.thunderstorms_extreme, // two clouds, and thunder
+            1324 to R.drawable.thunderstorms, // single cloud, and thunder
+            1325 to R.drawable.thunderstorms_day, // single cloud, sun, and thunder
+
             1401 to R.drawable.extreme_fog, // two clouds with fog
             1402 to R.drawable.overcast_fog, // cloud with fog
             1403 to R.drawable.overcast_fog, // single filled out cloud with fog
@@ -230,6 +279,23 @@ class IconMapping {
             2307 to R.drawable.thunderstorms_extreme_snow, // two filled out clouds, with lightning and snow or sleet
             2308 to R.drawable.thunderstorms_overcast_snow, // single filled out cloud, with lightning and snow or sleet
             2309 to R.drawable.thunderstorms_night_snow, // single filled out cloud with sun, lightning and snow or sleet
+
+            2310 to R.drawable.thunderstorms_extreme_rain, // two clouds, thunder, and rain
+            2311 to R.drawable.thunderstorms_overcast_rain, // single cloud, thunder, and rain
+            2312 to R.drawable.thunderstorms_night_rain, // single cloud, moon, thunder, and rain
+            2313 to R.drawable.thunderstorms_extreme_snow, // two clouds, thunder, snow, and rain
+            2314 to R.drawable.thunderstorms_night_snow, // single cloud, moon, thunder, snow, and rain
+            2315 to R.drawable.thunderstorms_extreme_snow, // two clouds, thunder, snow, and rain
+            2316 to R.drawable.thunderstorms_night_extreme_snow, // single cloud, moon, thunder, snow, and rain
+            2317 to R.drawable.extreme_sleet, // two clouds, sleet, and rain
+            2318 to R.drawable.overcast_sleet, // single cloud, sleet, and rain
+            2319 to R.drawable.partly_cloudy_night_sleet, // single cloud, moon, sleet, and rain
+            2320 to R.drawable.extreme_sleet, // two clouds, sleet, and rain
+            2321 to R.drawable.overcast_sleet, // single cloud, sleet, and rain
+            2322 to R.drawable.partly_cloudy_night_sleet, // single cloud, moon, sleet, and rain
+            2323 to R.drawable.thunderstorms_extreme, // two clouds, and thunder
+            2324 to R.drawable.thunderstorms, // single cloud, and thunder
+            2325 to R.drawable.thunderstorms_night, // single cloud, moon, and thunder
 
             2401 to R.drawable.extreme_fog, // two clouds with fog
             2402 to R.drawable.overcast_fog, // cloud with fog
@@ -299,6 +365,23 @@ class IconMapping {
             1308 to R.raw.thunderstorms_overcast_snow, // single filled out cloud, with lightning and snow or sleet
             1309 to R.raw.thunderstorms_day_snow, // single filled out cloud with sun, lightning and snow or sleet
 
+            1310 to R.raw.thunderstorms_extreme_rain, // two clouds, thunder, and rain
+            1311 to R.raw.thunderstorms_overcast_rain, // single cloud, thunder, and rain
+            1312 to R.raw.thunderstorms_day_rain, // single cloud, sun, thunder, and rain
+            1313 to R.raw.thunderstorms_extreme_snow, // two clouds, thunder, snow, and rain
+            1314 to R.raw.thunderstorms_day_snow, // single cloud, sun, thunder, snow, and rain
+            1315 to R.raw.thunderstorms_extreme_snow, // two clouds, thunder, snow, and rain
+            1316 to R.raw.thunderstorms_day_extreme_snow, // single cloud, sun, thunder, snow, and rain
+            1317 to R.raw.extreme_sleet, // two clouds, sleet, and rain
+            1318 to R.raw.overcast_sleet, // single cloud, sleet, and rain
+            1319 to R.raw.partly_cloudy_day_sleet, // single cloud, sun, sleet, and rain
+            1320 to R.raw.extreme_sleet, // two clouds, sleet, and rain
+            1321 to R.raw.overcast_sleet, // single cloud, sleet, and rain
+            1322 to R.raw.partly_cloudy_day_sleet, // single cloud, sun, sleet, and rain
+            1323 to R.raw.thunderstorms_extreme, // two clouds, and thunder
+            1324 to R.raw.thunderstorms, // single cloud, and thunder
+            1325 to R.raw.thunderstorms_day, // single cloud, sun, and thunder
+
             1401 to R.raw.extreme_fog, // two clouds with fog
             1402 to R.raw.overcast_fog, // cloud with fog
             1403 to R.raw.overcast_fog, // single filled out cloud with fog
@@ -365,6 +448,23 @@ class IconMapping {
             2308 to R.raw.thunderstorms_overcast_snow, // single filled out cloud, with lightning and snow or sleet
             2309 to R.raw.thunderstorms_night_snow, // single filled out cloud with sun, lightning and snow or sleet
 
+            2310 to R.raw.thunderstorms_extreme_rain, // two clouds, thunder, and rain
+            2311 to R.raw.thunderstorms_overcast_rain, // single cloud, thunder, and rain
+            2312 to R.raw.thunderstorms_night_rain, // single cloud, moon, thunder, and rain
+            2313 to R.raw.thunderstorms_extreme_snow, // two clouds, thunder, snow, and rain
+            2314 to R.raw.thunderstorms_night_snow, // single cloud, moon, thunder, snow, and rain
+            2315 to R.raw.thunderstorms_extreme_snow, // two clouds, thunder, snow, and rain
+            2316 to R.raw.thunderstorms_night_extreme_snow, // single cloud, moon, thunder, snow, and rain
+            2317 to R.raw.extreme_sleet, // two clouds, sleet, and rain
+            2318 to R.raw.overcast_sleet, // single cloud, sleet, and rain
+            2319 to R.raw.partly_cloudy_night_sleet, // single cloud, moon, sleet, and rain
+            2320 to R.raw.extreme_sleet, // two clouds, sleet, and rain
+            2321 to R.raw.overcast_sleet, // single cloud, sleet, and rain
+            2322 to R.raw.partly_cloudy_night_sleet, // single cloud, moon, sleet, and rain
+            2323 to R.raw.thunderstorms_extreme, // two clouds, and thunder
+            2324 to R.raw.thunderstorms, // single cloud, and thunder
+            2325 to R.raw.thunderstorms_night, // single cloud, moon, and thunder
+
             2401 to R.raw.extreme_fog, // two clouds with fog
             2402 to R.raw.overcast_fog, // cloud with fog
             2403 to R.raw.overcast_fog, // single filled out cloud with fog
@@ -411,6 +511,7 @@ class IconMapping {
             // day
             1201, 1202, 1203, 1204, 1205, 1206, 1207, 1208, // sleet
             1301, 1302, 1303, 1304, 1305, 1306, 1307, 1308, 1309, // rain and sleet
+            1310, 1311, 1312, 1313, 1314, 1315, 1316, 1317, 1318, 1319, 1320, 1321, 1322, 1323, 1324, 1325, // thunder, and rain, sleet or snow
             1405, 1406, 1407, 1408, 1409, // fog an drizzle, rain or sleet
             1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, // rain
             1601, 1602, 1603, 1604, 1605, 1606, 1607, 1608, 1609, // snow
@@ -418,6 +519,7 @@ class IconMapping {
             // night
             2201, 2202, 2203, 2204, 2205, 2206, 2207, 2208, // sleet
             2301, 2302, 2303, 2304, 2305, 2306, 2307, 2308, 2309, // rain and sleet
+            2310, 2311, 2312, 2313, 2314, 2315, 2316, 2317, 2318, 2319, 2320, 2321, 2322, 2323, 2324, 2325, // thunder, and rain, sleet or snow
             2405, 2406, 2407, 2408, 2409, // fog an drizzle, rain or sleet
             2501, 2502, 2503, 2504, 2505, 2506, 2507, 2508, 2509, // rain
             2601, 2602, 2603, 2604, 2605, 2606, 2607, 2608, 2609, // snow
