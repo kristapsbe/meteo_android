@@ -32,10 +32,10 @@ class IconMapping {
             1310 to R.drawable.tshower, // two clouds, thunder, and rain
             1311 to R.drawable.tshower, // single cloud, thunder, and rain
             1312 to R.drawable.tshower1, // single cloud, sun, thunder, and rain
-            1313 to R.drawable.sleet, // two clouds, thunder, snow, and rain
-            1314 to R.drawable.sleet1, // single cloud, sun, thunder, snow, and rain
-            1315 to R.drawable.sleet, // two clouds, thunder, snow, and rain
-            1316 to R.drawable.sleet1, // single cloud, sun, thunder, snow, and rain
+            1313 to R.drawable.tsleet, // two clouds, thunder, snow, and rain
+            1314 to R.drawable.tsleet1, // single cloud, sun, thunder, snow, and rain
+            1315 to R.drawable.tsleet, // two clouds, thunder, snow, and rain
+            1316 to R.drawable.tsleet1, // single cloud, sun, thunder, snow, and rain
             1317 to R.drawable.sleet, // two clouds, sleet, and rain
             1318 to R.drawable.sleet, // single cloud, sleet, and rain
             1319 to R.drawable.sleet1, // single cloud, sun, sleet, and rain
@@ -115,10 +115,10 @@ class IconMapping {
             2310 to R.drawable.tshower, // two clouds, thunder, and rain
             2311 to R.drawable.tshower, // single cloud, thunder, and rain
             2312 to R.drawable.tshower0, // single cloud, moon, thunder, and rain
-            2313 to R.drawable.sleet, // two clouds, thunder, snow, and rain
-            2314 to R.drawable.sleet0, // single cloud, moon, thunder, snow, and rain
-            2315 to R.drawable.sleet, // two clouds, thunder, snow, and rain
-            2316 to R.drawable.sleet0, // single cloud, moon, thunder, snow, and rain
+            2313 to R.drawable.tsleet, // two clouds, thunder, snow, and rain
+            2314 to R.drawable.tsleet0, // single cloud, moon, thunder, snow, and rain
+            2315 to R.drawable.tsleet, // two clouds, thunder, snow, and rain
+            2316 to R.drawable.tsleet0, // single cloud, moon, thunder, snow, and rain
             2317 to R.drawable.sleet, // two clouds, sleet, and rain
             2318 to R.drawable.sleet, // single cloud, sleet, and rain
             2319 to R.drawable.sleet0, // single cloud, moon, sleet, and rain
