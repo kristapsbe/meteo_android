@@ -95,6 +95,8 @@ class IconMapping {
             2308 to R.drawable.tshower, // single filled out cloud, with lightning and snow or sleet
             2309 to R.drawable.tshower0, // single filled out cloud with moon, and lightning
 
+            // 2314 is a thing that exists
+
             2401 to R.drawable.fog, // two clouds with fog
             2402 to R.drawable.fog, // cloud with fog
             2403 to R.drawable.fog0, // single filled out cloud with fog
