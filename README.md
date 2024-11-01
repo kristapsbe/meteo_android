@@ -13,6 +13,8 @@ The app is available for download on GooglePlay
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
      height="80">](https://play.google.com/store/apps/details?id=lv.kristapsbe.meteo_android)
 
+## Development
+
 This should just run on `Android Studio` (development was done using `Android Studio Koala Feature Drop | 2024.1.2`)
 
 An android app intended to consume data from 
