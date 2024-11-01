@@ -2,7 +2,7 @@
 
 A lightweight app for receiving weather forecast data published by the [Latvian meteorological institute](https://videscentrs.lvgmc.lv/) in Android.
 
-The app provides notifications for severe weather warnings, and has a widget.
+The app provides notifications for severe weather warnings and auroras, and has a widget.
 
 It's intended to consume data from https://github.com/kristapsbe/meteo_server .
 
