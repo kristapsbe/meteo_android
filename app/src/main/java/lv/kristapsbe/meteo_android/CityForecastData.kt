@@ -13,12 +13,11 @@ data class ForecastData(val time: Long, val vals: List<Double>)
 
 @Serializable
 data class WarningData(
-    val id: Int,
-    val intensity: List<String>,
-    val regions: List<String>,
+    val ids: List<Int>,
     val type: List<String>,
-    val time: List<Long>,
-    val description: List<String>
+    val intensity: List<String>,
+    val description_lv: List<String>,
+    val description_en: List<String>,
 )
 
 @Serializable
@@ -74,11 +73,11 @@ class CityForecastDataDownloader {
         }
 
         fun downloadDataLatLon(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327, doDL: Boolean = true): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon&add_last_no_skip=true", doDL)
+            return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon&add_last_no_skip=true&use_simple_warnings=true", doDL)
         }
 
         fun downloadDataCityName(ctx: Context, locationName: String = "Riga", doDL: Boolean = true): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL/name?city_name=$locationName&add_last_no_skip=true", doDL)
+            return downloadData(ctx, "$BASE_URL/name?city_name=$locationName&add_last_no_skip=true&use_simple_warnings=true", doDL)
         }
 
         fun loadStringFromStorage(ctx: Context, fileName: String): String {

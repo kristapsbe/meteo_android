@@ -106,11 +106,15 @@ class HourlyForecast(
 }
 
 class Warning(
-    val id: Int,
+    val ids: List<Int>,
     val intensity: String,
     val type: HashMap<String, String>,
-    val description: HashMap<String, String>,
-)
+    val description: HashMap<String, List<String>>,
+) {
+    fun getFullDescription(lang: String): String {
+        return description[lang]?.joinToString(separator = "\n\n") ?: ""
+    }
+}
 
 class Aurora(
     val prob: Int,
@@ -227,15 +231,15 @@ class DisplayInfo() {
 
             warnings = cityForecastData.warnings.map { e ->
                 Warning(
-                    e.id,
+                    e.ids,
                     e.intensity[1],
                     hashMapOf(
                         LANG_LV to e.type[0],
                         LANG_EN to e.type[1]
                     ),
                     hashMapOf(
-                        LANG_LV to e.description[0],
-                        LANG_EN to e.description[1]
+                        LANG_LV to e.description_lv,
+                        LANG_EN to e.description_en
                     )
                 )
             }

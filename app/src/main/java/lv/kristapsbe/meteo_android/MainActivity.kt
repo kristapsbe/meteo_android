@@ -983,10 +983,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .padding(20.dp, 20.dp, 20.dp, 0.dp)
                         .fillMaxWidth()
                         .clickable {
-                            if (self.showFullWarnings.value.contains(w.id)) {
-                                self.showFullWarnings.value -= w.id
+                            if (self.showFullWarnings.value.contains(w.ids[0])) {
+                                self.showFullWarnings.value -= w.ids[0]
                             } else {
-                                self.showFullWarnings.value += w.id
+                                self.showFullWarnings.value += w.ids[0]
                             }
                         },
                     verticalAlignment = Alignment.CenterVertically
@@ -1018,14 +1018,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     }
                 }
 
-                if (self.showFullWarnings.value.contains(w.id)) {
+                if (self.showFullWarnings.value.contains(w.ids[0])) {
                     Row(
                         modifier = Modifier
                             .clickable {
-                                if (self.showFullWarnings.value.contains(w.id)) {
-                                    self.showFullWarnings.value -= w.id
+                                if (self.showFullWarnings.value.contains(w.ids[0])) {
+                                    self.showFullWarnings.value -= w.ids[0]
                                 } else {
-                                    self.showFullWarnings.value += w.id
+                                    self.showFullWarnings.value += w.ids[0]
                                 }
                             },
                     ) {
@@ -1037,7 +1037,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                w.description[selectedLang.value] ?: "",
+                                w.getFullDescription(selectedLang.value),
                                 fontSize = 15.sp,
                                 color = Color(resources.getColor(R.color.text_color)),
                             )
