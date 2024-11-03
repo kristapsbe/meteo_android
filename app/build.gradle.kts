@@ -77,6 +77,4 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.datetime)
     implementation(libs.lottie.compose)
-    implementation(libs.androidx.lifecycle.runtime.ktx.v260)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
 }

@@ -234,6 +234,19 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val app = applicationContext as MyApplication
         app.workerCallback = this
 
+        val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            val currentVersionCode = packageInfo.versionCode
+            if (lastVersionCode != currentVersionCode) {
+                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+                prefs.setInt(Preference.LAST_VERSION_CODE, currentVersionCode)
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+        }
+
         // Fixing the back button / gesture
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
