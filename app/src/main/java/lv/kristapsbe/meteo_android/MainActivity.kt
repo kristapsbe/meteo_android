@@ -988,7 +988,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             for (w in displayInfo.value.warnings) {
                 Row(
                     modifier = Modifier
-                        .padding(20.dp, 20.dp, 20.dp, 0.dp)
                         .fillMaxWidth()
                         .clickable {
                             if (self.showFullWarnings.value.contains(w.ids[0])) {
@@ -997,58 +996,57 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 self.showFullWarnings.value += w.ids[0]
                             }
                         },
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(0.15f)
-                    ) {
-                        Image(
-                            painterResource(
-                                IconMapping.warningIconMapping[w.intensity]
-                                    ?: R.drawable.baseline_warning_yellow_24
-                            ),
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
+                    Column {
+                        Row(
                             modifier = Modifier
-                                .padding(10.dp)
-                        )
-                    }
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            w.type[selectedLang.value] ?: "",
-                            fontSize = 20.sp,
-                            color = Color(resources.getColor(R.color.text_color)),
-                            modifier = Modifier
-                                .padding(0.dp, 10.dp, 0.dp, 10.dp),
-                        )
-                    }
-                }
-
-                if (self.showFullWarnings.value.contains(w.ids[0])) {
-                    Row(
-                        modifier = Modifier
-                            .clickable {
-                                if (self.showFullWarnings.value.contains(w.ids[0])) {
-                                    self.showFullWarnings.value -= w.ids[0]
-                                } else {
-                                    self.showFullWarnings.value += w.ids[0]
-                                }
-                            },
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(0.15f)
+                                .padding(20.dp, 20.dp, 20.dp, 0.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(0.15f)
+                            ) {
+                                Image(
+                                    painterResource(
+                                        IconMapping.warningIconMapping[w.intensity]
+                                            ?: R.drawable.baseline_warning_yellow_24
+                                    ),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                )
+                            }
+                            Column(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    w.type[selectedLang.value] ?: "",
+                                    fontSize = 20.sp,
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                    modifier = Modifier
+                                        .padding(0.dp, 10.dp, 0.dp, 10.dp),
+                                )
+                            }
                         }
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                w.getFullDescription(selectedLang.value),
-                                fontSize = 15.sp,
-                                color = Color(resources.getColor(R.color.text_color)),
-                            )
+
+                        if (self.showFullWarnings.value.contains(w.ids[0])) {
+                            Row {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(0.15f)
+                                ) {
+                                }
+                                Column(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        w.getFullDescription(selectedLang.value),
+                                        fontSize = 15.sp,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -1072,7 +1070,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(0.dp, 10.dp, 0.dp, 0.dp)
                         .clickable {
                             val tmp = self.showFullDaily.value.toMutableList()
                             if (tmp.contains(d.date)) {
@@ -1081,25 +1078,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 tmp.add(d.date)
                             }
                             self.showFullDaily.value = tmp.toList()
-                        },
-                    verticalAlignment = Alignment.Bottom
+                        }
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(0.15f)
-                            .padding(0.dp, 15.dp, 0.dp, 0.dp),
-                    ) {
-                        Text(
-                            text = d.getDayOfWeek(selectedLang.value),
-                            fontSize = 27.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Left,
-                            color = Color(resources.getColor(R.color.text_color)),
-                        )
-                    }
-                    Column(
-                        modifier = Modifier
                             .fillMaxWidth()
+                            .padding(0.dp, 0.dp, 0.dp, 10.dp),
                     ) {
                         Row(
                             modifier = Modifier
@@ -1108,79 +1092,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         ) {
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth(0.40f)
+                                    .fillMaxWidth(0.15f)
+                                    .padding(0.dp, 15.dp, 0.dp, 0.dp),
                             ) {
-                                if (showFullDaily.value.contains(d.date)) {
-                                    Row {
-                                        val dateStr = d.date.toString()
-                                        Text( // TODO: don't use substrings to format
-                                            text = "${
-                                                dateStr.take(10).takeLast(2)
-                                            }.${
-                                                dateStr.take(7).takeLast(2)
-                                            }.${dateStr.take(4)}",
-                                            fontSize = 10.sp,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(resources.getColor(R.color.text_color)),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                        )
-                                    }
-                                }
-                                Row {
-                                    Text(
-                                        text = "${convertFromCtoDisplayTemp(d.tempMin, selectedTempType.value)} — ${convertFromCtoDisplayTemp(d.tempMax, selectedTempType.value)}",
-                                        textAlign = TextAlign.Center,
-                                        color = Color(resources.getColor(R.color.text_color)),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                    )
-                                }
-                            }
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth(0.65f)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .height(50.dp),
-                                    verticalAlignment = Alignment.Bottom
-                                ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth(0.5f)
-                                    ) {
-                                        ShowIcon(
-                                            d.pictogramDay.getAlternateAnimatedPictogram(),
-                                            d.pictogramDay.getPictogram(),
-                                            Modifier
-                                                .width(70.dp)
-                                                .height(40.dp)
-                                                .padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                            Modifier
-                                                .width(70.dp)
-                                                .height(40.dp)
-                                                .padding(3.dp, 3.dp, 3.dp, 0.dp)
-                                        )
-                                    }
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                    ) {
-                                        ShowIcon(
-                                            d.pictogramNight.getAlternateAnimatedPictogram(),
-                                            d.pictogramNight.getPictogram(),
-                                            Modifier
-                                                .width(70.dp)
-                                                .height(40.dp)
-                                                .padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                            Modifier
-                                                .width(70.dp)
-                                                .height(40.dp)
-                                                .padding(3.dp, 3.dp, 3.dp, 0.dp)
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text = d.getDayOfWeek(selectedLang.value),
+                                    fontSize = 27.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Left,
+                                    color = Color(resources.getColor(R.color.text_color)),
+                                )
                             }
                             Column(
                                 modifier = Modifier
@@ -1188,64 +1109,142 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             ) {
                                 Row(
                                     modifier = Modifier
-                                        .height(50.dp),
+                                        .fillMaxWidth(),
                                     verticalAlignment = Alignment.Bottom
                                 ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.40f)
+                                    ) {
+                                        if (showFullDaily.value.contains(d.date)) {
+                                            Row {
+                                                val dateStr = d.date.toString()
+                                                Text( // TODO: don't use substrings to format
+                                                    text = "${
+                                                        dateStr.take(10).takeLast(2)
+                                                    }.${
+                                                        dateStr.take(7).takeLast(2)
+                                                    }.${dateStr.take(4)}",
+                                                    fontSize = 10.sp,
+                                                    textAlign = TextAlign.Center,
+                                                    color = Color(resources.getColor(R.color.text_color)),
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                )
+                                            }
+                                        }
+                                        Row {
+                                            Text(
+                                                text = "${convertFromCtoDisplayTemp(d.tempMin, selectedTempType.value)} — ${convertFromCtoDisplayTemp(d.tempMax, selectedTempType.value)}",
+                                                textAlign = TextAlign.Center,
+                                                color = Color(resources.getColor(R.color.text_color)),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                            )
+                                        }
+                                    }
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.65f)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .height(50.dp),
+                                            verticalAlignment = Alignment.Bottom
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(0.5f)
+                                            ) {
+                                                ShowIcon(
+                                                    d.pictogramDay.getAlternateAnimatedPictogram(),
+                                                    d.pictogramDay.getPictogram(),
+                                                    Modifier
+                                                        .width(70.dp)
+                                                        .height(40.dp)
+                                                        .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                                    Modifier
+                                                        .width(70.dp)
+                                                        .height(40.dp)
+                                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                                )
+                                            }
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                            ) {
+                                                ShowIcon(
+                                                    d.pictogramNight.getAlternateAnimatedPictogram(),
+                                                    d.pictogramNight.getPictogram(),
+                                                    Modifier
+                                                        .width(70.dp)
+                                                        .height(40.dp)
+                                                        .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                                    Modifier
+                                                        .width(70.dp)
+                                                        .height(40.dp)
+                                                        .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .height(50.dp),
+                                            verticalAlignment = Alignment.Bottom
+                                        ) {
+                                            Text(
+                                                text = "${d.rainAmount} mm",
+                                                textAlign = TextAlign.Right,
+                                                color = Color(resources.getColor(R.color.text_color)),
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (showFullDaily.value.contains(d.date)) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.15f),
+                                ) {
+                                }
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.40f),
+                                ) {
                                     Text(
-                                        text = "${d.rainAmount} mm",
+                                        text = "${d.averageWind} — ${d.maxWind} m/s",
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 10.sp,
+                                        color = Color(resources.getColor(R.color.text_color)),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    )
+                                }
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                ) {
+                                    Text(
+                                        text = "${d.rainProb}%",
                                         textAlign = TextAlign.Right,
+                                        fontSize = 10.sp,
                                         color = Color(resources.getColor(R.color.text_color)),
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
                             }
-                        }
-                    }
-                }
-                if (showFullDaily.value.contains(d.date)) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                val tmp = self.showFullDaily.value.toMutableList()
-                                if (tmp.contains(d.date)) {
-                                    tmp.remove(d.date)
-                                } else {
-                                    tmp.add(d.date)
-                                }
-                                self.showFullDaily.value = tmp.toList()
-                            },
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth(0.15f),
-                        ) {
-                        }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth(0.40f),
-                        ) {
-                            Text(
-                                text = "${d.averageWind} — ${d.maxWind} m/s",
-                                textAlign = TextAlign.Center,
-                                fontSize = 10.sp,
-                                color = Color(resources.getColor(R.color.text_color)),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                        }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                        ) {
-                            Text(
-                                text = "${d.rainProb}%",
-                                textAlign = TextAlign.Right,
-                                fontSize = 10.sp,
-                                color = Color(resources.getColor(R.color.text_color)),
-                                modifier = Modifier.fillMaxWidth()
-                            )
                         }
                     }
                 }
