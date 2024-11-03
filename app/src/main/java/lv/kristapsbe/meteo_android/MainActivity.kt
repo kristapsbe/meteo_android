@@ -589,7 +589,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             displayInfo.value.getTodayForecast().date,
             displayInfo.value.lat,
             displayInfo.value.lon,
-            ZonedDateTime.now().offset.totalSeconds / 3600
+            ZonedDateTime.now().offset.totalSeconds / 3600 // TODO: lock timezone (?)
         )
 
         Column {
@@ -861,7 +861,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 h.date,
                                 displayInfo.value.lat,
                                 displayInfo.value.lon,
-                                tz
+                                tz // TODO: lock timezone (?)
                             )
                         }
                         prevHDay = h.getDayOfWeek()
