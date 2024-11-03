@@ -587,8 +587,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         val sunTimes: SunRiseSunSet = calculate(
             displayInfo.value.getTodayForecast().date,
-            prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble(),
-            prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble(),
+            displayInfo.value.lat,
+            displayInfo.value.lon,
             ZonedDateTime.now().offset.totalSeconds / 3600
         )
 
@@ -835,11 +835,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .horizontalScroll(scrollState)
                 ) {
                     var prevHDay: String? = null
-                    val lat = prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble()
-                    val lon = prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble()
                     val tz = ZonedDateTime.now().offset.totalSeconds / 3600
 
-                    var sunTimes: SunRiseSunSet = calculate(displayInfo.value.getTodayForecast().date, lat, lon, tz)
+                    var sunTimes: SunRiseSunSet = calculate(
+                        displayInfo.value.getTodayForecast().date,
+                        displayInfo.value.lat,
+                        displayInfo.value.lon,
+                        tz // TODO: lock timezone (?)
+                    )
                     var prevH: Int? = null
 
                     for (h in displayInfo.value.getHourlyForecasts()) {
@@ -854,7 +857,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             prevH = h.date.hour
                         }
                         if (prevHDay != h.getDayOfWeek()) {
-                            sunTimes = calculate(h.date, lat, lon, tz)
+                            sunTimes = calculate(
+                                h.date,
+                                displayInfo.value.lat,
+                                displayInfo.value.lon,
+                                tz
+                            )
                         }
                         prevHDay = h.getDayOfWeek()
 

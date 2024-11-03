@@ -181,6 +181,8 @@ class DisplayInfo() {
     }
 
     var city: String = ""
+    var lat: Double = 0.0
+    var lon: Double = 0.0
     // Today
     private var hourlyForecasts: List<HourlyForecast> = emptyList()
     // Tomorrow onwards
@@ -200,6 +202,8 @@ class DisplayInfo() {
             lastDownloaded = stringToDatetime(cityForecastData.last_downloaded)
             lastDownloadedNoSkip = stringToDatetime(cityForecastData.last_downloaded_no_skip)
             city = cityForecastData.city
+            lat = cityForecastData.lat
+            lon = cityForecastData.lon
             // TODO: I should get the ids dynamically
             hourlyForecasts = cityForecastData.hourly_forecast.map { e ->
                 HourlyForecast(
