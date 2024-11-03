@@ -975,7 +975,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         }
         HorizontalDivider(
             modifier = Modifier
-                .padding(20.dp, 20.dp, 20.dp, 0.dp),
+                .padding(20.dp, 20.dp, 20.dp, 10.dp),
             color = Color(resources.getColor(R.color.light_gray)),
             thickness = 1.dp
         )
@@ -1000,7 +1000,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     Column {
                         Row(
                             modifier = Modifier
-                                .padding(20.dp, 20.dp, 20.dp, 0.dp)
+                                .padding(20.dp, 10.dp, 20.dp, 10.dp)
                                 .fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -1032,7 +1032,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         }
 
                         if (self.showFullWarnings.value.contains(w.ids[0])) {
-                            Row {
+                            Row(
+                                modifier = Modifier
+                                    .padding(0.dp, 0.dp, 0.dp, 10.dp)
+                            ) {
                                 Column(
                                     modifier = Modifier.fillMaxWidth(0.15f)
                                 ) {
@@ -1053,7 +1056,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
             HorizontalDivider(
                 modifier = Modifier
-                    .padding(20.dp, 20.dp, 20.dp, 0.dp),
+                    .padding(20.dp, 10.dp, 20.dp, 0.dp),
                 color = Color(resources.getColor(R.color.light_gray)),
                 thickness = 1.dp
             )
@@ -1064,7 +1067,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     fun ShowDailyInfo() {
         val self = this
         Column(
-            modifier = Modifier.padding(20.dp, 20.dp, 20.dp, 20.dp)
+            modifier = Modifier
+                .padding(20.dp, if (displayInfo.value.warnings.isNotEmpty()) 20.dp else 10.dp, 20.dp, 20.dp)
         ) {
             for (d in displayInfo.value.dailyForecasts) {
                 Row(
