@@ -189,7 +189,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         // TODO: there's some sort of duplicate splash screen issue - https://developer.android.com/develop/ui/views/launch/splash-screen/migrate
         // TODO: I should fix up the labeling for screen readers - https://support.google.com/accessibility/android/answer/7158690#zippy=
-        // TODO: use system locale to figure out which lang should be the default
 
         super.onCreate(savedInstanceState)
 
