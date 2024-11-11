@@ -21,6 +21,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -319,7 +320,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth(0.1f)
-                            .clickable {
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
                                 isPrivacyPolicyChecked.value = !isPrivacyPolicyChecked.value
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -455,7 +459,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
                         mutableState.value = !mutableState.value
                         prefs.setBoolean(preference, mutableState.value)
                         DisplayInfo.updateWidget(
@@ -495,7 +502,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
                         mutableState.value = nextEntry[mutableState.value] ?: defaultVal
                         prefs.setString(preference, mutableState.value)
                         DisplayInfo.updateWidget(
@@ -526,7 +536,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         ) {
             Row(
                 modifier = Modifier
-                    .clickable {
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
                         doDisplaySettings.value = !doDisplaySettings.value
                     }
                     .padding(0.dp, 0.dp, 0.dp, 10.dp)
@@ -651,7 +664,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         painterResource(R.drawable.baseline_location_pin_24),
                         contentDescription = "",
                         modifier = Modifier
-                            .clickable {
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
                                 locationSearchMode.value = !locationSearchMode.value
                             }
                             .padding(10.dp)
@@ -683,7 +699,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         textAlign = TextAlign.Left,
                                         color = Color(resources.getColor(R.color.text_color)),
                                         modifier = Modifier
-                                            .clickable {
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null
+                                            ) {
                                                 locationSearchMode.value = !locationSearchMode.value
                                             }
                                     )
@@ -719,7 +738,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         painterResource(R.drawable.baseline_clear_24),
                                         contentDescription = "",
                                         modifier = Modifier
-                                            .clickable {
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null
+                                            ) {
                                                 customLocationName.value = ""
                                                 prefs.setString(Preference.FORCE_CURRENT_LOCATION, customLocationName.value)
                                                 val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
@@ -793,7 +815,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         Row (
             modifier = Modifier
                 .padding(20.dp, 10.dp, 20.dp, 0.dp)
-                .clickable {
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
                     self.showFullHourly.value = !self.showFullHourly.value
                 }
         ) {
@@ -1001,7 +1026,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
                             if (self.showFullWarnings.value.contains(w.ids[0])) {
                                 self.showFullWarnings.value -= w.ids[0]
                             } else {
@@ -1086,7 +1114,10 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
                             val tmp = self.showFullDaily.value.toMutableList()
                             if (tmp.contains(d.date)) {
                                 tmp.remove(d.date)
