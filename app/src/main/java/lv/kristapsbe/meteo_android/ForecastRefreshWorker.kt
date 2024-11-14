@@ -117,24 +117,27 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     fos.write(warnings.toString().toByteArray())
                 }
 
-                val hasAuroraNotificationBeenDisplayed = prefs.getBoolean(Preference.HAS_AURORA_NOTIFIED)
-                if (hasAuroraNotificationBeenDisplayed) {
-                    if (displayInfo.aurora.prob < AURORA_NOTIFICATION_THRESHOLD) {
-                        prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, false)
+                val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
+                if (doShowAurora) {
+                    val hasAuroraNotificationBeenDisplayed = prefs.getBoolean(Preference.HAS_AURORA_NOTIFIED)
+                    if (hasAuroraNotificationBeenDisplayed) {
+                        if (displayInfo.aurora.prob < AURORA_NOTIFICATION_THRESHOLD) {
+                            prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, false)
+                        }
+                    } else if (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
+                        prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, true)
+                        // TODO: do I actually need to set a new id?
+                        val auroraNotifId = prefs.getInt(Preference.AURORA_NOTIFICATION_ID)
+                        showNotification(
+                            MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
+                            auroraNotifId,
+                            LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_TITLE),
+                            "${LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_DESCRIPTION)} ${displayInfo.aurora.prob}%.",
+                            R.drawable.baseline_star_border_24,
+                            R.drawable.baseline_star_border_green_24
+                        )
+                        prefs.setInt(Preference.AURORA_NOTIFICATION_ID, (auroraNotifId+1))
                     }
-                } else if (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
-                    prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, true)
-                    // TODO: do I actually need to set a new id?
-                    val auroraNotifId = prefs.getInt(Preference.AURORA_NOTIFICATION_ID)
-                    showNotification(
-                        MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
-                        auroraNotifId,
-                        LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_TITLE),
-                        "${LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_DESCRIPTION)} ${displayInfo.aurora.prob}%.",
-                        R.drawable.baseline_star_border_24,
-                        R.drawable.baseline_star_border_green_24
-                    )
-                    prefs.setInt(Preference.AURORA_NOTIFICATION_ID, (auroraNotifId+1))
                 }
             }
         }
