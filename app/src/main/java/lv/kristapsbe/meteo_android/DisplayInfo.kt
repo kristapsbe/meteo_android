@@ -135,7 +135,7 @@ class DisplayInfo() {
             val selectedTemp = prefs.getString(Preference.TEMP_UNIT, CELSIUS)
             val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
             val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
-            val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, false)
+            val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
             val doFixIconDayNight = prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true)
             val useAnimatedIcons = prefs.getBoolean(Preference.USE_ANIMATED_ICONS, false)
 
