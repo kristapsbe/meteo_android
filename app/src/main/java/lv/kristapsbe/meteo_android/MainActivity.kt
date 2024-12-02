@@ -105,6 +105,7 @@ import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import java.time.ZonedDateTime
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.ln
 import kotlin.math.roundToInt
 
 
@@ -139,11 +140,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val CELSIUS = "C"
         const val KELVIN = "K"
         const val FAHRENHEIT = "F"
+        const val DALTON = "D"
 
         val nextTemp = hashMapOf(
             CELSIUS to KELVIN,
             KELVIN to FAHRENHEIT,
-            FAHRENHEIT to CELSIUS
+            FAHRENHEIT to DALTON,
+            DALTON to CELSIUS
         )
 
         val nextLang = hashMapOf(
@@ -155,6 +158,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             return when (toConvert) {
                 FAHRENHEIT -> "${((9.0f/5.0f)*tempC.toFloat()+32.0f).roundToInt()}°"
                 KELVIN -> "${(tempC.toFloat()+273.15f).roundToInt()}°"
+                DALTON -> "${(320.55f*ln((tempC.toFloat()+273.15f)/273.15f)).roundToInt()}°" // https://www.explainxkcd.com/wiki/index.php/3001:_Temperature_Scales
                 else -> "$tempC°"
             }
         }
