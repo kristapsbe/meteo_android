@@ -138,9 +138,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         const val LANG_LV = "lv"
 
         const val CELSIUS = "C"
-        const val KELVIN = "K"
-        const val FAHRENHEIT = "F"
-        const val DALTON = "D"
+        private const val KELVIN = "K"
+        private const val FAHRENHEIT = "F"
+        private const val DALTON = "D"
 
         val nextTemp = hashMapOf(
             CELSIUS to KELVIN,

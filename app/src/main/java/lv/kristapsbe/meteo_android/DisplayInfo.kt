@@ -109,7 +109,7 @@ class Warning(
     val ids: List<Int>,
     val intensity: String,
     val type: HashMap<String, String>,
-    val description: HashMap<String, List<String>>,
+    private val description: HashMap<String, List<String>>,
 ) {
     fun getFullDescription(lang: String): String {
         return description[lang]?.joinToString(separator = "\n\n") ?: ""
