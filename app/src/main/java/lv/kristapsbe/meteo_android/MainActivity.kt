@@ -361,7 +361,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 annotatedText.getStringAnnotations(tag = "URL", start = offset, end = offset)
                                     .firstOrNull()?.let { annotation ->
                                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                         applicationContext.startActivity(intent)
                                     }
                             }
@@ -374,8 +374,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             if (isPrivacyPolicyChecked.value) {
                                 privacyPolicyAccepted.value = true
                                 prefs.setBoolean(Preference.PRIVACY_POLICY_ACCEPTED, privacyPolicyAccepted.value)
-                                finish();
-                                startActivity(intent);
+                                finish()
+                                startActivity(intent)
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)  // Set button background color
