@@ -74,12 +74,12 @@ class CityForecastDataDownloader {
             return cityForecast
         }
 
-        fun downloadDataLatLon(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327, doDL: Boolean = true): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true", doDL)
+        fun downloadDataLatLon(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327, doDL: Boolean = true, isAnimated: Boolean = false): CityForecastData? {
+            return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true&is_animated=$isAnimated", doDL)
         }
 
-        fun downloadDataCityName(ctx: Context, locationName: String = "Riga", doDL: Boolean = true): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL/name?city_name=$locationName&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true", doDL)
+        fun downloadDataCityName(ctx: Context, locationName: String = "Riga", doDL: Boolean = true, isAnimated: Boolean = false): CityForecastData? {
+            return downloadData(ctx, "$BASE_URL/name?city_name=$locationName&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true&is_animated=$isAnimated", doDL)
         }
 
         fun loadStringFromStorage(ctx: Context, fileName: String): String {

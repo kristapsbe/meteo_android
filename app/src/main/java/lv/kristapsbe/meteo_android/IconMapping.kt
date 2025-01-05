@@ -56,6 +56,14 @@ class IconMapping {
             1408 to R.drawable.fog1, // two clouds with fog, sun and rain
             1409 to R.drawable.fog, // cloud with fog and snow or sleet
 
+            1410 to R.drawable.lsnow, // filled cloud with wind, and light snow
+            1411 to R.drawable.lsnow1, // unfilled cloud with sun, wind, and light snow
+            1412 to R.drawable.lsnow1, // filled cloud with sun, wind, and light snow
+            1413 to R.drawable.snow, // two clouds with wind and snow
+            1414 to R.drawable.snow1, // filled cloud with sun, wind, and snow
+            1415 to R.drawable.sleet, // two clouds with wind, sleet, and snow
+            1416 to R.drawable.sleet1, // filled cloud with sun, wind, sleet, and snow
+
             1501 to R.drawable.shower, // two clouds and drizzle
             1502 to R.drawable.shower, // cloud and drizzle
             1503 to R.drawable.shower1, // cloud, sun and drizzle
@@ -138,6 +146,14 @@ class IconMapping {
             2407 to R.drawable.fog, // two clouds with fog and rain
             2408 to R.drawable.fog0, // two clouds with fog, moon and rain
             2409 to R.drawable.fog, // cloud with fog and snow or sleet
+
+            2410 to R.drawable.lsnow, // filled cloud with wind, and light snow
+            2411 to R.drawable.lsnow0, // unfilled cloud with moon, wind, and light snow
+            2412 to R.drawable.lsnow0, // filled cloud with moon, wind, and light snow
+            2413 to R.drawable.snow, // two clouds with wind and snow
+            2414 to R.drawable.snow0, // filled cloud with moon, wind, and snow
+            2415 to R.drawable.sleet, // two clouds with wind, sleet, and snow
+            2416 to R.drawable.sleet0, // filled cloud with moon, wind, sleet, and snow
 
             2501 to R.drawable.shower, // two clouds and drizzle
             2502 to R.drawable.shower, // cloud and drizzle
@@ -224,6 +240,14 @@ class IconMapping {
             1408 to R.drawable.extreme_day_fog, // two clouds with fog, sun and rain
             1409 to R.drawable.overcast_fog, // cloud with fog and snow or sleet
 
+            1410 to R.drawable.overcast_snow, // filled cloud with wind, and light snow
+            1411 to R.drawable.partly_cloudy_day_snow, // unfilled cloud with sun, wind, and light snow
+            1412 to R.drawable.overcast_day_snow, // filled cloud with sun, wind, and light snow
+            1413 to R.drawable.extreme_snow, // two clouds with wind and snow
+            1414 to R.drawable.overcast_day_snow, // filled cloud with sun, wind, and snow
+            1415 to R.drawable.extreme_sleet, // two clouds with wind, sleet, and snow
+            1416 to R.drawable.overcast_day_sleet, // filled cloud with sun, wind, sleet, and snow
+
             1501 to R.drawable.extreme_drizzle, // two clouds and drizzle
             1502 to R.drawable.overcast_drizzle, // cloud and drizzle
             1503 to R.drawable.partly_cloudy_day_drizzle, // cloud, sun and drizzle
@@ -306,6 +330,14 @@ class IconMapping {
             2407 to R.drawable.extreme_fog, // two clouds with fog and rain
             2408 to R.drawable.extreme_night_fog, // two clouds with fog, sun and rain
             2409 to R.drawable.overcast_fog, // cloud with fog and snow or sleet
+
+            2410 to R.drawable.overcast_snow, // filled cloud with wind, and light snow
+            2411 to R.drawable.partly_cloudy_night_snow, // unfilled cloud with moon, wind, and light snow
+            2412 to R.drawable.overcast_night_snow, // filled cloud with moon, wind, and light snow
+            2413 to R.drawable.extreme_snow, // two clouds with wind and snow
+            2414 to R.drawable.overcast_night_snow, // filled cloud with moon, wind, and snow
+            2415 to R.drawable.extreme_sleet, // two clouds with wind, sleet, and snow
+            2416 to R.drawable.overcast_night_sleet, // filled cloud with moon, wind, sleet, and snow
 
             2501 to R.drawable.extreme_drizzle, // two clouds and drizzle
             2502 to R.drawable.overcast_drizzle, // cloud and drizzle
@@ -392,6 +424,14 @@ class IconMapping {
             1408 to R.raw.extreme_day_fog, // two clouds with fog, sun and rain
             1409 to R.raw.overcast_fog, // cloud with fog and snow or sleet
 
+            1410 to R.raw.overcast_snow, // filled cloud with wind, and light snow
+            1411 to R.raw.partly_cloudy_day_snow, // unfilled cloud with sun, wind, and light snow
+            1412 to R.raw.overcast_day_snow, // filled cloud with sun, wind, and light snow
+            1413 to R.raw.extreme_snow, // two clouds with wind and snow
+            1414 to R.raw.overcast_day_snow, // filled cloud with sun, wind, and snow
+            1415 to R.raw.extreme_sleet, // two clouds with wind, sleet, and snow
+            1416 to R.raw.overcast_day_sleet, // filled cloud with sun, wind, sleet, and snow
+
             1501 to R.raw.extreme_drizzle, // two clouds and drizzle
             1502 to R.raw.overcast_drizzle, // cloud and drizzle
             1503 to R.raw.partly_cloudy_day_drizzle, // cloud, sun and drizzle
@@ -475,6 +515,14 @@ class IconMapping {
             2408 to R.raw.extreme_night_fog, // two clouds with fog, sun and rain
             2409 to R.raw.overcast_fog, // cloud with fog and snow or sleet
 
+            2410 to R.raw.overcast_snow, // filled cloud with wind, and light snow
+            2411 to R.raw.partly_cloudy_night_snow, // unfilled cloud with moon, wind, and light snow
+            2412 to R.raw.overcast_night_snow, // filled cloud with moon, wind, and light snow
+            2413 to R.raw.extreme_snow, // two clouds with wind and snow
+            2414 to R.raw.overcast_night_snow, // filled cloud with moon, wind, and snow
+            2415 to R.raw.extreme_sleet, // two clouds with wind, sleet, and snow
+            2416 to R.raw.overcast_night_sleet, // filled cloud with moon, wind, sleet, and snow
+
             2501 to R.raw.extreme_drizzle, // two clouds and drizzle
             2502 to R.raw.overcast_drizzle, // cloud and drizzle
             2503 to R.raw.partly_cloudy_night_drizzle, // cloud, sun and drizzle
@@ -512,7 +560,8 @@ class IconMapping {
             1201, 1202, 1203, 1204, 1205, 1206, 1207, 1208, // sleet
             1301, 1302, 1303, 1304, 1305, 1306, 1307, 1308, 1309, // rain and sleet
             1310, 1311, 1312, 1313, 1314, 1315, 1316, 1317, 1318, 1319, 1320, 1321, 1322, 1323, 1324, 1325, // thunder, and rain, sleet or snow
-            1405, 1406, 1407, 1408, 1409, // fog an drizzle, rain or sleet
+            1405, 1406, 1407, 1408, 1409, // fog and drizzle, rain or sleet
+            1410, 1411, 1412, 1413, 1414, 1415, 1416, // wind and snow or sleet
             1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, // rain
             1601, 1602, 1603, 1604, 1605, 1606, 1607, 1608, 1609, // snow
             1610, 1611, 1612, 1613, 1614, 1615, 1616, 1617, 1618, 1619, // sleet or snow
@@ -520,7 +569,8 @@ class IconMapping {
             2201, 2202, 2203, 2204, 2205, 2206, 2207, 2208, // sleet
             2301, 2302, 2303, 2304, 2305, 2306, 2307, 2308, 2309, // rain and sleet
             2310, 2311, 2312, 2313, 2314, 2315, 2316, 2317, 2318, 2319, 2320, 2321, 2322, 2323, 2324, 2325, // thunder, and rain, sleet or snow
-            2405, 2406, 2407, 2408, 2409, // fog an drizzle, rain or sleet
+            2405, 2406, 2407, 2408, 2409, // fog and drizzle, rain or sleet
+            2410, 2411, 2412, 2413, 2414, 2415, 2416, // wind and snow or sleet
             2501, 2502, 2503, 2504, 2505, 2506, 2507, 2508, 2509, // rain
             2601, 2602, 2603, 2604, 2605, 2606, 2607, 2608, 2609, // snow
             2610, 2611, 2612, 2613, 2614, 2615, 2616, 2617, 2618, 2619, // sleet or snow
