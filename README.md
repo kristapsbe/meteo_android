@@ -4,7 +4,7 @@ A lightweight app for receiving weather forecast data published by the [Latvian 
 
 The app provides notifications for severe weather warnings and auroras, and has a widget.
 
-It's intended to consume data from https://github.com/kristapsbe/meteo_server .
+It's intended to consume data from [this api](https://github.com/kristapsbe/meteo_server).
 
 ## Download
 
@@ -22,4 +22,5 @@ An android app intended to consume data from
 jetpack compose - helpful docs
 https://developer.android.com/develop/ui/compose/mental-model
 
-weather icons https://github.com/kristapsbe/WeatherNowIcons
+static weather icons https://github.com/kristapsbe/WeatherNowIcons
+animated weather icons https://github.com/kristapsbe/weather-icons (production, filled, lottie or 256)
