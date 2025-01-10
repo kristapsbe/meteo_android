@@ -23,4 +23,5 @@ jetpack compose - helpful docs
 https://developer.android.com/develop/ui/compose/mental-model
 
 [static weather icons](https://github.com/kristapsbe/WeatherNowIcons)
+
 [animated weather icons](https://github.com/kristapsbe/weather-icons) (production, filled, lottie or 256)
