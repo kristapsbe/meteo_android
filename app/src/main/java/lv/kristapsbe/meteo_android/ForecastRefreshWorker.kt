@@ -103,7 +103,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 // TODO: the file's just going to keep growing - I need to clear it out somehow
                 for (w in displayInfo.warnings) {
                     if (!w.ids.all { it in warnings }) {
-                        warnings.addAll(w.ids) // TODO: only add if allowed to push notifs
+                        warnings.addAll(w.ids)
                         showNotification(
                             MainActivity.WEATHER_WARNINGS_CHANNEL_ID,
                             w.ids[0],
