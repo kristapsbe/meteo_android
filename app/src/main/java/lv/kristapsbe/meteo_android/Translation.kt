@@ -139,7 +139,7 @@ class LangStrings {
         )
 
         fun getDirectionString(lang: String, deg: Int): String {
-            return directions[if (lang == "") LANG_EN else lang]?.get(deg) ?: ""
+            return directions[if (lang == LANG_LV) LANG_LV else LANG_EN]?.get(deg) ?: ""
         }
 
         private val translationStrings = hashMapOf(
@@ -188,7 +188,7 @@ class LangStrings {
         )
 
         fun getTranslationString(lang: String, key: Translation): String {
-            return translationStrings[if (lang == "") LANG_EN else lang]?.get(key) ?: ""
+            return translationStrings[if (lang == LANG_LV) LANG_LV else LANG_EN]?.get(key) ?: ""
         }
     }
 }

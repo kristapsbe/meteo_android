@@ -18,7 +18,7 @@ enum class Preference {
     PRIVACY_POLICY_ACCEPTED,
     HAS_AURORA_NOTIFIED,
     AURORA_NOTIFICATION_ID,
-    LAST_VERSION_CODE,
+    LAST_LONG_VERSION_CODE,
 }
 
 class AppPreferences(context: Context) {
@@ -27,15 +27,24 @@ class AppPreferences(context: Context) {
 
     private val defaultString = ""
     private val defaultInt = -1
+    private val defaultLong = -1L
     private val defaultBoolean = false
     private val defaultFloat = -999f
 
-    fun getInt(pref: Preference): Int {
-        return prefs.getInt(pref.toString(), defaultInt)
+    fun getInt(pref: Preference, overrideDefault: Int = defaultInt): Int {
+        return prefs.getInt(pref.toString(), overrideDefault)
     }
 
     fun setInt(pref: Preference, value: Int) {
         prefs.edit().putInt(pref.toString(), value).apply()
+    }
+
+    fun getLong(pref: Preference, overrideDefault: Long = defaultLong): Long {
+        return prefs.getLong(pref.toString(), overrideDefault)
+    }
+
+    fun setLong(pref: Preference, value: Long) {
+        prefs.edit().putLong(pref.toString(), value).apply()
     }
 
     fun getFloat(pref: Preference, overrideDefault: Float = defaultFloat): Float {

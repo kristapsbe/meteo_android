@@ -70,7 +70,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -239,14 +238,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val app = applicationContext as MyApplication
         app.workerCallback = this
 
-        val lastVersionCode = prefs.getInt(Preference.LAST_VERSION_CODE)
+        val lastVersionCode = prefs.getLong(Preference.LAST_LONG_VERSION_CODE)
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
-            val currentVersionCode = packageInfo.versionCode
+            val currentVersionCode = packageInfo.longVersionCode
             if (lastVersionCode != currentVersionCode) {
                 val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
                 WorkManager.getInstance(applicationContext).enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-                prefs.setInt(Preference.LAST_VERSION_CODE, currentVersionCode)
+                prefs.setLong(Preference.LAST_LONG_VERSION_CODE, currentVersionCode)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
@@ -321,7 +320,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(resources.getColor(R.color.sky_blue)))
+                    .background(Color(getColor(R.color.sky_blue)))
                     .fillMaxWidth()
                     .padding(20.dp)
             ) {
@@ -464,7 +463,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Text(
                     text = LangStrings.getTranslationString(selectedLang.value, translation),
                     textAlign = TextAlign.Start,
-                    color = Color(resources.getColor(R.color.text_color)),
+                    color = Color(getColor(R.color.text_color)),
                 )
             }
             Column(
@@ -507,7 +506,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Text(
                     text = LangStrings.getTranslationString(selectedLang.value, translation),
                     textAlign = TextAlign.Start,
-                    color = Color(resources.getColor(R.color.text_color)),
+                    color = Color(getColor(R.color.text_color)),
                 )
             }
             Column(
@@ -530,7 +529,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier
                         .fillMaxWidth(),
                     text = mutableState.value,
-                    color = Color(resources.getColor(R.color.text_color)),
+                    color = Color(getColor(R.color.text_color)),
                     textAlign = TextAlign.Center
                 )
             }
@@ -573,7 +572,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 HorizontalDivider(
                     modifier = Modifier
                         .padding(0.dp, 10.dp, 0.dp, 20.dp),
-                    color = Color(resources.getColor(R.color.light_gray)),
+                    color = Color(getColor(R.color.light_gray)),
                     thickness = 1.dp
                 )
             }
@@ -581,24 +580,24 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     @Composable
-    fun ShowHourlyIcon(h: HourlyForecast, sunTimes: SunRiseSunSet, lottieModifier: Modifier, imageModifier: Modifier) {
+    fun ShowHourlyIcon(h: HourlyForecast, sunTimes: SunRiseSunSet, modifier: Modifier, imageModifier: Modifier) {
         ShowIcon(
             if (doFixIconDayNight.value) h.pictogram.getAlternateAnimatedPictogram(h.date, sunTimes) else h.pictogram.getAlternateAnimatedPictogram(),
             if (doFixIconDayNight.value) h.pictogram.getPictogram(h.date, sunTimes) else h.pictogram.getPictogram(),
-            lottieModifier,
+            modifier,
             imageModifier
         )
     }
 
     @Composable
-    fun ShowIcon(lottieIcon: Int, imageIcon: Int, lottieModifier: Modifier, imageModifier: Modifier) {
+    fun ShowIcon(lottieIcon: Int, imageIcon: Int, modifier: Modifier, imageModifier: Modifier) {
         if (useAnimatedIcons.value) {
             val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(lottieIcon))
             val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
             LottieAnimation(
                 composition = composition,
                 progress = progress,
-                modifier = lottieModifier
+                modifier = modifier
             )
         } else {
             Image(
@@ -656,7 +655,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         text = convertFromCtoDisplayTemp(hForecast.currentTemp, selectedTempType.value),
                         fontSize = 100.sp,
                         textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
+                        color = Color(getColor(R.color.text_color)),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -771,7 +770,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(hForecast.feelsLikeTemp, selectedTempType.value)}",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
+                        color = Color(getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(0.dp, 0.dp, 20.dp, 0.dp),
@@ -787,7 +786,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     Text(
                         text = if (selectedLang.value == LANG_EN) "Aurora ${displayInfo.value.aurora.prob}% at ${displayInfo.value.aurora.time}" else "Ziemeļblāzma ${displayInfo.value.aurora.prob}% plkst. ${displayInfo.value.aurora.time}",
                         textAlign = TextAlign.Center,
-                        color = Color(resources.getColor(R.color.text_color)),
+                        color = Color(getColor(R.color.text_color)),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(0.dp, 10.dp, 0.dp, 0.dp)
@@ -798,14 +797,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         HorizontalDivider(
             modifier = Modifier
                 .padding(20.dp, 20.dp, 20.dp, 10.dp),
-            color = Color(resources.getColor(R.color.light_gray)),
+            color = Color(getColor(R.color.light_gray)),
             thickness = 1.dp
         )
     }
 
     @Composable
     fun ObserveLifecycle(onEvent: (Lifecycle.Event) -> Unit) {
-        val lifecycleOwner = LocalLifecycleOwner.current
+        val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
@@ -952,7 +951,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 Text(
                                     "${sunTimes.setH}:${sunTimes.setMin}",
                                     fontSize = 20.sp,
-                                    color = Color(resources.getColor(R.color.text_color)),
+                                    color = Color(getColor(R.color.text_color)),
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
                                 )
@@ -980,7 +979,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             Text(
                                 "${h.time.take(2)}:${h.time.takeLast(2)}",
                                 fontSize = 20.sp,
-                                color = Color(resources.getColor(R.color.text_color)),
+                                color = Color(getColor(R.color.text_color)),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                             )
@@ -1024,7 +1023,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         HorizontalDivider(
             modifier = Modifier
                 .padding(20.dp, 20.dp, 20.dp, 10.dp),
-            color = Color(resources.getColor(R.color.light_gray)),
+            color = Color(getColor(R.color.light_gray)),
             thickness = 1.dp
         )
     }
@@ -1075,7 +1074,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 Text(
                                     w.type[selectedLang.value] ?: "",
                                     fontSize = 20.sp,
-                                    color = Color(resources.getColor(R.color.text_color)),
+                                    color = Color(getColor(R.color.text_color)),
                                     modifier = Modifier
                                         .padding(0.dp, 10.dp, 0.dp, 10.dp),
                                 )
@@ -1097,7 +1096,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     Text(
                                         w.getFullDescription(selectedLang.value),
                                         fontSize = 15.sp,
-                                        color = Color(resources.getColor(R.color.text_color)),
+                                        color = Color(getColor(R.color.text_color)),
                                     )
                                 }
                             }
@@ -1108,7 +1107,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             HorizontalDivider(
                 modifier = Modifier
                     .padding(20.dp, 10.dp, 20.dp, 0.dp),
-                color = Color(resources.getColor(R.color.light_gray)),
+                color = Color(getColor(R.color.light_gray)),
                 thickness = 1.dp
             )
         }
@@ -1185,7 +1184,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                                     }.${dateStr.take(4)}",
                                                     fontSize = 10.sp,
                                                     textAlign = TextAlign.Center,
-                                                    color = Color(resources.getColor(R.color.text_color)),
+                                                    color = Color(getColor(R.color.text_color)),
                                                     modifier = Modifier
                                                         .fillMaxWidth()
                                                 )
@@ -1195,7 +1194,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                             Text(
                                                 text = "${convertFromCtoDisplayTemp(d.tempMin, selectedTempType.value)} — ${convertFromCtoDisplayTemp(d.tempMax, selectedTempType.value)}",
                                                 textAlign = TextAlign.Center,
-                                                color = Color(resources.getColor(R.color.text_color)),
+                                                color = Color(getColor(R.color.text_color)),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                             )
@@ -1258,7 +1257,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                             Text(
                                                 text = "${d.rainAmount} mm",
                                                 textAlign = TextAlign.Right,
-                                                color = Color(resources.getColor(R.color.text_color)),
+                                                color = Color(getColor(R.color.text_color)),
                                                 modifier = Modifier.fillMaxWidth()
                                             )
                                         }
@@ -1285,7 +1284,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         text = "${d.averageWind} — ${d.maxWind} m/s",
                                         textAlign = TextAlign.Center,
                                         fontSize = 10.sp,
-                                        color = Color(resources.getColor(R.color.text_color)),
+                                        color = Color(getColor(R.color.text_color)),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                     )
@@ -1298,7 +1297,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         text = "${d.rainProb}%",
                                         textAlign = TextAlign.Right,
                                         fontSize = 10.sp,
-                                        color = Color(resources.getColor(R.color.text_color)),
+                                        color = Color(getColor(R.color.text_color)),
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
@@ -1311,7 +1310,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         HorizontalDivider(
             modifier = Modifier
                 .padding(20.dp, 20.dp, 20.dp, 20.dp),
-            color = Color(resources.getColor(R.color.light_gray)),
+            color = Color(getColor(R.color.light_gray)),
             thickness = 1.dp
         )
     }
@@ -1327,7 +1326,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 fontSize = 8.sp,
                 lineHeight = 10.sp,
                 text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_ISSUED)} ${displayInfo.value.getLastUpdated()}",
-                color = Color(resources.getColor(R.color.text_color)),
+                color = Color(getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
             )
             Text(
@@ -1335,7 +1334,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 fontSize = 8.sp,
                 lineHeight = 10.sp,
                 text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_DOWNLOADED)} ${displayInfo.value.getLastDownloaded()}",
-                color = Color(resources.getColor(R.color.text_color)),
+                color = Color(getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
             )
             Text(
@@ -1343,7 +1342,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 fontSize = 8.sp,
                 lineHeight = 10.sp,
                 text = "${LangStrings.getTranslationString(selectedLang.value, Translation.FORECAST_DOWNLOADED_NO_SKIP)} ${displayInfo.value.getLastDownloadedNoSkip()}",
-                color = Color(resources.getColor(R.color.text_color)),
+                color = Color(getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
             )
         }

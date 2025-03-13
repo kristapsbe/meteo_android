@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "lv.kristapsbe.meteo_android"
-        minSdk = 26
+        minSdk = 28
         targetSdk = 34
         versionCode = 148
         versionName = "0.9.64"
