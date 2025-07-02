@@ -7,14 +7,14 @@ plugins {
 
 android {
     namespace = "lv.kristapsbe.meteo_android"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "lv.kristapsbe.meteo_android"
         minSdk = 28
-        targetSdk = 34
-        versionCode = 149
-        versionName = "1.0.1"
+        targetSdk = 35
+        versionCode = 150
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
