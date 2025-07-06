@@ -873,6 +873,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     if (event == Lifecycle.Event.ON_RESUME) {
                         coroutineScope.launch {
                             scrollState.scrollTo(0)
+                            showFullHourly.value = false
                         }
                     }
                 }
@@ -1032,6 +1033,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     fun ShowWarningInfo() {
         val self = this
         if (displayInfo.value.warnings.isNotEmpty()) {
+            val coroutineScope = rememberCoroutineScope()
+
+            ObserveLifecycle { event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    coroutineScope.launch {
+                        self.showFullWarnings.value = setOf<Int>()
+                    }
+                }
+            }
+
             for (w in displayInfo.value.warnings) {
                 Row(
                     modifier = Modifier
@@ -1120,6 +1131,16 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             modifier = Modifier
                 .padding(20.dp, if (displayInfo.value.warnings.isNotEmpty()) 20.dp else 10.dp, 20.dp, 20.dp)
         ) {
+            val coroutineScope = rememberCoroutineScope()
+
+            ObserveLifecycle { event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    coroutineScope.launch {
+                        self.showFullDaily.value = listOf<LocalDateTime>()
+                    }
+                }
+            }
+
             for (d in displayInfo.value.dailyForecasts) {
                 Row(
                     modifier = Modifier
