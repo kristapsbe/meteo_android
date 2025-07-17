@@ -71,12 +71,13 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
 
             val customLocationName = prefs.getString(Preference.FORCE_CURRENT_LOCATION)
             val isAnimated = prefs.getBoolean(Preference.USE_ANIMATED_ICONS)
+            val enableExperimental = prefs.getBoolean(Preference.ENABLE_EXPERIMENTAL_FORECASTS)
             val cityForecast: CityForecastData?
             if (customLocationName != "") {
-                cityForecast = CityForecastDataDownloader.downloadDataCityName(app, locationName = customLocationName, isAnimated = isAnimated)
+                cityForecast = CityForecastDataDownloader.downloadDataCityName(app, locationName = customLocationName, isAnimated = isAnimated, enableExperimental = enableExperimental)
             } else {
                 val location = getLastLocation(app)
-                cityForecast = CityForecastDataDownloader.downloadDataLatLon(app, lat = location.elementAt(0), lon = location.elementAt(1), isAnimated = isAnimated)
+                cityForecast = CityForecastDataDownloader.downloadDataLatLon(app, lat = location.elementAt(0), lon = location.elementAt(1), isAnimated = isAnimated, enableExperimental = enableExperimental)
                 prefs.setFloat(Preference.LAST_LAT, location.elementAt(0).toFloat())
                 prefs.setFloat(Preference.LAST_LON, location.elementAt(1).toFloat())
             }
