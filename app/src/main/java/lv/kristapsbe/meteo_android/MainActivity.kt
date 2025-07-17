@@ -176,6 +176,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private lateinit var doShowAurora: MutableState<Boolean>
     private lateinit var doFixIconDayNight: MutableState<Boolean>
     private lateinit var useAnimatedIcons: MutableState<Boolean>
+    private lateinit var enableExperimental: MutableState<Boolean>
     private lateinit var customLocationName: MutableState<String>
     private lateinit var privacyPolicyAccepted: MutableState<Boolean>
 
@@ -210,6 +211,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         doShowAurora = mutableStateOf(prefs.getBoolean(Preference.DO_SHOW_AURORA, true))
         doFixIconDayNight = mutableStateOf(prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true))
         useAnimatedIcons = mutableStateOf(prefs.getBoolean(Preference.USE_ANIMATED_ICONS, false))
+        enableExperimental = mutableStateOf(prefs.getBoolean(Preference.ENABLE_EXPERIMENTAL_FORECASTS, false))
         customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
         privacyPolicyAccepted = mutableStateOf(prefs.getBoolean(Preference.PRIVACY_POLICY_ACCEPTED, false))
 
@@ -568,6 +570,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 SettingsEntryBoolean(Translation.SETTINGS_FIX_ICON_DAY_NIGHT, Preference.DO_FIX_ICON_DAY_NIGHT, doFixIconDayNight)
                 SettingsEntryBoolean(Translation.SETTINGS_USE_ALT_LAYOUT, Preference.USE_ALT_LAYOUT, useAltLayout)
                 SettingsEntryBoolean(Translation.SETTINGS_USE_ANIMATED_ICONS, Preference.USE_ANIMATED_ICONS, useAnimatedIcons)
+                SettingsEntryBoolean(Translation.SETTINGS_ENABLE_EXPERIMENTAL_FORECASTS, Preference.ENABLE_EXPERIMENTAL_FORECASTS, enableExperimental)
 
                 HorizontalDivider(
                     modifier = Modifier

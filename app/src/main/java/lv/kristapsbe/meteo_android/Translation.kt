@@ -20,6 +20,7 @@ enum class Translation {
     SETTINGS_FIX_ICON_DAY_NIGHT,
     SETTINGS_USE_ALT_LAYOUT,
     SETTINGS_USE_ANIMATED_ICONS,
+    SETTINGS_ENABLE_EXPERIMENTAL_FORECASTS,
 
     NOTIFICATION_AURORA_TITLE,
     NOTIFICATION_AURORA_DESCRIPTION,
@@ -160,6 +161,7 @@ class LangStrings {
                 Translation.NOTIFICATION_AURORA_DESCRIPTION to "Aurora probability has increased to",
                 Translation.SETTINGS_FIX_ICON_DAY_NIGHT to "Match icons to sunrise and sunset",
                 Translation.SETTINGS_USE_ANIMATED_ICONS to "Use animated icons",
+                Translation.SETTINGS_ENABLE_EXPERIMENTAL_FORECASTS to "Enable experimental forecasts",
                 Translation.PRIVACY_I_HAVE_READ to "I have read and agree to the ",
                 Translation.PRIVACY_POLICY to "Privacy Policy",
                 Translation.PRIVACY_CONTINUE to "Continue"
@@ -181,6 +183,7 @@ class LangStrings {
                 Translation.NOTIFICATION_AURORA_DESCRIPTION to "Ziemeļblāzmas varbūtība ir palielinājusies līdz",
                 Translation.SETTINGS_FIX_ICON_DAY_NIGHT to "Likt ikonām sakrist ar saullēktu un saulrietu",
                 Translation.SETTINGS_USE_ANIMATED_ICONS to "Lietot animētas ikonas",
+                Translation.SETTINGS_ENABLE_EXPERIMENTAL_FORECASTS to "Iespējot eksperimentālās prognozes",
                 Translation.PRIVACY_I_HAVE_READ to "Es esmu izlasījis un piekrītu ",
                 Translation.PRIVACY_POLICY to "Privātuma politikai",
                 Translation.PRIVACY_CONTINUE to "Turpināt"
