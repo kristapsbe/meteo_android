@@ -28,6 +28,8 @@ enum class Translation {
     PRIVACY_I_HAVE_READ,
     PRIVACY_POLICY,
     PRIVACY_CONTINUE,
+
+    DATA_SOURCES
 }
 
 class LangStrings {
@@ -164,7 +166,8 @@ class LangStrings {
                 Translation.SETTINGS_ENABLE_EXPERIMENTAL_FORECASTS to "Enable experimental forecasts",
                 Translation.PRIVACY_I_HAVE_READ to "I have read and agree to the ",
                 Translation.PRIVACY_POLICY to "Privacy Policy",
-                Translation.PRIVACY_CONTINUE to "Continue"
+                Translation.PRIVACY_CONTINUE to "Continue",
+                Translation.DATA_SOURCES to "Data sources"
             ),
             LANG_LV to hashMapOf(
                 Translation.RAIN_EXPECTED_TODAY to "šodien plkst.",
@@ -186,7 +189,8 @@ class LangStrings {
                 Translation.SETTINGS_ENABLE_EXPERIMENTAL_FORECASTS to "Iespējot eksperimentālās prognozes",
                 Translation.PRIVACY_I_HAVE_READ to "Es esmu izlasījis un piekrītu ",
                 Translation.PRIVACY_POLICY to "Privātuma politikai",
-                Translation.PRIVACY_CONTINUE to "Turpināt"
+                Translation.PRIVACY_CONTINUE to "Turpināt",
+                Translation.DATA_SOURCES to "Datu avoti"
             )
         )
 

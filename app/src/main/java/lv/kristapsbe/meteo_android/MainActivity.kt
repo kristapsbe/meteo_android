@@ -23,6 +23,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -1008,7 +1009,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 textAlign = TextAlign.Center,
                             )
                             if (showFullHourly.value) {
-                                for (tVal in listOf("${h.rainAmount} mm", "${h.stormProb}%", "${h.windSpeed} m/s", h.getDirection(selectedLang.value), h.uvIndex.toString())) {
+                                for (tVal in listOf("${h.rainAmount} mm", (if (h.stormProb != -999) "${h.stormProb}%" else ""), "${h.windSpeed} m/s", h.getDirection(selectedLang.value), (if (h.uvIndex != -999) h.uvIndex.toString() else ""))) {
                                     Text(
                                         tVal,
                                         color = Color(resources.getColor(R.color.text_color)),
@@ -1318,7 +1319,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                         .fillMaxWidth(),
                                 ) {
                                     Text(
-                                        text = "${d.rainProb}%",
+                                        text = (if (d.rainProb != -999) "${d.rainProb}%" else ""),
                                         textAlign = TextAlign.Right,
                                         fontSize = 10.sp,
                                         color = Color(getColor(R.color.text_color)),
@@ -1369,6 +1370,42 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 color = Color(getColor(R.color.text_color)),
                 textAlign = TextAlign.Right
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End // This aligns the content to the right
+            ) {
+                val annotatedText = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = Color.LightGray, fontSize = 8.sp)) {
+                        pushStringAnnotation(
+                            tag = "URL",
+                            annotation = "https://meteo.kristapsbe.lv/attribution?lang=${selectedLang.value}"
+                        )
+                        append(
+                            LangStrings.getTranslationString(
+                                selectedLang.value,
+                                Translation.DATA_SOURCES
+                            )
+                        )
+                        pop()
+                    }
+                }
+
+                ClickableText(
+                    text = annotatedText,
+                    onClick = { offset ->
+                        annotatedText.getStringAnnotations(
+                            tag = "URL",
+                            start = offset,
+                            end = offset
+                        )
+                            .firstOrNull()?.let { annotation ->
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                applicationContext.startActivity(intent)
+                            }
+                    }
+                )
+            }
         }
     }
 
