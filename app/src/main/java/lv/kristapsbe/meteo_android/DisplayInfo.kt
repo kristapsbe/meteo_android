@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -304,7 +305,7 @@ class DisplayInfo() {
         val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }
         if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
             val dt = convertTimestampToLocalDateTime(System.currentTimeMillis())
-            return if (hourlyRain[0].date.dayOfMonth == dt.date.dayOfMonth) {
+            return if (hourlyRain[0].date.day == dt.date.day) {
                 "${LangStrings.getTranslationString(lang, Translation.RAIN_EXPECTED_TODAY)} ${hourlyRain[0].date.hour}:00"
             } else {
                 "${LangStrings.getTranslationString(lang, Translation.RAIN_EXPECTED_TOMORROW)} ${hourlyRain[0].date.hour}:00"
