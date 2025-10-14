@@ -4,7 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
@@ -26,6 +26,7 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
 import java.time.ZonedDateTime
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlin.time.ExperimentalTime
 
 
 class WeatherPictogram(
@@ -266,6 +267,7 @@ class DisplayInfo() {
         )
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun convertTimestampToLocalDateTime(timestampMillis: Long): LocalDateTime {
         val instant = Instant.fromEpochMilliseconds(timestampMillis)
         val timeZone = TimeZone.currentSystemDefault()

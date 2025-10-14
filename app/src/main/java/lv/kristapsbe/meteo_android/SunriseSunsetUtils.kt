@@ -30,14 +30,14 @@ class SunriseSunsetUtils {
 
         private fun calculateJulianDay(t: LocalDateTime): Double {
             var year = t.year
-            var month = t.month.value
+            var month = t.month.ordinal
             if (month <= 2) {
                 year -= 1
                 month += 12
             }
             val a = floor(((1.0f)*year)/100)
             val b = 2 - a + floor(a/4)
-            return floor(365.25*(year + 4716)) + floor(30.6001 * (month+1)) + t.dayOfMonth + b - 1524.5
+            return floor(365.25*(year + 4716)) + floor(30.6001 * (month+1)) + t.day + b - 1524.5
         }
 
         private fun calcMeanObliquityOfEcliptic(t: Double): Double {
