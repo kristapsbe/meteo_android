@@ -25,3 +25,5 @@ https://developer.android.com/develop/ui/compose/mental-model
 [static weather icons](https://github.com/kristapsbe/WeatherNowIcons)
 
 [animated weather icons](https://github.com/kristapsbe/weather-icons) (production, filled, lottie or 256)
+
+todo: https://support.google.com/googleplay/android-developer/answer/10144311#prominent-disclosure - background location access needs a prominent disclosure
