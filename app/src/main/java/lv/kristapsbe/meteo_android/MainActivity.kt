@@ -110,6 +110,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.ln
 import kotlin.math.roundToInt
+import androidx.core.net.toUri
 
 
 interface WorkerCallback {
@@ -1404,7 +1405,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     fun ShowMetadataInfo(navigationBarHeight: Int) {
         Column(
             modifier = Modifier
-                .padding(20.dp, 0.dp, 20.dp, (5+navigationBarHeight).dp)
+                .padding(20.dp, 0.dp, 20.dp, 0.dp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -1459,13 +1460,32 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             end = offset
                         )
                             .firstOrNull()?.let { annotation ->
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                val intent = Intent(Intent.ACTION_VIEW, annotation.item.toUri())
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 applicationContext.startActivity(intent)
                             }
                     }
                 )
             }
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(20.dp, 20.dp, 20.dp, 20.dp),
+            color = Color(getColor(R.color.light_gray)),
+            thickness = 1.dp
+        )
+        Column(
+            modifier = Modifier
+                .padding(20.dp, 0.dp, 20.dp, (5+navigationBarHeight).dp)
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 8.sp,
+                lineHeight = 10.sp,
+                text = LangStrings.getTranslationString(selectedLang.value, Translation.DISCLOSURE),
+                color = Color(getColor(R.color.text_color)),
+                textAlign = TextAlign.Right
+            )
         }
     }
 
