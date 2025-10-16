@@ -45,6 +45,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -75,6 +76,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -180,6 +182,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private lateinit var enableExperimental: MutableState<Boolean>
     private lateinit var customLocationName: MutableState<String>
     private lateinit var privacyPolicyAccepted: MutableState<Boolean>
+    private lateinit var locationDisclosureAccepted: MutableState<Boolean>
 
     private var wasLastScrollNegative: Boolean = false
 
@@ -191,6 +194,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var locationSearchMode = mutableStateOf(false)
     private var doDisplaySettings = mutableStateOf(false)
     private var isPrivacyPolicyChecked = mutableStateOf(false)
+    private var isLocationDisclosureAccepted = mutableStateOf(false)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -215,8 +219,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         enableExperimental = mutableStateOf(prefs.getBoolean(Preference.ENABLE_EXPERIMENTAL_FORECASTS, false))
         customLocationName = mutableStateOf(prefs.getString(Preference.FORCE_CURRENT_LOCATION))
         privacyPolicyAccepted = mutableStateOf(prefs.getBoolean(Preference.PRIVACY_POLICY_ACCEPTED, false))
+        locationDisclosureAccepted = mutableStateOf(prefs.getBoolean(Preference.LOCATION_DISCLOSURE_ACCEPTED, false))
 
-        if (privacyPolicyAccepted.value) {
+        if (privacyPolicyAccepted.value && locationDisclosureAccepted.value) {
             setup()
         }
 
@@ -227,7 +232,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    if (privacyPolicyAccepted.value) {
+                    if (privacyPolicyAccepted.value && locationDisclosureAccepted.value) {
                         AllForecasts()
                     } else {
                         PrivacyPolicy()
@@ -353,8 +358,25 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     ) {
                         // TODO: move translations to class
                         val annotatedText = buildAnnotatedString {
-                            append(LangStrings.getTranslationString(selectedLang.value, Translation.PRIVACY_I_HAVE_READ))
-                            withStyle(style = SpanStyle(color = Color.Blue)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 14.sp,
+                                    fontFamily = FontFamily.Default,
+                                    fontWeight = FontWeight.Normal,
+                                    color = LocalContentColor.current
+                                )
+                            ) {
+                                append(LangStrings.getTranslationString(selectedLang.value, Translation.PRIVACY_I_HAVE_READ))
+                            }
+
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 14.sp,
+                                    fontFamily = FontFamily.Default,
+                                    fontWeight = FontWeight.Normal,
+                                    color = Color.Blue
+                                )
+                            ) {
                                 pushStringAnnotation(tag = "URL", annotation = "https://meteo.kristapsbe.lv/privacy-policy?lang=${selectedLang.value}")
                                 append(LangStrings.getTranslationString(selectedLang.value, Translation.PRIVACY_POLICY))
                                 pop()
@@ -377,12 +399,50 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         )
                     }
                 }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.1f)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                isLocationDisclosureAccepted.value = !isLocationDisclosureAccepted.value
+                            },
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painterResource(if (isLocationDisclosureAccepted.value) R.drawable.baseline_check_box_24 else R.drawable.baseline_check_box_outline_blank_24),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = LangStrings.getTranslationString(selectedLang.value, Translation.DISCLOSURE),
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.Default,
+                            fontWeight = FontWeight.Normal,
+                            color = LocalContentColor.current,
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .fillMaxWidth(),
+                        )
+                    }
+                }
                 Row {
                     Button(
                         onClick = {
-                            if (isPrivacyPolicyChecked.value) {
+                            if (isPrivacyPolicyChecked.value && isLocationDisclosureAccepted.value) {
                                 privacyPolicyAccepted.value = true
                                 prefs.setBoolean(Preference.PRIVACY_POLICY_ACCEPTED, privacyPolicyAccepted.value)
+                                locationDisclosureAccepted.value = true
+                                prefs.setBoolean(Preference.LOCATION_DISCLOSURE_ACCEPTED, locationDisclosureAccepted.value)
                                 finish()
                                 startActivity(intent)
                             }
@@ -1182,7 +1242,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                     fontSize = 27.sp,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Left,
-                                    color = Color(resources.getColor(R.color.text_color)),
+                                    color = Color(getColor(R.color.text_color)),
                                 )
                             }
                             Column(

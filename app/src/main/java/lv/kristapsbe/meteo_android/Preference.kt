@@ -2,6 +2,7 @@ package lv.kristapsbe.meteo_android
 
 import android.app.Activity.MODE_PRIVATE
 import android.content.Context
+import androidx.core.content.edit
 
 
 enum class Preference {
@@ -17,6 +18,7 @@ enum class Preference {
     LAST_LAT,
     LAST_LON,
     PRIVACY_POLICY_ACCEPTED,
+    LOCATION_DISCLOSURE_ACCEPTED,
     HAS_AURORA_NOTIFIED,
     AURORA_NOTIFICATION_ID,
     LAST_LONG_VERSION_CODE,
@@ -37,7 +39,7 @@ class AppPreferences(context: Context) {
     }
 
     fun setInt(pref: Preference, value: Int) {
-        prefs.edit().putInt(pref.toString(), value).apply()
+        prefs.edit { putInt(pref.toString(), value)}
     }
 
     fun getLong(pref: Preference, overrideDefault: Long = defaultLong): Long {
@@ -45,7 +47,7 @@ class AppPreferences(context: Context) {
     }
 
     fun setLong(pref: Preference, value: Long) {
-        prefs.edit().putLong(pref.toString(), value).apply()
+        prefs.edit { putLong(pref.toString(), value) }
     }
 
     fun getFloat(pref: Preference, overrideDefault: Float = defaultFloat): Float {
@@ -53,7 +55,7 @@ class AppPreferences(context: Context) {
     }
 
     fun setFloat(pref: Preference, value: Float) {
-        prefs.edit().putFloat(pref.toString(), value).apply()
+        prefs.edit { putFloat(pref.toString(), value) }
     }
 
     fun getBoolean(pref: Preference, overrideDefault: Boolean = defaultBoolean): Boolean {
@@ -61,7 +63,7 @@ class AppPreferences(context: Context) {
     }
 
     fun setBoolean(pref: Preference, value: Boolean) {
-        prefs.edit().putBoolean(pref.toString(), value).apply()
+        prefs.edit { putBoolean(pref.toString(), value) }
     }
 
     fun getString(pref: Preference, overrideDefault: String = defaultString): String {
@@ -69,6 +71,6 @@ class AppPreferences(context: Context) {
     }
 
     fun setString(pref: Preference, value: String) {
-        prefs.edit().putString(pref.toString(), value).apply()
+        prefs.edit { putString(pref.toString(), value) }
     }
 }

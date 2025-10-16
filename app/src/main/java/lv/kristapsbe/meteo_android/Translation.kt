@@ -29,6 +29,8 @@ enum class Translation {
     PRIVACY_POLICY,
     PRIVACY_CONTINUE,
 
+    DISCLOSURE,
+
     DATA_SOURCES
 }
 
@@ -167,6 +169,7 @@ class LangStrings {
                 Translation.PRIVACY_I_HAVE_READ to "I have read and agree to the ",
                 Translation.PRIVACY_POLICY to "Privacy Policy",
                 Translation.PRIVACY_CONTINUE to "Continue",
+                Translation.DISCLOSURE to "MeteoLatvia collects location data to enable the delivery of relevant weather forecast and severe weather warning information even when the app is closed or not in use.",
                 Translation.DATA_SOURCES to "Data sources"
             ),
             LANG_LV to hashMapOf(
@@ -190,6 +193,7 @@ class LangStrings {
                 Translation.PRIVACY_I_HAVE_READ to "Es esmu izlasījis un piekrītu ",
                 Translation.PRIVACY_POLICY to "Privātuma politikai",
                 Translation.PRIVACY_CONTINUE to "Turpināt",
+                Translation.DISCLOSURE to "Lietotne Meteo Latvija savāc atrašanās vietas datus, lai nodrošinātu atbilstošu laika prognožu un bīstamu laikapstākļu brīdinājumu piegādi, pat ja lietotne ir aizvērta vai netiek izmantota.",
                 Translation.DATA_SOURCES to "Datu avoti"
             )
         )
