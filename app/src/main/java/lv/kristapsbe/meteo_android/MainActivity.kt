@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -392,7 +391,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                             onClick = { offset ->
                                 annotatedText.getStringAnnotations(tag = "URL", start = offset, end = offset)
                                     .firstOrNull()?.let { annotation ->
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                        val intent = Intent(Intent.ACTION_VIEW,
+                                            annotation.item.toUri())
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                         applicationContext.startActivity(intent)
                                     }
