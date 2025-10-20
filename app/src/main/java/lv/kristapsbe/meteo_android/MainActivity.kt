@@ -9,8 +9,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -85,6 +87,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -109,7 +112,6 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.ln
 import kotlin.math.roundToInt
-import androidx.core.net.toUri
 
 
 interface WorkerCallback {
@@ -314,6 +316,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val workRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(20, TimeUnit.MINUTES).build()
         val workManager = WorkManager.getInstance(this)
         workManager.enqueueUniquePeriodicWork(PERIODIC_FORECAST_DL_NAME, ExistingPeriodicWorkPolicy.UPDATE, workRequest)
+
+        // TODO: I was considering requesting an exemption from battery optimization
+        // looks like trying high‑priority FCM messages, scheduled jobs instead of doing this could be better
     }
 
     @Composable
@@ -410,7 +415,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
-                                isLocationDisclosureAccepted.value = !isLocationDisclosureAccepted.value
+                                isLocationDisclosureAccepted.value =
+                                    !isLocationDisclosureAccepted.value
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
