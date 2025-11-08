@@ -107,6 +107,7 @@ import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -691,11 +692,12 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
         }
 
+        val zoneId = ZoneId.systemDefault()
         val sunTimes: SunRiseSunSet = calculate(
             displayInfo.value.getTodayForecast().date,
             displayInfo.value.lat,
             displayInfo.value.lon,
-            ZonedDateTime.now().offset.totalSeconds / 3600 // TODO: lock timezone (?)
+            ZonedDateTime.now(zoneId).offset.totalSeconds / 3600 // TODO: lock timezone (?)
         )
 
         Column {
@@ -954,7 +956,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         .horizontalScroll(scrollState)
                 ) {
                     var prevHDay: String? = null
-                    val tz = ZonedDateTime.now().offset.totalSeconds / 3600
+                    val zoneId = ZoneId.systemDefault()
+                    val tz = ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
 
                     var sunTimes: SunRiseSunSet = calculate(
                         displayInfo.value.getTodayForecast().date,

@@ -24,6 +24,7 @@ import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateIconMapping
 import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateAnimatedIconMapping
 import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LAT
 import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -156,11 +157,12 @@ class DisplayInfo() {
 
             intent.putExtra("do_show_widget_background", doShowWidgetBackground)
             if (doFixIconDayNight) {
+                val zoneId = ZoneId.systemDefault()
                 val sunTimes: SunRiseSunSet = calculate(
                     displayInfo.getTodayForecast().date,
                     prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble(),
                     prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble(),
-                    ZonedDateTime.now().offset.totalSeconds / 3600
+                    ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
                 )
 
                 intent.putExtra("icon_image", if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram(displayInfo.getTodayForecast().date, sunTimes) else displayInfo.getTodayForecast().pictogram.getPictogram(displayInfo.getTodayForecast().date, sunTimes))
