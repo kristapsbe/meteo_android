@@ -2,20 +2,21 @@ package lv.kristapsbe.meteo_android
 
 import android.Manifest
 import android.app.Activity.MODE_PRIVATE
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.work.Worker
+import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
@@ -28,7 +29,7 @@ import java.util.Locale
 import kotlin.coroutines.resume
 
 
-class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
+class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
     private suspend fun getLastLocation(context: Context): Set<Double> {
         val fusedLocationClient: FusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
@@ -63,87 +64,108 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         }
     }
 
-    override fun doWork(): Result {
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        val id = "DOWNLOAD_CHANNEL"
+        val title = "Meteo"
+        val text = "Atjaunina prognozes datus"
+
+        val name = "Datu lejupielāde"
+        val importance = NotificationManager.IMPORTANCE_LOW
+        val channel = NotificationChannel(id, name, importance)
+        val notificationManager: NotificationManager =
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+
+        val notification = NotificationCompat.Builder(applicationContext, id)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setSmallIcon(R.drawable.baseline_warning_24)
+            .setOngoing(true)
+            .build()
+
+        return ForegroundInfo(NOTIFICATION_ID, notification)
+    }
+
+    override suspend fun doWork(): Result {
         val app = applicationContext as MyApplication
         val callback = app.workerCallback
 
-        runBlocking {
-            val prefs = AppPreferences(app)
+        val prefs = AppPreferences(app)
 
-            val customLocationName = prefs.getString(Preference.FORCE_CURRENT_LOCATION)
-            val isAnimated = prefs.getBoolean(Preference.USE_ANIMATED_ICONS)
-            val enableExperimental = prefs.getBoolean(Preference.ENABLE_EXPERIMENTAL_FORECASTS)
-            val cityForecast: CityForecastData?
-            if (customLocationName != "") {
-                cityForecast = CityForecastDataDownloader.downloadDataCityName(app, locationName = customLocationName, isAnimated = isAnimated, enableExperimental = enableExperimental)
-            } else {
-                val location = getLastLocation(app)
-                cityForecast = CityForecastDataDownloader.downloadDataLatLon(app, lat = location.elementAt(0), lon = location.elementAt(1), isAnimated = isAnimated, enableExperimental = enableExperimental)
-                prefs.setFloat(Preference.LAST_LAT, location.elementAt(0).toFloat())
-                prefs.setFloat(Preference.LAST_LON, location.elementAt(1).toFloat())
+        val customLocationName = prefs.getString(Preference.FORCE_CURRENT_LOCATION)
+        val isAnimated = prefs.getBoolean(Preference.USE_ANIMATED_ICONS)
+        val enableExperimental = prefs.getBoolean(Preference.ENABLE_EXPERIMENTAL_FORECASTS)
+        val cityForecast: CityForecastData?
+        if (customLocationName != "") {
+            cityForecast = CityForecastDataDownloader.downloadDataCityName(app, locationName = customLocationName, isAnimated = isAnimated, enableExperimental = enableExperimental)
+        } else {
+            val location = getLastLocation(app)
+            cityForecast = CityForecastDataDownloader.downloadDataLatLon(app, lat = location.elementAt(0), lon = location.elementAt(1), isAnimated = isAnimated, enableExperimental = enableExperimental)
+            prefs.setFloat(Preference.LAST_LAT, location.elementAt(0).toFloat())
+            prefs.setFloat(Preference.LAST_LON, location.elementAt(1).toFloat())
+        }
+
+        callback?.onWorkerResult(cityForecast)
+
+        if (cityForecast != null) {
+            val currentLocale: Locale = Locale.getDefault()
+            val language: String = currentLocale.language
+
+            val selectedLang = prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
+
+            val displayInfo = DisplayInfo(cityForecast)
+            DisplayInfo.updateWidget(
+                applicationContext,
+                displayInfo
+            )
+            var warnings: HashSet<Int> = hashSetOf()
+            val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)
+            if (content != "") {
+                warnings = Json.decodeFromString<HashSet<Int>>(content)
             }
 
-            callback?.onWorkerResult(cityForecast)
-
-            if (cityForecast != null) {
-                val currentLocale: Locale = Locale.getDefault()
-                val language: String = currentLocale.language
-
-                val selectedLang = prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
-
-                val displayInfo = DisplayInfo(cityForecast)
-                DisplayInfo.updateWidget(
-                    applicationContext,
-                    displayInfo
-                )
-                var warnings: HashSet<Int> = hashSetOf()
-                val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)
-                if (content != "") {
-                    warnings = Json.decodeFromString<HashSet<Int>>(content)
+            // TODO: the file's just going to keep growing - I need to clear it out somehow
+            for (w in displayInfo.warnings) {
+                if (!w.ids.all { it in warnings }) {
+                    warnings.addAll(w.ids)
+                    showNotification(
+                        MainActivity.WEATHER_WARNINGS_CHANNEL_ID,
+                        w.ids[0],
+                        w.type[selectedLang] ?: "",
+                        w.getFullDescription(selectedLang),
+                        R.drawable.baseline_warning_24,
+                        IconMapping.warningIconMapping[w.intensity] ?: R.drawable.baseline_warning_yellow_24
+                    )
                 }
+            }
+            applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
+                fos.write(warnings.toString().toByteArray())
+            }
 
-                // TODO: the file's just going to keep growing - I need to clear it out somehow
-                for (w in displayInfo.warnings) {
-                    if (!w.ids.all { it in warnings }) {
-                        warnings.addAll(w.ids)
-                        showNotification(
-                            MainActivity.WEATHER_WARNINGS_CHANNEL_ID,
-                            w.ids[0],
-                            w.type[selectedLang] ?: "",
-                            w.getFullDescription(selectedLang),
-                            R.drawable.baseline_warning_24,
-                            IconMapping.warningIconMapping[w.intensity] ?: R.drawable.baseline_warning_yellow_24
-                        )
+            val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
+            if (doShowAurora) {
+                val hasAuroraNotificationBeenDisplayed = prefs.getBoolean(Preference.HAS_AURORA_NOTIFIED)
+                if (hasAuroraNotificationBeenDisplayed) {
+                    if (displayInfo.aurora.prob < AURORA_NOTIFICATION_THRESHOLD) {
+                        prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, false)
                     }
-                }
-                applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
-                    fos.write(warnings.toString().toByteArray())
-                }
-
-                val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
-                if (doShowAurora) {
-                    val hasAuroraNotificationBeenDisplayed = prefs.getBoolean(Preference.HAS_AURORA_NOTIFIED)
-                    if (hasAuroraNotificationBeenDisplayed) {
-                        if (displayInfo.aurora.prob < AURORA_NOTIFICATION_THRESHOLD) {
-                            prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, false)
-                        }
-                    } else if (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
-                        prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, true)
-                        // TODO: do I actually need to set a new id?
-                        val auroraNotifId = prefs.getInt(Preference.AURORA_NOTIFICATION_ID)
-                        showNotification(
-                            MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
-                            auroraNotifId,
-                            LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_TITLE),
-                            "${LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_DESCRIPTION)} ${displayInfo.aurora.prob}%.",
-                            R.drawable.baseline_star_border_24,
-                            R.drawable.baseline_star_border_green_24
-                        )
-                        prefs.setInt(Preference.AURORA_NOTIFICATION_ID, (auroraNotifId+1))
-                    }
+                } else if (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
+                    prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, true)
+                    // TODO: do I actually need to set a new id?
+                    val auroraNotifId = prefs.getInt(Preference.AURORA_NOTIFICATION_ID)
+                    showNotification(
+                        MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
+                        auroraNotifId,
+                        LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_TITLE),
+                        "${LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_DESCRIPTION)} ${displayInfo.aurora.prob}%." ,
+                        R.drawable.baseline_star_border_24,
+                        R.drawable.baseline_star_border_green_24
+                    )
+                    prefs.setInt(Preference.AURORA_NOTIFICATION_ID, (auroraNotifId+1))
                 }
             }
         }
+
         return Result.success()
     }
 
@@ -182,5 +204,9 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             }
             notify(id, builder.build())
         }
+    }
+
+    companion object {
+        private const val NOTIFICATION_ID = 1001
     }
 }
