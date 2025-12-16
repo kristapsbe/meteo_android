@@ -9,10 +9,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -199,6 +197,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var isPrivacyPolicyChecked = mutableStateOf(false)
     private var isLocationDisclosureAccepted = mutableStateOf(false)
 
+    fun privacyPolicyToggle() {
+        isPrivacyPolicyChecked.value = !isPrivacyPolicyChecked.value
+    }
+
+    fun locationDisclosureAcceptedToggle() {
+        isLocationDisclosureAccepted.value = !isLocationDisclosureAccepted.value
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // TODO: there's some sort of duplicate splash screen issue - https://developer.android.com/develop/ui/views/launch/splash-screen/migrate
@@ -238,7 +243,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     if (privacyPolicyAccepted.value && locationDisclosureAccepted.value) {
                         AllForecasts()
                     } else {
-                        PrivacyPolicy()
+                        PrivacyPolicy(::privacyPolicyToggle, ::locationDisclosureAcceptedToggle)
                     }
                 }
             }
@@ -323,7 +328,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     @Composable
-    fun PrivacyPolicy() {
+    fun PrivacyPolicy(privacyPolicyToggleFun: () -> Unit, locationDisclosureAcceptedToggleFun: () -> Unit) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -348,7 +353,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
-                                isPrivacyPolicyChecked.value = !isPrivacyPolicyChecked.value
+                                privacyPolicyToggleFun()
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -416,8 +421,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
-                                isLocationDisclosureAccepted.value =
-                                    !isLocationDisclosureAccepted.value
+                                locationDisclosureAcceptedToggleFun()
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
