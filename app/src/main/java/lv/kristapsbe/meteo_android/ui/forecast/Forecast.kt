@@ -111,18 +111,8 @@ fun AllForecasts(
             )
     ) {
         Settings(
-            doDisplaySettings,
-            selectedLang,
-            showWidgetBackground,
-            selectedTempType,
-            doShowAurora,
-            doFixIconDayNight,
-            useAltLayout,
-            useAnimatedIcons,
-            enableExperimental,
-            selectedLang.value,
+            mainActivity,
             prefs,
-            displayInfo,
             applicationContext
         )
         CurrentInfo(

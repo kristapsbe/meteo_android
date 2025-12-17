@@ -103,27 +103,27 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
     private lateinit var prefs: AppPreferences
 
-    private lateinit var selectedLang: MutableState<String>
-    private lateinit var selectedTempType: MutableState<String>
-    private lateinit var showWidgetBackground: MutableState<Boolean>
-    private lateinit var useAltLayout: MutableState<Boolean>
-    private lateinit var doShowAurora: MutableState<Boolean>
-    private lateinit var doFixIconDayNight: MutableState<Boolean>
-    private lateinit var useAnimatedIcons: MutableState<Boolean>
-    private lateinit var enableExperimental: MutableState<Boolean>
+    lateinit var selectedLang: MutableState<String>
+    lateinit var selectedTempType: MutableState<String>
+    lateinit var showWidgetBackground: MutableState<Boolean>
+    lateinit var useAltLayout: MutableState<Boolean>
+    lateinit var doShowAurora: MutableState<Boolean>
+    lateinit var doFixIconDayNight: MutableState<Boolean>
+    lateinit var useAnimatedIcons: MutableState<Boolean>
+    lateinit var enableExperimental: MutableState<Boolean>
     private lateinit var customLocationName: MutableState<String>
     private lateinit var privacyPolicyAccepted: MutableState<Boolean>
     private lateinit var locationDisclosureAccepted: MutableState<Boolean>
 
     var wasLastScrollNegative: Boolean = false
 
-    private var displayInfo = mutableStateOf(DisplayInfo())
+    var displayInfo = mutableStateOf(DisplayInfo())
     private var isLoading = mutableStateOf(false)
     var showFullHourly = mutableStateOf(false)
     var showFullDaily = mutableStateOf(listOf<LocalDateTime>())
     var showFullWarnings = mutableStateOf(setOf<Int>())
     private var locationSearchMode = mutableStateOf(false)
-    private var doDisplaySettings = mutableStateOf(false)
+    var doDisplaySettings = mutableStateOf(false)
     private var isPrivacyPolicyChecked = mutableStateOf(false)
     private var isLocationDisclosureAccepted = mutableStateOf(false)
 

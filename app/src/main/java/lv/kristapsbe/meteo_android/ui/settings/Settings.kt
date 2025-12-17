@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import lv.kristapsbe.meteo_android.AppPreferences
 import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.LangStrings
+import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.CELSIUS
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.nextLang
@@ -34,18 +35,8 @@ import lv.kristapsbe.meteo_android.Translation
 
 @Composable
 fun Settings(
-    doDisplaySettings: MutableState<Boolean>,
-    selectedLang: MutableState<String>,
-    showWidgetBackground: MutableState<Boolean>,
-    selectedTempType: MutableState<String>,
-    doShowAurora: MutableState<Boolean>,
-    doFixIconDayNight: MutableState<Boolean>,
-    useAltLayout: MutableState<Boolean>,
-    useAnimatedIcons: MutableState<Boolean>,
-    enableExperimental: MutableState<Boolean>,
-    currentSelectedLang: String,
+    mainActivity: MainActivity,
     prefs: AppPreferences,
-    displayInfo: MutableState<DisplayInfo>,
     applicationContext: Context
 ) {
     Column(
@@ -60,7 +51,7 @@ fun Settings(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) {
-                    doDisplaySettings.value = !doDisplaySettings.value
+                    mainActivity.doDisplaySettings.value = !mainActivity.doDisplaySettings.value
                 }
                 .padding(0.dp, 0.dp, 0.dp, 10.dp)
         ) {
@@ -70,81 +61,73 @@ fun Settings(
                 contentScale = ContentScale.Fit,
             )
         }
-        if (doDisplaySettings.value) {
+        if (mainActivity.doDisplaySettings.value) {
             SettingsEntryString(
                 Translation.SETTINGS_APP_LANGUAGE,
                 Preference.LANG,
-                selectedLang,
+                mainActivity.selectedLang,
                 nextLang,
                 LANG_EN,
-                currentSelectedLang,
                 prefs,
-                displayInfo,
+                mainActivity,
                 applicationContext
             )
             SettingsEntryBoolean(
                 Translation.SETTINGS_WIDGET_TRANSPARENCY,
                 Preference.DO_SHOW_WIDGET_BACKGROUND,
-                showWidgetBackground,
-                currentSelectedLang,
+                mainActivity.showWidgetBackground,
                 prefs,
-                displayInfo,
+                mainActivity,
                 applicationContext
             )
             SettingsEntryString(
                 Translation.SETTINGS_TEMPERATURE_UNIT,
                 Preference.TEMP_UNIT,
-                selectedTempType,
+                mainActivity.selectedTempType,
                 nextTemp,
                 CELSIUS,
-                currentSelectedLang,
                 prefs,
-                displayInfo,
+                mainActivity,
                 applicationContext
             )
             SettingsEntryBoolean(
                 Translation.SETTINGS_DISPLAY_AURORA,
                 Preference.DO_SHOW_AURORA,
-                doShowAurora,
-                currentSelectedLang,
+                mainActivity.doShowAurora,
                 prefs,
-                displayInfo,
+                mainActivity,
                 applicationContext
             )
             SettingsEntryBoolean(
                 Translation.SETTINGS_FIX_ICON_DAY_NIGHT,
                 Preference.DO_FIX_ICON_DAY_NIGHT,
-                doFixIconDayNight,
-                currentSelectedLang,
+                mainActivity.doFixIconDayNight,
                 prefs,
-                displayInfo,
+                mainActivity,
                 applicationContext
             )
             SettingsEntryBoolean(
                 Translation.SETTINGS_USE_ALT_LAYOUT,
                 Preference.USE_ALT_LAYOUT,
-                useAltLayout,
-                currentSelectedLang,
+                mainActivity.useAltLayout,
                 prefs,
-                displayInfo,
+                mainActivity,
                 applicationContext
             )
             SettingsEntryBoolean(
                 Translation.SETTINGS_USE_ANIMATED_ICONS,
                 Preference.USE_ANIMATED_ICONS,
-                useAnimatedIcons,
-                currentSelectedLang,
+                mainActivity.useAnimatedIcons,
                 prefs,
-                displayInfo,
+                mainActivity,
                 applicationContext
             )
             SettingsEntryBoolean(
                 Translation.SETTINGS_ENABLE_EXPERIMENTAL_FORECASTS,
                 Preference.ENABLE_EXPERIMENTAL_FORECASTS,
-                enableExperimental,
-                currentSelectedLang,
+                mainActivity.enableExperimental,
                 prefs,
-                displayInfo,
+                mainActivity,
                 applicationContext
             )
 
@@ -164,9 +147,8 @@ fun SettingsEntryBoolean(
     translation: Translation,
     preference: Preference,
     mutableState: MutableState<Boolean>,
-    selectedLang: String,
     prefs: AppPreferences,
-    displayInfo: MutableState<DisplayInfo>,
+    mainActivity: MainActivity,
     applicationContext: Context
 ) {
     Row(
@@ -180,7 +162,10 @@ fun SettingsEntryBoolean(
                 .fillMaxWidth(0.85f)
         ) {
             Text(
-                text = LangStrings.getTranslationString(selectedLang, translation),
+                text = LangStrings.getTranslationString(
+                    mainActivity.selectedLang.value,
+                    translation
+                ),
                 textAlign = TextAlign.Start,
                 color = colorResource(id = R.color.text_color),
             )
@@ -196,7 +181,7 @@ fun SettingsEntryBoolean(
                     prefs.setBoolean(preference, mutableState.value)
                     DisplayInfo.updateWidget(
                         applicationContext,
-                        displayInfo.value
+                        mainActivity.displayInfo.value
                     )
                 },
             horizontalAlignment = Alignment.CenterHorizontally
@@ -217,9 +202,8 @@ fun SettingsEntryString(
     mutableState: MutableState<String>,
     nextEntry: HashMap<String, String>,
     defaultVal: String,
-    selectedLang: String,
     prefs: AppPreferences,
-    displayInfo: MutableState<DisplayInfo>,
+    mainActivity: MainActivity,
     applicationContext: Context
 ) {
     Row(
@@ -233,7 +217,10 @@ fun SettingsEntryString(
                 .fillMaxWidth(0.85f)
         ) {
             Text(
-                text = LangStrings.getTranslationString(selectedLang, translation),
+                text = LangStrings.getTranslationString(
+                    mainActivity.selectedLang.value,
+                    translation
+                ),
                 textAlign = TextAlign.Start,
                 color = colorResource(id = R.color.text_color),
             )
@@ -249,7 +236,7 @@ fun SettingsEntryString(
                     prefs.setString(preference, mutableState.value)
                     DisplayInfo.updateWidget(
                         applicationContext,
-                        displayInfo.value
+                        mainActivity.displayInfo.value
                     )
                 },
             horizontalAlignment = Alignment.CenterHorizontally
