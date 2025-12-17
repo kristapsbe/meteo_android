@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,11 +25,20 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.R
+import lv.kristapsbe.meteo_android.ui.utils.ObserveLifecycle
+import androidx.compose.ui.res.colorResource
+import lv.kristapsbe.meteo_android.DisplayInfo
+import lv.kristapsbe.meteo_android.MainActivity
 
 
 @Composable
-fun ShowDailyInfo() {
-    val self = this
+fun DailyInfo(
+    mainActivity: MainActivity,
+    displayInfo: MutableState<DisplayInfo>,
+    showFullDaily: MutableState<List<LocalDateTime>>,
+    selectedLang: MutableState<String>,
+    selectedTempType: MutableState<String>
+) {
     Column(
         modifier = Modifier
             .padding(
@@ -44,7 +53,7 @@ fun ShowDailyInfo() {
         ObserveLifecycle { event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 coroutineScope.launch {
-                    self.showFullDaily.value = listOf<LocalDateTime>()
+                    mainActivity.showFullDaily.value = listOf<LocalDateTime>()
                 }
             }
         }
@@ -57,13 +66,13 @@ fun ShowDailyInfo() {
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
-                        val tmp = self.showFullDaily.value.toMutableList()
+                        val tmp = mainActivity.showFullDaily.value.toMutableList()
                         if (tmp.contains(d.date)) {
                             tmp.remove(d.date)
                         } else {
                             tmp.add(d.date)
                         }
-                        self.showFullDaily.value = tmp.toList()
+                        mainActivity.showFullDaily.value = tmp.toList()
                     }
             ) {
                 Column(
@@ -86,7 +95,7 @@ fun ShowDailyInfo() {
                                 fontSize = 27.sp,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Left,
-                                color = Color(getColor(R.color.text_color)),
+                                color = colorResource(id = R.color.text_color),
                             )
                         }
                         Column(
@@ -113,7 +122,7 @@ fun ShowDailyInfo() {
                                                 }.${dateStr.take(4)}",
                                                 fontSize = 10.sp,
                                                 textAlign = TextAlign.Center,
-                                                color = Color(getColor(R.color.text_color)),
+                                                color = colorResource(id = R.color.text_color),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                             )
@@ -133,7 +142,7 @@ fun ShowDailyInfo() {
                                                 )
                                             }",
                                             textAlign = TextAlign.Center,
-                                            color = Color(getColor(R.color.text_color)),
+                                            color = colorResource(id = R.color.text_color),
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                         )
@@ -196,7 +205,7 @@ fun ShowDailyInfo() {
                                         Text(
                                             text = "${d.rainAmount} mm",
                                             textAlign = TextAlign.Right,
-                                            color = Color(getColor(R.color.text_color)),
+                                            color = colorResource(id = R.color.text_color),
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                     }
@@ -223,7 +232,7 @@ fun ShowDailyInfo() {
                                     text = "${d.averageWind} — ${d.maxWind} m/s",
                                     textAlign = TextAlign.Center,
                                     fontSize = 10.sp,
-                                    color = Color(getColor(R.color.text_color)),
+                                    color = colorResource(id = R.color.text_color),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                 )
@@ -236,7 +245,7 @@ fun ShowDailyInfo() {
                                     text = (if (d.rainProb != -999) "${d.rainProb}%" else ""),
                                     textAlign = TextAlign.Right,
                                     fontSize = 10.sp,
-                                    color = Color(getColor(R.color.text_color)),
+                                    color = colorResource(id = R.color.text_color),
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -249,7 +258,7 @@ fun ShowDailyInfo() {
     HorizontalDivider(
         modifier = Modifier
             .padding(20.dp, 20.dp, 20.dp, 20.dp),
-        color = Color(getColor(R.color.light_gray)),
+        color = colorResource(id = R.color.light_gray),
         thickness = 1.dp
     )
 }

@@ -118,7 +118,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private var displayInfo = mutableStateOf(DisplayInfo())
     private var isLoading = mutableStateOf(false)
     private var showFullHourly = mutableStateOf(false)
-    private var showFullDaily = mutableStateOf(listOf<LocalDateTime>())
+    var showFullDaily = mutableStateOf(listOf<LocalDateTime>())
     private var showFullWarnings = mutableStateOf(setOf<Int>())
     private var locationSearchMode = mutableStateOf(false)
     private var doDisplaySettings = mutableStateOf(false)

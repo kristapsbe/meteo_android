@@ -26,7 +26,11 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_DL_NAM
 import lv.kristapsbe.meteo_android.R
 import lv.kristapsbe.meteo_android.ui.settings.Settings
 import androidx.compose.ui.res.colorResource
+import lv.kristapsbe.meteo_android.DisplayInfo
+import lv.kristapsbe.meteo_android.ui.forecast.components.CurrentInfo
+import lv.kristapsbe.meteo_android.ui.forecast.components.DailyInfo
 import lv.kristapsbe.meteo_android.ui.metadata.MetadataInfo
+import kotlin.Boolean
 import kotlin.String
 
 
@@ -100,10 +104,19 @@ fun AllForecasts() {
             displayInfo,
             applicationContext
         )
-        ShowCurrentInfo()
+        CurrentInfo(
+            locationSearchMode,
+            customLocationName,
+            selectedLang,
+            selectedTempType,
+            doShowAurora,
+            displayInfo,
+            prefs,
+            applicationContext
+        )
         ShowHourlyInfo()
         ShowWarningInfo()
-        ShowDailyInfo()
+        DailyInfo(mainActivity, displayInfo, showFullDaily, selectedLang, selectedTempType)
         MetadataInfo(
             selectedLang,
             displayInfo,

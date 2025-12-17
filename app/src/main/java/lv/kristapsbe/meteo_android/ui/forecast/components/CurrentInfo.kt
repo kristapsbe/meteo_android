@@ -1,5 +1,6 @@
 package lv.kristapsbe.meteo_android.ui.forecast.components
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -19,12 +20,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.ForecastRefreshWorker
 import lv.kristapsbe.meteo_android.HourlyForecast
 import lv.kristapsbe.meteo_android.LangStrings
@@ -51,10 +53,21 @@ import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.Translation
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import androidx.compose.ui.res.colorResource
+import lv.kristapsbe.meteo_android.AppPreferences
 
 
 @Composable
-fun ShowCurrentInfo() {
+fun CurrentInfo(
+    locationSearchMode: MutableState<Boolean>,
+    customLocationName: MutableState<String>,
+    selectedLang: MutableState<String>,
+    selectedTempType: MutableState<String>,
+    doShowAurora: MutableState<Boolean>,
+    displayInfo: MutableState<DisplayInfo>,
+    prefs: AppPreferences,
+    applicationContext: Context
+) {
     val focusManager = LocalFocusManager.current
 
     val focusRequester = remember { FocusRequester() }
@@ -103,7 +116,7 @@ fun ShowCurrentInfo() {
                     ),
                     fontSize = 100.sp,
                     textAlign = TextAlign.Center,
-                    color = Color(getColor(R.color.text_color)),
+                    color = colorResource(id = R.color.text_color),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -155,7 +168,7 @@ fun ShowCurrentInfo() {
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     textAlign = TextAlign.Left,
-                                    color = Color(getColor(R.color.text_color)),
+                                    color = colorResource(id = R.color.text_color),
                                     modifier = Modifier
                                         .clickable(
                                             interactionSource = remember { MutableInteractionSource() },
@@ -174,9 +187,9 @@ fun ShowCurrentInfo() {
                                     maxLines = 1,
                                     textStyle = TextStyle(
                                         fontSize = 20.sp,
-                                        color = Color(resources.getColor(R.color.text_color))
+                                        color = colorResource(id = R.color.text_color)
                                     ),
-                                    cursorBrush = SolidColor(Color(getColor(R.color.text_color))),
+                                    cursorBrush = SolidColor(colorResource(id = R.color.text_color)),
                                     keyboardActions = KeyboardActions(
                                         onDone = {
                                             locationSearchMode.value = false
@@ -249,7 +262,7 @@ fun ShowCurrentInfo() {
                     }",
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center,
-                    color = Color(getColor(R.color.text_color)),
+                    color = colorResource(id = R.color.text_color),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(0.dp, 0.dp, 20.dp, 0.dp),
@@ -265,7 +278,7 @@ fun ShowCurrentInfo() {
                 Text(
                     text = if (selectedLang.value == LANG_EN) "Aurora ${displayInfo.value.aurora.prob}% at ${displayInfo.value.aurora.time}" else "Ziemeļblāzma ${displayInfo.value.aurora.prob}% plkst. ${displayInfo.value.aurora.time}",
                     textAlign = TextAlign.Center,
-                    color = Color(getColor(R.color.text_color)),
+                    color = colorResource(id = R.color.text_color),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(0.dp, 10.dp, 0.dp, 0.dp)
@@ -276,7 +289,7 @@ fun ShowCurrentInfo() {
     HorizontalDivider(
         modifier = Modifier
             .padding(20.dp, 20.dp, 20.dp, 10.dp),
-        color = Color(getColor(R.color.light_gray)),
+        color = colorResource(id = R.color.light_gray),
         thickness = 1.dp
     )
 }
