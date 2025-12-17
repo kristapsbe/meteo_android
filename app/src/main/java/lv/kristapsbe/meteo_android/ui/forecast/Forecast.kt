@@ -128,26 +128,13 @@ fun AllForecasts(
             useAnimatedIcons
         )
         HourlyInfo(
-            mainActivity,
-            showFullHourly,
-            displayInfo,
-            selectedLang,
-            selectedTempType,
-            doFixIconDayNight,
-            useAnimatedIcons
+            mainActivity
         )
         WarningInfo(
-            mainActivity,
-            displayInfo,
-            selectedLang
+            mainActivity
         )
         DailyInfo(
-            mainActivity,
-            displayInfo,
-            showFullDaily,
-            selectedLang,
-            selectedTempType,
-            useAnimatedIcons
+            mainActivity
         )
         MetadataInfo(
             selectedLang,

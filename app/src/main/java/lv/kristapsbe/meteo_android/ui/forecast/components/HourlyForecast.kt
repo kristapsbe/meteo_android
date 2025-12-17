@@ -35,7 +35,6 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import kotlinx.coroutines.launch
-import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.HourlyForecast
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
@@ -49,13 +48,7 @@ import java.time.ZonedDateTime
 
 @Composable
 fun HourlyInfo(
-    mainActivity: MainActivity,
-    showFullHourly: MutableState<Boolean>,
-    displayInfo: MutableState<DisplayInfo>,
-    selectedLang: MutableState<String>,
-    selectedTempType: MutableState<String>,
-    doFixIconDayNight: MutableState<Boolean>,
-    useAnimatedIcons: MutableState<Boolean>
+    mainActivity: MainActivity
 ) {
     Row(
         modifier = Modifier
@@ -71,7 +64,7 @@ fun HourlyInfo(
             modifier = Modifier
                 .width(30.dp)
         ) {
-            if (showFullHourly.value) {
+            if (mainActivity.showFullHourly.value) {
                 Row(
                     modifier = Modifier
                         .height((23f * Resources.getSystem().displayMetrics.scaledDensity / Resources.getSystem().displayMetrics.density).dp)
@@ -114,7 +107,7 @@ fun HourlyInfo(
                 if (event == Lifecycle.Event.ON_RESUME) {
                     coroutineScope.launch {
                         scrollState.scrollTo(0)
-                        showFullHourly.value = false
+                        mainActivity.showFullHourly.value = false
                     }
                 }
             }
@@ -128,14 +121,14 @@ fun HourlyInfo(
                 val tz = ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
 
                 var sunTimes: SunRiseSunSet = calculate(
-                    displayInfo.value.getTodayForecast().date,
-                    displayInfo.value.lat,
-                    displayInfo.value.lon,
+                    mainActivity.displayInfo.value.getTodayForecast().date,
+                    mainActivity.displayInfo.value.lat,
+                    mainActivity.displayInfo.value.lon,
                     tz // TODO: lock timezone (?)
                 )
                 var prevH: Int? = null
 
-                for (h in displayInfo.value.getHourlyForecasts()) {
+                for (h in mainActivity.displayInfo.value.getHourlyForecasts()) {
                     if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
                         VerticalDivider(
                             color = colorResource(id = R.color.light_gray),
@@ -149,8 +142,8 @@ fun HourlyInfo(
                     if (prevHDay != h.getDayOfWeek()) {
                         sunTimes = calculate(
                             h.date,
-                            displayInfo.value.lat,
-                            displayInfo.value.lon,
+                            mainActivity.displayInfo.value.lat,
+                            mainActivity.displayInfo.value.lon,
                             tz // TODO: lock timezone (?)
                         )
                     }
@@ -182,7 +175,7 @@ fun HourlyInfo(
                                     .width(70.dp)
                                     .height(40.dp)
                                     .padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                useAnimatedIcons
+                                mainActivity.useAnimatedIcons
                             )
                         }
                     } else if (sunTimes.setH >= prevH && sunTimes.setH < h.date.hour) {
@@ -211,7 +204,7 @@ fun HourlyInfo(
                                     .width(70.dp)
                                     .height(40.dp)
                                     .padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                useAnimatedIcons
+                                mainActivity.useAnimatedIcons
                             )
                         }
                     }
@@ -240,22 +233,25 @@ fun HourlyInfo(
                                 .width(70.dp)
                                 .height(40.dp)
                                 .padding(3.dp, 3.dp, 3.dp, 0.dp),
-                            doFixIconDayNight,
-                            useAnimatedIcons
+                            mainActivity.doFixIconDayNight,
+                            mainActivity.useAnimatedIcons
                         )
 
                         Text(
-                            convertFromCtoDisplayTemp(h.currentTemp, selectedTempType.value),
+                            convertFromCtoDisplayTemp(
+                                h.currentTemp,
+                                mainActivity.selectedTempType.value
+                            ),
                             color = colorResource(id = R.color.text_color),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
                         )
-                        if (showFullHourly.value) {
+                        if (mainActivity.showFullHourly.value) {
                             for (tVal in listOf(
                                 "${h.rainAmount} mm",
                                 (if (h.stormProb != -999) "${h.stormProb}%" else ""),
                                 "${h.windSpeed} m/s",
-                                h.getDirection(selectedLang.value),
+                                h.getDirection(mainActivity.selectedLang.value),
                                 (if (h.uvIndex != -999) h.uvIndex.toString() else "")
                             )) {
                                 Text(

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -22,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.launch
-import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.IconMapping
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.R
@@ -30,11 +28,9 @@ import lv.kristapsbe.meteo_android.ui.utils.ObserveLifecycle
 
 @Composable
 fun WarningInfo(
-    mainActivity: MainActivity,
-    displayInfo: MutableState<DisplayInfo>,
-    selectedLang: MutableState<String>
+    mainActivity: MainActivity
 ) {
-    if (displayInfo.value.warnings.isNotEmpty()) {
+    if (mainActivity.displayInfo.value.warnings.isNotEmpty()) {
         val coroutineScope = rememberCoroutineScope()
 
         ObserveLifecycle { event ->
@@ -45,7 +41,7 @@ fun WarningInfo(
             }
         }
 
-        for (w in displayInfo.value.warnings) {
+        for (w in mainActivity.displayInfo.value.warnings) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -85,7 +81,7 @@ fun WarningInfo(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                w.type[selectedLang.value] ?: "",
+                                w.type[mainActivity.selectedLang.value] ?: "",
                                 fontSize = 20.sp,
                                 color = colorResource(id = R.color.text_color),
                                 modifier = Modifier
@@ -107,7 +103,7 @@ fun WarningInfo(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    w.getFullDescription(selectedLang.value),
+                                    w.getFullDescription(mainActivity.selectedLang.value),
                                     fontSize = 15.sp,
                                     color = colorResource(id = R.color.text_color),
                                 )

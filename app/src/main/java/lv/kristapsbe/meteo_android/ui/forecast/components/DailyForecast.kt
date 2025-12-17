@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -24,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
-import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.R
@@ -33,18 +31,13 @@ import lv.kristapsbe.meteo_android.ui.utils.ObserveLifecycle
 
 @Composable
 fun DailyInfo(
-    mainActivity: MainActivity,
-    displayInfo: MutableState<DisplayInfo>,
-    showFullDaily: MutableState<List<LocalDateTime>>,
-    selectedLang: MutableState<String>,
-    selectedTempType: MutableState<String>,
-    useAnimatedIcons: MutableState<Boolean>
+    mainActivity: MainActivity
 ) {
     Column(
         modifier = Modifier
             .padding(
                 20.dp,
-                if (displayInfo.value.warnings.isNotEmpty()) 20.dp else 10.dp,
+                if (mainActivity.displayInfo.value.warnings.isNotEmpty()) 20.dp else 10.dp,
                 20.dp,
                 20.dp
             )
@@ -59,7 +52,7 @@ fun DailyInfo(
             }
         }
 
-        for (d in displayInfo.value.dailyForecasts) {
+        for (d in mainActivity.displayInfo.value.dailyForecasts) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,7 +85,7 @@ fun DailyInfo(
                                 .padding(0.dp, 15.dp, 0.dp, 0.dp),
                         ) {
                             Text(
-                                text = d.getDayOfWeek(selectedLang.value),
+                                text = d.getDayOfWeek(mainActivity.selectedLang.value),
                                 fontSize = 27.sp,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Left,
@@ -112,7 +105,7 @@ fun DailyInfo(
                                     modifier = Modifier
                                         .fillMaxWidth(0.40f)
                                 ) {
-                                    if (showFullDaily.value.contains(d.date)) {
+                                    if (mainActivity.showFullDaily.value.contains(d.date)) {
                                         Row {
                                             val dateStr = d.date.toString()
                                             Text( // TODO: don't use substrings to format
@@ -134,12 +127,12 @@ fun DailyInfo(
                                             text = "${
                                                 convertFromCtoDisplayTemp(
                                                     d.tempMin,
-                                                    selectedTempType.value
+                                                    mainActivity.selectedTempType.value
                                                 )
                                             } — ${
                                                 convertFromCtoDisplayTemp(
                                                     d.tempMax,
-                                                    selectedTempType.value
+                                                    mainActivity.selectedTempType.value
                                                 )
                                             }",
                                             textAlign = TextAlign.Center,
@@ -173,7 +166,7 @@ fun DailyInfo(
                                                     .width(70.dp)
                                                     .height(40.dp)
                                                     .padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                                useAnimatedIcons
+                                                mainActivity.useAnimatedIcons
                                             )
                                         }
                                         Column(
@@ -191,7 +184,7 @@ fun DailyInfo(
                                                     .width(70.dp)
                                                     .height(40.dp)
                                                     .padding(3.dp, 3.dp, 3.dp, 0.dp),
-                                                useAnimatedIcons
+                                                mainActivity.useAnimatedIcons
                                             )
                                         }
                                     }
@@ -216,7 +209,7 @@ fun DailyInfo(
                             }
                         }
                     }
-                    if (showFullDaily.value.contains(d.date)) {
+                    if (mainActivity.showFullDaily.value.contains(d.date)) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
