@@ -9,7 +9,8 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 
 
-class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters) :
+    CoroutineWorker(context, workerParams) {
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val id = "UPDATE_CHANNEL"
         val title = "Meteo"
@@ -36,7 +37,8 @@ class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters
         val app = applicationContext as MyApplication
         val callback = app.workerCallback
 
-        val cityForecast = CityForecastDataDownloader.downloadDataLatLon(applicationContext, doDL = false)
+        val cityForecast =
+            CityForecastDataDownloader.downloadDataLatLon(applicationContext, doDL = false)
         callback?.onWorkerResult(cityForecast)
 
         if (cityForecast != null) {

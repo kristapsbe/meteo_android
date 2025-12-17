@@ -39,7 +39,7 @@ class AppPreferences(context: Context) {
     }
 
     fun setInt(pref: Preference, value: Int) {
-        prefs.edit { putInt(pref.toString(), value)}
+        prefs.edit { putInt(pref.toString(), value) }
     }
 
     fun getLong(pref: Preference, overrideDefault: Long = defaultLong): Long {

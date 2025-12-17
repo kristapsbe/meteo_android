@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.datetime.LocalDateTime
@@ -239,7 +240,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
             val currentVersionCode = packageInfo.longVersionCode
             if (lastVersionCode != currentVersionCode) {
-                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
+                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .build()
                 WorkManager.getInstance(applicationContext).enqueueUniqueWork(
                     SINGLE_FORECAST_DL_NAME,
                     ExistingWorkPolicy.REPLACE,
@@ -271,7 +274,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 Log.e("ERROR", "Failed to load data from storage: $e")
             }
         } else {
-            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .build()
             WorkManager.getInstance(applicationContext)
                 .enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
         }
@@ -279,85 +284,77 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val permissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { _ ->
-            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-            WorkManager.getInstance(applicationContext)
-                .enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .build()
+            WorkManager
+                .getInstance(applicationContext)
+                .enqueueUniqueWork(
+                    SINGLE_FORECAST_DL_NAME,
+                    ExistingWorkPolicy.REPLACE,
+                    workRequest
+                )
         }
 
-        val permissions = mutableListOf<String>()
-        if (
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val weatherWarningsChannel = NotificationChannel(
+                WEATHER_WARNINGS_CHANNEL_ID,
+                WEATHER_WARNINGS_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = WEATHER_WARNINGS_CHANNEL_DESCRIPTION
+            }
+
+            val auroraNotificationChannel = NotificationChannel(
+                AURORA_NOTIFICATION_CHANNEL_ID,
+                AURORA_NOTIFICATION_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = AURORA_NOTIFICATION_CHANNEL_DESCRIPTION
+            }
+
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(weatherWarningsChannel)
+            notificationManager.createNotificationChannel(auroraNotificationChannel)
+        }
+
+        val requiredPermissions = mutableListOf<String>()
+        if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
-        ) { // don't specifically care which granularity is granted, as long as we've got some sort of location access
-            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-            permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
-        }
-        if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
         ) {
-            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+            requiredPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
         }
-        if (permissions.isNotEmpty()) {
-            permissionRequest.launch(permissions.toTypedArray())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requiredPermissions.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
 
-        createNotificationChannel(
-            applicationContext,
-            WEATHER_WARNINGS_CHANNEL_ID,
-            WEATHER_WARNINGS_CHANNEL_NAME,
-            WEATHER_WARNINGS_CHANNEL_DESCRIPTION
-        )
-        createNotificationChannel(
-            applicationContext,
-            AURORA_NOTIFICATION_CHANNEL_ID,
-            AURORA_NOTIFICATION_CHANNEL_NAME,
-            AURORA_NOTIFICATION_CHANNEL_DESCRIPTION
-        )
+        if (requiredPermissions.isNotEmpty()) {
+            permissionRequest.launch(requiredPermissions.toTypedArray())
+        }
 
-        val workRequest =
-            PeriodicWorkRequestBuilder<ForecastRefreshWorker>(20, TimeUnit.MINUTES).build()
-        val workManager = WorkManager.getInstance(this)
-        workManager.enqueueUniquePeriodicWork(
+        val periodicWorkRequest =
+            PeriodicWorkRequestBuilder<ForecastRefreshWorker>(1, TimeUnit.HOURS)
+                .build()
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
             PERIODIC_FORECAST_DL_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
         )
-
-        // TODO: I was considering requesting an exemption from battery optimization
-        // looks like trying high‑priority FCM messages, scheduled jobs instead of doing this could be better
-    }
-
-    private fun createNotificationChannel(
-        context: Context,
-        channelId: String,
-        channelName: String,
-        channelDescription: String
-    ) {
-        val channel = NotificationChannel(
-            channelId,
-            channelName,
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            description = channelDescription
-        }
-        // Register the channel with the system
-        val notificationManager: NotificationManager =
-            context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
     }
 
     override fun onWorkerResult(cityForecast: CityForecastData?) {
-        displayInfo.value = DisplayInfo(cityForecast)
-        isLoading.value = false
+        if (cityForecast != null) {
+            displayInfo.value = DisplayInfo(cityForecast)
+            isLoading.value = false
+        }
     }
 }

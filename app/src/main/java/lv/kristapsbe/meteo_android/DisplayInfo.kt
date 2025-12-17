@@ -4,31 +4,30 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import kotlinx.datetime.LocalDate
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
+import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateAnimatedIconMapping
+import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateIconMapping
+import lv.kristapsbe.meteo_android.IconMapping.Companion.iconMapping
+import lv.kristapsbe.meteo_android.IconMapping.Companion.rainCodes
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getDirectionString
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getShortenedDayString
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.CELSIUS
+import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LAT
+import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
-import lv.kristapsbe.meteo_android.IconMapping.Companion.rainCodes
-import lv.kristapsbe.meteo_android.IconMapping.Companion.iconMapping
-import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateIconMapping
-import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateAnimatedIconMapping
-import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LAT
-import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 
 class WeatherPictogram(
@@ -39,7 +38,8 @@ class WeatherPictogram(
     }
 
     private fun getPictogram(currH: Int, riseH: Int, setH: Int): Int {
-        return iconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)] ?: R.drawable.unknown
+        return iconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)]
+            ?: R.drawable.unknown
     }
 
     fun getPictogram(t: LocalDateTime, sunTimes: SunRiseSunSet): Int {
@@ -51,7 +51,8 @@ class WeatherPictogram(
     }
 
     private fun getAlternatePictogram(currH: Int, riseH: Int, setH: Int): Int {
-        return alternateIconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)] ?: R.raw.not_available
+        return alternateIconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)]
+            ?: R.raw.not_available
     }
 
     fun getAlternatePictogram(t: LocalDateTime, sunTimes: SunRiseSunSet): Int {
@@ -63,7 +64,8 @@ class WeatherPictogram(
     }
 
     private fun getAlternateAnimatedPictogram(currH: Int, riseH: Int, setH: Int): Int {
-        return alternateAnimatedIconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)] ?: R.raw.not_available
+        return alternateAnimatedIconMapping[code.mod(1000) + (if (currH in (riseH + 1)..setH) 1000 else 2000)]
+            ?: R.raw.not_available
     }
 
     fun getAlternateAnimatedPictogram(t: LocalDateTime, sunTimes: SunRiseSunSet): Int {
@@ -104,7 +106,7 @@ class HourlyForecast(
     }
 
     fun getDirection(lang: String): String {
-        return getDirectionString(lang, windDirection/10)
+        return getDirectionString(lang, windDirection / 10)
     }
 }
 
@@ -134,10 +136,12 @@ class DisplayInfo() {
             val currentLocale: Locale = Locale.getDefault()
             val language: String = currentLocale.language
 
-            val lang = prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
+            val lang =
+                prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
             val selectedTemp = prefs.getString(Preference.TEMP_UNIT, CELSIUS)
             val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
-            val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
+            val doShowWidgetBackground =
+                prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
             val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
             val doFixIconDayNight = prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true)
             val useAnimatedIcons = prefs.getBoolean(Preference.USE_ANIMATED_ICONS, false)
@@ -151,9 +155,25 @@ class DisplayInfo() {
             intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
 
-            intent.putExtra("widget_text", convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp))
+            intent.putExtra(
+                "widget_text",
+                convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp)
+            )
             intent.putExtra("widget_location", displayInfo.city)
-            intent.putExtra("widget_feelslike", "${LangStrings.getTranslationString(lang, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}")
+            intent.putExtra(
+                "widget_feelslike",
+                "${
+                    LangStrings.getTranslationString(
+                        lang,
+                        Translation.FEELS_LIKE
+                    )
+                } ${
+                    convertFromCtoDisplayTemp(
+                        displayInfo.getTodayForecast().feelsLikeTemp,
+                        selectedTemp
+                    )
+                }"
+            )
 
             intent.putExtra("do_show_widget_background", doShowWidgetBackground)
             if (doFixIconDayNight) {
@@ -165,9 +185,21 @@ class DisplayInfo() {
                     ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
                 )
 
-                intent.putExtra("icon_image", if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram(displayInfo.getTodayForecast().date, sunTimes) else displayInfo.getTodayForecast().pictogram.getPictogram(displayInfo.getTodayForecast().date, sunTimes))
+                intent.putExtra(
+                    "icon_image",
+                    if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram(
+                        displayInfo.getTodayForecast().date,
+                        sunTimes
+                    ) else displayInfo.getTodayForecast().pictogram.getPictogram(
+                        displayInfo.getTodayForecast().date,
+                        sunTimes
+                    )
+                )
             } else {
-                intent.putExtra("icon_image", if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram() else displayInfo.getTodayForecast().pictogram.getPictogram())
+                intent.putExtra(
+                    "icon_image",
+                    if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram() else displayInfo.getTodayForecast().pictogram.getPictogram()
+                )
             }
             intent.putExtra("warning_red", displayInfo.warnings.any { it.intensity == "Red" })
             intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
@@ -175,7 +207,10 @@ class DisplayInfo() {
             intent.putExtra("rain_image", displayInfo.getRainIconId(useAnimatedIcons))
             intent.putExtra("rain", displayInfo.getWhenRainExpected(lang))
             intent.putExtra("uv_index", displayInfo.getTodayForecast().uvIndex.toString())
-            intent.putExtra("do_show_aurora", (doShowAurora && (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD)))
+            intent.putExtra(
+                "do_show_aurora",
+                (doShowAurora && (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD))
+            )
             intent.putExtra("do_show_uv", (displayInfo.getTodayForecast().uvIndex > 0))
             intent.putExtra("aurora", "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})")
             intent.putExtra("use_alt_layout", useAltLayout)
@@ -187,8 +222,10 @@ class DisplayInfo() {
     var city: String = ""
     var lat: Double = 0.0
     var lon: Double = 0.0
+
     // Today
     private var hourlyForecasts: List<HourlyForecast> = emptyList()
+
     // Tomorrow onwards
     var dailyForecasts: List<DailyForecast> = emptyList()
 
@@ -254,7 +291,9 @@ class DisplayInfo() {
 
             aurora = Aurora(
                 cityForecastData.aurora_probs.prob,
-                "${cityForecastData.aurora_probs.time.takeLast(4).take(2)}:${cityForecastData.aurora_probs.time.takeLast(2)}"
+                "${
+                    cityForecastData.aurora_probs.time.takeLast(4).take(2)
+                }:${cityForecastData.aurora_probs.time.takeLast(2)}"
             )
         }
     }
@@ -289,13 +328,25 @@ class DisplayInfo() {
         if (currHourlyForecasts.isNotEmpty()) {
             return currHourlyForecasts[0]
         }
-        return HourlyForecast(LocalDateTime(1970, 1, 1, 0, 0),"", 0, 0, 0, 0, 0, 0, 0, WeatherPictogram(0))
+        return HourlyForecast(
+            LocalDateTime(1970, 1, 1, 0, 0),
+            "",
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            WeatherPictogram(0)
+        )
     }
 
     // TODO: can this be merged into getWhenRainExpected (?)
     fun getRainIconId(useAlternativeIcon: Boolean): Int {
         val hForecasts = getHourlyForecasts()
-        val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }
+        val hourlyRain =
+            hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }
         if (hourlyRain.isNotEmpty()) {
             return if (useAlternativeIcon) hourlyRain[0].pictogram.getAlternatePictogram() else hourlyRain[0].pictogram.getPictogram()
         }
@@ -304,13 +355,24 @@ class DisplayInfo() {
 
     fun getWhenRainExpected(lang: String): String {
         val hForecasts = getHourlyForecasts()
-        val hourlyRain = hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }
+        val hourlyRain =
+            hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }
         if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
             val dt = convertTimestampToLocalDateTime(System.currentTimeMillis())
             return if (hourlyRain[0].date.day == dt.date.day) {
-                "${LangStrings.getTranslationString(lang, Translation.RAIN_EXPECTED_TODAY)} ${hourlyRain[0].date.hour}:00"
+                "${
+                    LangStrings.getTranslationString(
+                        lang,
+                        Translation.RAIN_EXPECTED_TODAY
+                    )
+                } ${hourlyRain[0].date.hour}:00"
             } else {
-                "${LangStrings.getTranslationString(lang, Translation.RAIN_EXPECTED_TOMORROW)} ${hourlyRain[0].date.hour}:00"
+                "${
+                    LangStrings.getTranslationString(
+                        lang,
+                        Translation.RAIN_EXPECTED_TOMORROW
+                    )
+                } ${hourlyRain[0].date.hour}:00"
             }
         }
         return ""

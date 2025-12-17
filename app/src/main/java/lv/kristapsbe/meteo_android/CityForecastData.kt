@@ -44,10 +44,15 @@ data class CityForecastData(
 class CityForecastDataDownloader {
     companion object {
         const val RESPONSE_FILE = "response.json"
+
         //private const val BASE_URL = "http://10.0.2.2:8000/api/v1/forecast/cities"
         private const val BASE_URL = "https://meteo.kristapsbe.lv/api/v1/forecast/cities"
 
-        private fun downloadData(ctx: Context, urlString: String, doDL: Boolean): CityForecastData? {
+        private fun downloadData(
+            ctx: Context,
+            urlString: String,
+            doDL: Boolean
+        ): CityForecastData? {
             var cityForecast: CityForecastData? = null
             if (doDL) {
                 try {
@@ -74,12 +79,33 @@ class CityForecastDataDownloader {
             return cityForecast
         }
 
-        fun downloadDataLatLon(ctx: Context, lat: Double = 56.9730, lon: Double = 24.1327, doDL: Boolean = true, isAnimated: Boolean = false, enableExperimental: Boolean = false): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL?lat=$lat&lon=$lon&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true&is_animated=$isAnimated&enable_experimental=$enableExperimental", doDL)
+        fun downloadDataLatLon(
+            ctx: Context,
+            lat: Double = 56.9730,
+            lon: Double = 24.1327,
+            doDL: Boolean = true,
+            isAnimated: Boolean = false,
+            enableExperimental: Boolean = false
+        ): CityForecastData? {
+            return downloadData(
+                ctx,
+                "$BASE_URL?lat=$lat&lon=$lon&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true&is_animated=$isAnimated&enable_experimental=$enableExperimental",
+                doDL
+            )
         }
 
-        fun downloadDataCityName(ctx: Context, locationName: String = "Riga", doDL: Boolean = true, isAnimated: Boolean = false, enableExperimental: Boolean = false): CityForecastData? {
-            return downloadData(ctx, "$BASE_URL/name?city_name=$locationName&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true&is_animated=$isAnimated&enable_experimental=$enableExperimental", doDL)
+        fun downloadDataCityName(
+            ctx: Context,
+            locationName: String = "Riga",
+            doDL: Boolean = true,
+            isAnimated: Boolean = false,
+            enableExperimental: Boolean = false
+        ): CityForecastData? {
+            return downloadData(
+                ctx,
+                "$BASE_URL/name?city_name=$locationName&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true&is_animated=$isAnimated&enable_experimental=$enableExperimental",
+                doDL
+            )
         }
 
         fun loadStringFromStorage(ctx: Context, fileName: String): String {

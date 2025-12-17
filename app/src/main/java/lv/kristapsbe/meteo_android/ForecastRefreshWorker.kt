@@ -29,15 +29,22 @@ import java.util.Locale
 import kotlin.coroutines.resume
 
 
-class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
+    CoroutineWorker(context, workerParams) {
     private suspend fun getLastLocation(context: Context): Set<Double> {
         val fusedLocationClient: FusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
 
         val lastLocation = suspendCancellableCoroutine { continuation ->
             if (
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
             ) {
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location ->
@@ -97,10 +104,21 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         val enableExperimental = prefs.getBoolean(Preference.ENABLE_EXPERIMENTAL_FORECASTS)
         val cityForecast: CityForecastData?
         if (customLocationName != "") {
-            cityForecast = CityForecastDataDownloader.downloadDataCityName(app, locationName = customLocationName, isAnimated = isAnimated, enableExperimental = enableExperimental)
+            cityForecast = CityForecastDataDownloader.downloadDataCityName(
+                app,
+                locationName = customLocationName,
+                isAnimated = isAnimated,
+                enableExperimental = enableExperimental
+            )
         } else {
             val location = getLastLocation(app)
-            cityForecast = CityForecastDataDownloader.downloadDataLatLon(app, lat = location.elementAt(0), lon = location.elementAt(1), isAnimated = isAnimated, enableExperimental = enableExperimental)
+            cityForecast = CityForecastDataDownloader.downloadDataLatLon(
+                app,
+                lat = location.elementAt(0),
+                lon = location.elementAt(1),
+                isAnimated = isAnimated,
+                enableExperimental = enableExperimental
+            )
             prefs.setFloat(Preference.LAST_LAT, location.elementAt(0).toFloat())
             prefs.setFloat(Preference.LAST_LON, location.elementAt(1).toFloat())
         }
@@ -111,7 +129,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             val currentLocale: Locale = Locale.getDefault()
             val language: String = currentLocale.language
 
-            val selectedLang = prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
+            val selectedLang =
+                prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
 
             val displayInfo = DisplayInfo(cityForecast)
             DisplayInfo.updateWidget(
@@ -119,7 +138,10 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                 displayInfo
             )
             var warnings: HashSet<Int> = hashSetOf()
-            val content = loadStringFromStorage(applicationContext, MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE)
+            val content = loadStringFromStorage(
+                applicationContext,
+                MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE
+            )
             if (content != "") {
                 warnings = Json.decodeFromString<HashSet<Int>>(content)
             }
@@ -134,17 +156,22 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                         w.type[selectedLang] ?: "",
                         w.getFullDescription(selectedLang),
                         R.drawable.baseline_warning_24,
-                        IconMapping.warningIconMapping[w.intensity] ?: R.drawable.baseline_warning_yellow_24
+                        IconMapping.warningIconMapping[w.intensity]
+                            ?: R.drawable.baseline_warning_yellow_24
                     )
                 }
             }
-            applicationContext.openFileOutput(MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE, MODE_PRIVATE).use { fos ->
+            applicationContext.openFileOutput(
+                MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE,
+                MODE_PRIVATE
+            ).use { fos ->
                 fos.write(warnings.toString().toByteArray())
             }
 
             val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
             if (doShowAurora) {
-                val hasAuroraNotificationBeenDisplayed = prefs.getBoolean(Preference.HAS_AURORA_NOTIFIED)
+                val hasAuroraNotificationBeenDisplayed =
+                    prefs.getBoolean(Preference.HAS_AURORA_NOTIFIED)
                 if (hasAuroraNotificationBeenDisplayed) {
                     if (displayInfo.aurora.prob < AURORA_NOTIFICATION_THRESHOLD) {
                         prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, false)
@@ -156,12 +183,20 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
                     showNotification(
                         MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
                         auroraNotifId,
-                        LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_TITLE),
-                        "${LangStrings.getTranslationString(selectedLang, Translation.NOTIFICATION_AURORA_DESCRIPTION)} ${displayInfo.aurora.prob}%." ,
+                        LangStrings.getTranslationString(
+                            selectedLang,
+                            Translation.NOTIFICATION_AURORA_TITLE
+                        ),
+                        "${
+                            LangStrings.getTranslationString(
+                                selectedLang,
+                                Translation.NOTIFICATION_AURORA_DESCRIPTION
+                            )
+                        } ${displayInfo.aurora.prob}%.",
                         R.drawable.baseline_star_border_24,
                         R.drawable.baseline_star_border_green_24
                     )
-                    prefs.setInt(Preference.AURORA_NOTIFICATION_ID, (auroraNotifId+1))
+                    prefs.setInt(Preference.AURORA_NOTIFICATION_ID, (auroraNotifId + 1))
                 }
             }
         }
@@ -169,7 +204,14 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
         return Result.success()
     }
 
-    private fun showNotification(notifChannel: String, id: Int, title: String, description: String, smallIcon: Int, largeIcon: Int) {
+    private fun showNotification(
+        notifChannel: String,
+        id: Int,
+        title: String,
+        description: String,
+        smallIcon: Int,
+        largeIcon: Int
+    ) {
         val intent = Intent(applicationContext, MainActivity::class.java)
         //if (notifChannel == MainActivity.WEATHER_WARNINGS_CHANNEL_ID) {
         //    intent.putExtra(
@@ -185,14 +227,15 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) : 
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val builder: NotificationCompat.Builder = NotificationCompat.Builder(applicationContext, notifChannel)
-            .setSmallIcon(smallIcon)
-            .setLargeIcon(Icon.createWithResource(applicationContext, largeIcon))
-            .setContentTitle(title)
-            .setContentText(description)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
+        val builder: NotificationCompat.Builder =
+            NotificationCompat.Builder(applicationContext, notifChannel)
+                .setSmallIcon(smallIcon)
+                .setLargeIcon(Icon.createWithResource(applicationContext, largeIcon))
+                .setContentTitle(title)
+                .setContentText(description)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
 
         with(NotificationManagerCompat.from(applicationContext)) {
             if (ActivityCompat.checkSelfPermission(

@@ -18,9 +18,15 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_NO_DL_
 
 
 class ForecastWidget : AppWidgetProvider() {
-    override fun onAppWidgetOptionsChanged(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, newOptions: Bundle) {
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle
+    ) {
         val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>().build()
-        WorkManager.getInstance(context).enqueueUniqueWork(SINGLE_FORECAST_NO_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+        WorkManager.getInstance(context)
+            .enqueueUniqueWork(SINGLE_FORECAST_NO_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
 
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
     }
@@ -32,7 +38,26 @@ class ForecastWidget : AppWidgetProvider() {
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null, null, null, false, false, false, null, "", false, null, false, false, false, -1, "")
+            updateAppWidget(
+                context,
+                appWidgetManager,
+                appWidgetId,
+                null,
+                null,
+                null,
+                false,
+                false,
+                false,
+                null,
+                "",
+                false,
+                null,
+                false,
+                false,
+                false,
+                -1,
+                ""
+            )
         }
     }
 
@@ -63,17 +88,37 @@ class ForecastWidget : AppWidgetProvider() {
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, text, locationText, feelsLikeText, warningRed, warningOrange, warningYellow, icon, rain ?: "", doShowWidgetBackground, aurora, useAltLayout, doShowAurora, doShowUV, rainImage, uvIndex)
+                updateAppWidget(
+                    context,
+                    appWidgetManager,
+                    appWidgetId,
+                    text,
+                    locationText,
+                    feelsLikeText,
+                    warningRed,
+                    warningOrange,
+                    warningYellow,
+                    icon,
+                    rain ?: "",
+                    doShowWidgetBackground,
+                    aurora,
+                    useAltLayout,
+                    doShowAurora,
+                    doShowUV,
+                    rainImage,
+                    uvIndex
+                )
             }
         }
     }
 
     override fun onEnabled(context: Context) {
         val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>().build()
-        WorkManager.getInstance(context).enqueueUniqueWork(SINGLE_FORECAST_NO_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+        WorkManager.getInstance(context)
+            .enqueueUniqueWork(SINGLE_FORECAST_NO_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
     }
 
-    override fun onDisabled(context: Context) { }
+    override fun onDisabled(context: Context) {}
 }
 
 internal fun updateAppWidget(
@@ -103,7 +148,14 @@ internal fun updateAppWidget(
     val views = RemoteViews(context.packageName, R.layout.forecast_widget)
     views.setOnClickPendingIntent(R.id.widget, pendingIntent)
 
-    views.setInt(R.id.widget, "setBackgroundColor", ContextCompat.getColor(context, if (doShowWidgetBackground) R.color.sky_blue else R.color.transparent))
+    views.setInt(
+        R.id.widget,
+        "setBackgroundColor",
+        ContextCompat.getColor(
+            context,
+            if (doShowWidgetBackground) R.color.sky_blue else R.color.transparent
+        )
+    )
     if (text != null) {
         views.setTextViewText(R.id.appwidget_text, text)
     }
@@ -159,7 +211,10 @@ internal fun updateAppWidget(
     if (warningOrange) {
         views.setImageViewResource(R.id.orange_warning, R.drawable.baseline_warning_orange_24)
         views.setImageViewResource(R.id.orange_warning_small, R.drawable.baseline_warning_orange_24)
-        views.setImageViewResource(R.id.orange_warning_small_alt, R.drawable.baseline_warning_orange_24)
+        views.setImageViewResource(
+            R.id.orange_warning_small_alt,
+            R.drawable.baseline_warning_orange_24
+        )
     } else {
         views.setImageViewResource(R.id.orange_warning, 0)
         views.setImageViewResource(R.id.orange_warning_small, 0)
@@ -168,7 +223,10 @@ internal fun updateAppWidget(
     if (warningYellow) {
         views.setImageViewResource(R.id.yellow_warning, R.drawable.baseline_warning_yellow_24)
         views.setImageViewResource(R.id.yellow_warning_small, R.drawable.baseline_warning_yellow_24)
-        views.setImageViewResource(R.id.yellow_warning_small_alt, R.drawable.baseline_warning_yellow_24)
+        views.setImageViewResource(
+            R.id.yellow_warning_small_alt,
+            R.drawable.baseline_warning_yellow_24
+        )
     } else {
         views.setImageViewResource(R.id.yellow_warning, 0)
         views.setImageViewResource(R.id.yellow_warning_small, 0)
