@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -16,38 +17,59 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import lv.kristapsbe.meteo_android.AppPreferences
+import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.ForecastRefreshWorker
+import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_DL_NAME
 import lv.kristapsbe.meteo_android.R
-import lv.kristapsbe.meteo_android.ui.settings.Settings
-import androidx.compose.ui.res.colorResource
-import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.ui.forecast.components.CurrentInfo
 import lv.kristapsbe.meteo_android.ui.forecast.components.DailyInfo
+import lv.kristapsbe.meteo_android.ui.forecast.components.HourlyInfo
+import lv.kristapsbe.meteo_android.ui.forecast.components.WarningInfo
 import lv.kristapsbe.meteo_android.ui.metadata.MetadataInfo
-import kotlin.Boolean
-import kotlin.String
+import lv.kristapsbe.meteo_android.ui.settings.Settings
 
 
 @Composable
-fun AllForecasts() {
-    val self = this
+fun AllForecasts(
+    mainActivity: MainActivity,
+    isLoading: MutableState<Boolean>,
+    doDisplaySettings: MutableState<Boolean>,
+    selectedLang: MutableState<String>,
+    showWidgetBackground: MutableState<Boolean>,
+    selectedTempType: MutableState<String>,
+    doShowAurora: MutableState<Boolean>,
+    resources: Resources,
+    doFixIconDayNight: MutableState<Boolean>,
+    useAltLayout: MutableState<Boolean>,
+    useAnimatedIcons: MutableState<Boolean>,
+    enableExperimental: MutableState<Boolean>,
+    displayInfo: MutableState<DisplayInfo>,
+    locationSearchMode: MutableState<Boolean>,
+    customLocationName: MutableState<String>,
+    prefs: AppPreferences,
+    applicationContext: android.content.Context,
+    showFullHourly: MutableState<Boolean>,
+    showFullDaily: MutableState<List<kotlinx.datetime.LocalDateTime>>
+) {
     val scrollState = rememberScrollState()
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (available.y > 0 && !wasLastScrollNegative) {
-                    wasLastScrollNegative = true
+                if (available.y > 0 && !mainActivity.wasLastScrollNegative) {
+                    mainActivity.wasLastScrollNegative = true
                     if (!isLoading.value) {
                         isLoading.value = true
                         val workRequest =
                             OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
-                        WorkManager.getInstance(self).enqueueUniqueWork(
+                        WorkManager.getInstance(mainActivity).enqueueUniqueWork(
                             SINGLE_FORECAST_DL_NAME,
                             ExistingWorkPolicy.REPLACE,
                             workRequest
@@ -61,7 +83,7 @@ fun AllForecasts() {
                 consumed: Velocity,
                 available: Velocity
             ): Velocity {
-                wasLastScrollNegative = false
+                mainActivity.wasLastScrollNegative = false
                 return super.onPostFling(consumed, available)
             }
         }
@@ -71,7 +93,6 @@ fun AllForecasts() {
     // Get the current configuration (including orientation)
     val configuration = LocalConfiguration.current
     var navigationBarHeight = 0
-    val resources = resources
     val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
     if (resourceId > 0) {
         val displayMetrics = Resources.getSystem().displayMetrics
@@ -99,7 +120,7 @@ fun AllForecasts() {
             useAltLayout,
             useAnimatedIcons,
             enableExperimental,
-            currentSelectedLang,
+            selectedLang.value,
             prefs,
             displayInfo,
             applicationContext
@@ -112,11 +133,32 @@ fun AllForecasts() {
             doShowAurora,
             displayInfo,
             prefs,
-            applicationContext
+            applicationContext,
+            doFixIconDayNight,
+            useAnimatedIcons
         )
-        ShowHourlyInfo()
-        ShowWarningInfo()
-        DailyInfo(mainActivity, displayInfo, showFullDaily, selectedLang, selectedTempType)
+        HourlyInfo(
+            mainActivity,
+            showFullHourly,
+            displayInfo,
+            selectedLang,
+            selectedTempType,
+            doFixIconDayNight,
+            useAnimatedIcons
+        )
+        WarningInfo(
+            mainActivity,
+            displayInfo,
+            selectedLang
+        )
+        DailyInfo(
+            mainActivity,
+            displayInfo,
+            showFullDaily,
+            selectedLang,
+            selectedTempType,
+            useAnimatedIcons
+        )
         MetadataInfo(
             selectedLang,
             displayInfo,

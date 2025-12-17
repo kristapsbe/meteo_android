@@ -30,6 +30,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.ui.forecast.AllForecasts
 import lv.kristapsbe.meteo_android.ui.privacy.PrivacyPolicy
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import java.util.Locale
@@ -113,13 +114,13 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     private lateinit var privacyPolicyAccepted: MutableState<Boolean>
     private lateinit var locationDisclosureAccepted: MutableState<Boolean>
 
-    private var wasLastScrollNegative: Boolean = false
+    var wasLastScrollNegative: Boolean = false
 
     private var displayInfo = mutableStateOf(DisplayInfo())
     private var isLoading = mutableStateOf(false)
-    private var showFullHourly = mutableStateOf(false)
+    var showFullHourly = mutableStateOf(false)
     var showFullDaily = mutableStateOf(listOf<LocalDateTime>())
-    private var showFullWarnings = mutableStateOf(setOf<Int>())
+    var showFullWarnings = mutableStateOf(setOf<Int>())
     private var locationSearchMode = mutableStateOf(false)
     private var doDisplaySettings = mutableStateOf(false)
     private var isPrivacyPolicyChecked = mutableStateOf(false)
@@ -192,7 +193,27 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     if (privacyPolicyAccepted.value && locationDisclosureAccepted.value) {
-                        AllForecasts()
+                        AllForecasts(
+                            this,
+                            isLoading,
+                            doDisplaySettings,
+                            selectedLang,
+                            showWidgetBackground,
+                            selectedTempType,
+                            doShowAurora,
+                            resources,
+                            doFixIconDayNight,
+                            useAltLayout,
+                            useAnimatedIcons,
+                            enableExperimental,
+                            displayInfo,
+                            locationSearchMode,
+                            customLocationName,
+                            prefs,
+                            applicationContext,
+                            showFullHourly,
+                            showFullDaily
+                        )
                     } else {
                         PrivacyPolicy(
                             ::privacyPolicyToggle,

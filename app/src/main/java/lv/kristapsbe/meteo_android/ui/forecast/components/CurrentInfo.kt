@@ -28,6 +28,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import lv.kristapsbe.meteo_android.AppPreferences
 import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.ForecastRefreshWorker
 import lv.kristapsbe.meteo_android.HourlyForecast
@@ -53,8 +55,6 @@ import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.Translation
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import androidx.compose.ui.res.colorResource
-import lv.kristapsbe.meteo_android.AppPreferences
 
 
 @Composable
@@ -66,7 +66,9 @@ fun CurrentInfo(
     doShowAurora: MutableState<Boolean>,
     displayInfo: MutableState<DisplayInfo>,
     prefs: AppPreferences,
-    applicationContext: Context
+    applicationContext: Context,
+    doFixIconDayNight: MutableState<Boolean>,
+    useAnimatedIcons: MutableState<Boolean>
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -103,7 +105,9 @@ fun CurrentInfo(
                         .fillMaxHeight(),
                     Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.8f)
+                        .fillMaxHeight(0.8f),
+                    doFixIconDayNight,
+                    useAnimatedIcons
                 )
             }
             Column(

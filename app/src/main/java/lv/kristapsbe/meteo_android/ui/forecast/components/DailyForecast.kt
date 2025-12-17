@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -23,12 +24,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
+import lv.kristapsbe.meteo_android.DisplayInfo
+import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.R
 import lv.kristapsbe.meteo_android.ui.utils.ObserveLifecycle
-import androidx.compose.ui.res.colorResource
-import lv.kristapsbe.meteo_android.DisplayInfo
-import lv.kristapsbe.meteo_android.MainActivity
 
 
 @Composable
@@ -37,7 +37,8 @@ fun DailyInfo(
     displayInfo: MutableState<DisplayInfo>,
     showFullDaily: MutableState<List<LocalDateTime>>,
     selectedLang: MutableState<String>,
-    selectedTempType: MutableState<String>
+    selectedTempType: MutableState<String>,
+    useAnimatedIcons: MutableState<Boolean>
 ) {
     Column(
         modifier = Modifier
@@ -171,7 +172,8 @@ fun DailyInfo(
                                                 Modifier
                                                     .width(70.dp)
                                                     .height(40.dp)
-                                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                                    .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                                useAnimatedIcons
                                             )
                                         }
                                         Column(
@@ -188,7 +190,8 @@ fun DailyInfo(
                                                 Modifier
                                                     .width(70.dp)
                                                     .height(40.dp)
-                                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                                    .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                                useAnimatedIcons
                                             )
                                         }
                                     }

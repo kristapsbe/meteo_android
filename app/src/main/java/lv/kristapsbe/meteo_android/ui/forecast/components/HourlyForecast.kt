@@ -16,13 +16,14 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,18 +35,28 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import kotlinx.coroutines.launch
+import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.HourlyForecast
+import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.R
 import lv.kristapsbe.meteo_android.SunRiseSunSet
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
+import lv.kristapsbe.meteo_android.ui.utils.ObserveLifecycle
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
 
 @Composable
-fun ShowHourlyInfo() {
-    val self = this
+fun HourlyInfo(
+    mainActivity: MainActivity,
+    showFullHourly: MutableState<Boolean>,
+    displayInfo: MutableState<DisplayInfo>,
+    selectedLang: MutableState<String>,
+    selectedTempType: MutableState<String>,
+    doFixIconDayNight: MutableState<Boolean>,
+    useAnimatedIcons: MutableState<Boolean>
+) {
     Row(
         modifier = Modifier
             .padding(20.dp, 10.dp, 20.dp, 0.dp)
@@ -53,7 +64,7 @@ fun ShowHourlyInfo() {
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) {
-                self.showFullHourly.value = !self.showFullHourly.value
+                mainActivity.showFullHourly.value = !mainActivity.showFullHourly.value
             }
     ) {
         Column(
@@ -127,7 +138,7 @@ fun ShowHourlyInfo() {
                 for (h in displayInfo.value.getHourlyForecasts()) {
                     if (prevHDay != null && prevHDay != h.getDayOfWeek()) {
                         VerticalDivider(
-                            color = Color(getColor(R.color.light_gray)),
+                            color = colorResource(id = R.color.light_gray),
                             modifier = Modifier.height(80.dp),
                             thickness = 1.dp
                         )
@@ -155,7 +166,7 @@ fun ShowHourlyInfo() {
                             Text(
                                 "${sunTimes.riseH}:${sunTimes.riseMin}",
                                 fontSize = 20.sp,
-                                color = Color(getColor(R.color.text_color)),
+                                color = colorResource(id = R.color.text_color),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                             )
@@ -170,7 +181,8 @@ fun ShowHourlyInfo() {
                                 Modifier
                                     .width(70.dp)
                                     .height(40.dp)
-                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                    .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                useAnimatedIcons
                             )
                         }
                     } else if (sunTimes.setH >= prevH && sunTimes.setH < h.date.hour) {
@@ -183,7 +195,7 @@ fun ShowHourlyInfo() {
                             Text(
                                 "${sunTimes.setH}:${sunTimes.setMin}",
                                 fontSize = 20.sp,
-                                color = Color(getColor(R.color.text_color)),
+                                color = colorResource(id = R.color.text_color),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                             )
@@ -198,7 +210,8 @@ fun ShowHourlyInfo() {
                                 Modifier
                                     .width(70.dp)
                                     .height(40.dp)
-                                    .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                    .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                                useAnimatedIcons
                             )
                         }
                     }
@@ -211,7 +224,7 @@ fun ShowHourlyInfo() {
                         Text(
                             "${h.time.take(2)}:${h.time.takeLast(2)}",
                             fontSize = 20.sp,
-                            color = Color(getColor(R.color.text_color)),
+                            color = colorResource(id = R.color.text_color),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
                         )
@@ -226,12 +239,14 @@ fun ShowHourlyInfo() {
                             Modifier
                                 .width(70.dp)
                                 .height(40.dp)
-                                .padding(3.dp, 3.dp, 3.dp, 0.dp)
+                                .padding(3.dp, 3.dp, 3.dp, 0.dp),
+                            doFixIconDayNight,
+                            useAnimatedIcons
                         )
 
                         Text(
                             convertFromCtoDisplayTemp(h.currentTemp, selectedTempType.value),
-                            color = Color(getColor(R.color.text_color)),
+                            color = colorResource(id = R.color.text_color),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
                         )
@@ -245,7 +260,7 @@ fun ShowHourlyInfo() {
                             )) {
                                 Text(
                                     tVal,
-                                    color = Color(getColor(R.color.text_color)),
+                                    color = colorResource(id = R.color.text_color),
                                     fontSize = 16.sp,
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.Center,
@@ -261,7 +276,7 @@ fun ShowHourlyInfo() {
     HorizontalDivider(
         modifier = Modifier
             .padding(20.dp, 20.dp, 20.dp, 10.dp),
-        color = Color(getColor(R.color.light_gray)),
+        color = colorResource(id = R.color.light_gray),
         thickness = 1.dp
     )
 }
@@ -271,7 +286,9 @@ fun ShowHourlyIcon(
     h: HourlyForecast,
     sunTimes: SunRiseSunSet,
     modifier: Modifier,
-    imageModifier: Modifier
+    imageModifier: Modifier,
+    doFixIconDayNight: MutableState<Boolean>,
+    useAnimatedIcons: MutableState<Boolean>
 ) {
     ShowIcon(
         if (doFixIconDayNight.value) h.pictogram.getAlternateAnimatedPictogram(
@@ -283,12 +300,19 @@ fun ShowHourlyIcon(
             sunTimes
         ) else h.pictogram.getPictogram(),
         modifier,
-        imageModifier
+        imageModifier,
+        useAnimatedIcons
     )
 }
 
 @Composable
-fun ShowIcon(lottieIcon: Int, imageIcon: Int, modifier: Modifier, imageModifier: Modifier) {
+fun ShowIcon(
+    lottieIcon: Int,
+    imageIcon: Int,
+    modifier: Modifier,
+    imageModifier: Modifier,
+    useAnimatedIcons: MutableState<Boolean>
+) {
     if (useAnimatedIcons.value) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(lottieIcon))
         val progress by animateLottieCompositionAsState(

@@ -10,32 +10,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.launch
+import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.IconMapping
+import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.R
-import kotlin.collections.minus
-import kotlin.collections.plus
+import lv.kristapsbe.meteo_android.ui.utils.ObserveLifecycle
 
 @Composable
-fun ShowWarningInfo() {
-    val self = this
+fun WarningInfo(
+    mainActivity: MainActivity,
+    displayInfo: MutableState<DisplayInfo>,
+    selectedLang: MutableState<String>
+) {
     if (displayInfo.value.warnings.isNotEmpty()) {
         val coroutineScope = rememberCoroutineScope()
 
         ObserveLifecycle { event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 coroutineScope.launch {
-                    self.showFullWarnings.value = setOf<Int>()
+                    mainActivity.showFullWarnings.value = setOf<Int>()
                 }
             }
         }
@@ -48,10 +53,10 @@ fun ShowWarningInfo() {
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
-                        if (self.showFullWarnings.value.contains(w.ids[0])) {
-                            self.showFullWarnings.value -= w.ids[0]
+                        if (mainActivity.showFullWarnings.value.contains(w.ids[0])) {
+                            mainActivity.showFullWarnings.value -= w.ids[0]
                         } else {
-                            self.showFullWarnings.value += w.ids[0]
+                            mainActivity.showFullWarnings.value += w.ids[0]
                         }
                     },
             ) {
@@ -82,14 +87,14 @@ fun ShowWarningInfo() {
                             Text(
                                 w.type[selectedLang.value] ?: "",
                                 fontSize = 20.sp,
-                                color = Color(getColor(R.color.text_color)),
+                                color = colorResource(id = R.color.text_color),
                                 modifier = Modifier
                                     .padding(0.dp, 10.dp, 0.dp, 10.dp),
                             )
                         }
                     }
 
-                    if (self.showFullWarnings.value.contains(w.ids[0])) {
+                    if (mainActivity.showFullWarnings.value.contains(w.ids[0])) {
                         Row(
                             modifier = Modifier
                                 .padding(0.dp, 0.dp, 0.dp, 10.dp)
@@ -104,7 +109,7 @@ fun ShowWarningInfo() {
                                 Text(
                                     w.getFullDescription(selectedLang.value),
                                     fontSize = 15.sp,
-                                    color = Color(getColor(R.color.text_color)),
+                                    color = colorResource(id = R.color.text_color),
                                 )
                             }
                         }
@@ -115,7 +120,7 @@ fun ShowWarningInfo() {
         HorizontalDivider(
             modifier = Modifier
                 .padding(20.dp, 10.dp, 20.dp, 0.dp),
-            color = Color(getColor(R.color.light_gray)),
+            color = colorResource(id = R.color.light_gray),
             thickness = 1.dp
         )
     }
