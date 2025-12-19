@@ -8,7 +8,9 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.graphics.drawable.Icon
+import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -18,6 +20,7 @@ import androidx.work.WorkerParameters
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
@@ -90,10 +93,24 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
             .setOngoing(true)
             .build()
 
-        return ForegroundInfo(NOTIFICATION_ID, notification)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(
+                NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+            )
+        } else {
+            ForegroundInfo(NOTIFICATION_ID, notification)
+        }
     }
 
     override suspend fun doWork(): Result {
+        try {
+            setForeground(getForegroundInfo())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         val app = applicationContext as MyApplication
         val callback = app.workerCallback
 
@@ -165,7 +182,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
                 MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE,
                 MODE_PRIVATE
             ).use { fos ->
-                fos.write(warnings.toString().toByteArray())
+                fos.write(Json.encodeToString(warnings).toByteArray())
             }
 
             val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)

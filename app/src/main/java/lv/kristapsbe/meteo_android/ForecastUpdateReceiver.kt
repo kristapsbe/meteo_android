@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 
@@ -18,7 +19,9 @@ class ForecastUpdateReceiver : BroadcastReceiver() {
             scheduleNextUpdate(context)
         } else {
             // Enqueue the work
-            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 MainActivity.PERIODIC_FORECAST_DL_NAME,
                 ExistingWorkPolicy.REPLACE,
