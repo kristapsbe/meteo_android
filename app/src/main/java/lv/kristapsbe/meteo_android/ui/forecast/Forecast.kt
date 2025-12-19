@@ -20,14 +20,17 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import lv.kristapsbe.meteo_android.AppPreferences
 import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.ForecastRefreshWorker
 import lv.kristapsbe.meteo_android.MainActivity
-import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_DL_NAME
+import lv.kristapsbe.meteo_android.MainActivity.Companion.IS_EXPEDITED_KEY
+import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_WORK_NAME
 import lv.kristapsbe.meteo_android.R
 import lv.kristapsbe.meteo_android.ui.forecast.components.CurrentInfo
 import lv.kristapsbe.meteo_android.ui.forecast.components.DailyInfo
@@ -41,23 +44,17 @@ import lv.kristapsbe.meteo_android.ui.settings.Settings
 fun AllForecasts(
     mainActivity: MainActivity,
     isLoading: MutableState<Boolean>,
-    doDisplaySettings: MutableState<Boolean>,
     selectedLang: MutableState<String>,
-    showWidgetBackground: MutableState<Boolean>,
     selectedTempType: MutableState<String>,
     doShowAurora: MutableState<Boolean>,
     resources: Resources,
     doFixIconDayNight: MutableState<Boolean>,
-    useAltLayout: MutableState<Boolean>,
     useAnimatedIcons: MutableState<Boolean>,
-    enableExperimental: MutableState<Boolean>,
     displayInfo: MutableState<DisplayInfo>,
     locationSearchMode: MutableState<Boolean>,
     customLocationName: MutableState<String>,
     prefs: AppPreferences,
-    applicationContext: android.content.Context,
-    showFullHourly: MutableState<Boolean>,
-    showFullDaily: MutableState<List<kotlinx.datetime.LocalDateTime>>
+    applicationContext: android.content.Context
 ) {
     val scrollState = rememberScrollState()
     val nestedScrollConnection = remember {
@@ -68,9 +65,12 @@ fun AllForecasts(
                     if (!isLoading.value) {
                         isLoading.value = true
                         val workRequest =
-                            OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                            OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
+                                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                                .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
+                                .build()
                         WorkManager.getInstance(mainActivity).enqueueUniqueWork(
-                            SINGLE_FORECAST_DL_NAME,
+                            SINGLE_WORK_NAME,
                             ExistingWorkPolicy.REPLACE,
                             workRequest
                         )

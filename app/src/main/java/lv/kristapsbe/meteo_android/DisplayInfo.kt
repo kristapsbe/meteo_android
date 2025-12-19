@@ -3,7 +3,6 @@ package lv.kristapsbe.meteo_android
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
@@ -130,7 +129,6 @@ class DisplayInfo() {
     companion object {
         fun updateWidget(context: Context, displayInfo: DisplayInfo) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
-
             val prefs = AppPreferences(context)
 
             val currentLocale: Locale = Locale.getDefault()
@@ -150,33 +148,10 @@ class DisplayInfo() {
             val widget = ComponentName(context, ForecastWidget::class.java)
             val widgetIds = appWidgetManager.getAppWidgetIds(widget)
 
-            // Create an intent to update the widget
-            val intent = Intent(context, ForecastWidget::class.java)
-            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
+            val widgetText = convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp)
+            val feelsLikeText = "${LangStrings.getTranslationString(lang, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}"
 
-            intent.putExtra(
-                "widget_text",
-                convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp)
-            )
-            intent.putExtra("widget_location", displayInfo.city)
-            intent.putExtra(
-                "widget_feelslike",
-                "${
-                    LangStrings.getTranslationString(
-                        lang,
-                        Translation.FEELS_LIKE
-                    )
-                } ${
-                    convertFromCtoDisplayTemp(
-                        displayInfo.getTodayForecast().feelsLikeTemp,
-                        selectedTemp
-                    )
-                }"
-            )
-
-            intent.putExtra("do_show_widget_background", doShowWidgetBackground)
-            if (doFixIconDayNight) {
+            val iconImage = if (doFixIconDayNight) {
                 val zoneId = ZoneId.systemDefault()
                 val sunTimes: SunRiseSunSet = calculate(
                     displayInfo.getTodayForecast().date,
@@ -184,38 +159,35 @@ class DisplayInfo() {
                     prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble(),
                     ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
                 )
-
-                intent.putExtra(
-                    "icon_image",
-                    if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram(
-                        displayInfo.getTodayForecast().date,
-                        sunTimes
-                    ) else displayInfo.getTodayForecast().pictogram.getPictogram(
-                        displayInfo.getTodayForecast().date,
-                        sunTimes
-                    )
-                )
+                if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram(displayInfo.getTodayForecast().date, sunTimes)
+                else displayInfo.getTodayForecast().pictogram.getPictogram(displayInfo.getTodayForecast().date, sunTimes)
             } else {
-                intent.putExtra(
-                    "icon_image",
-                    if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram() else displayInfo.getTodayForecast().pictogram.getPictogram()
+                if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram()
+                else displayInfo.getTodayForecast().pictogram.getPictogram()
+            }
+
+            for (appWidgetId in widgetIds) {
+                updateAppWidget(
+                    context,
+                    appWidgetManager,
+                    appWidgetId,
+                    widgetText,
+                    displayInfo.city,
+                    feelsLikeText,
+                    displayInfo.warnings.any { it.intensity == "Red" },
+                    displayInfo.warnings.any { it.intensity == "Orange" },
+                    displayInfo.warnings.any { it.intensity == "Yellow" },
+                    iconImage,
+                    displayInfo.getWhenRainExpected(lang),
+                    doShowWidgetBackground,
+                    "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})",
+                    useAltLayout,
+                    (doShowAurora && (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD)),
+                    (displayInfo.getTodayForecast().uvIndex > 0),
+                    displayInfo.getRainIconId(useAnimatedIcons),
+                    displayInfo.getTodayForecast().uvIndex.toString()
                 )
             }
-            intent.putExtra("warning_red", displayInfo.warnings.any { it.intensity == "Red" })
-            intent.putExtra("warning_orange", displayInfo.warnings.any { it.intensity == "Orange" })
-            intent.putExtra("warning_yellow", displayInfo.warnings.any { it.intensity == "Yellow" })
-            intent.putExtra("rain_image", displayInfo.getRainIconId(useAnimatedIcons))
-            intent.putExtra("rain", displayInfo.getWhenRainExpected(lang))
-            intent.putExtra("uv_index", displayInfo.getTodayForecast().uvIndex.toString())
-            intent.putExtra(
-                "do_show_aurora",
-                (doShowAurora && (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD))
-            )
-            intent.putExtra("do_show_uv", (displayInfo.getTodayForecast().uvIndex > 0))
-            intent.putExtra("aurora", "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})")
-            intent.putExtra("use_alt_layout", useAltLayout)
-
-            context.sendBroadcast(intent)
         }
     }
 

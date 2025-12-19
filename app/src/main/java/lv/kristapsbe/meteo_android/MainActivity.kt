@@ -1,6 +1,7 @@
 package lv.kristapsbe.meteo_android
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -21,11 +22,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
-import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.Constraints
+import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
@@ -35,7 +37,6 @@ import lv.kristapsbe.meteo_android.ui.forecast.AllForecasts
 import lv.kristapsbe.meteo_android.ui.privacy.PrivacyPolicy
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 import kotlin.math.ln
 import kotlin.math.roundToInt
 
@@ -64,9 +65,9 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
 
-        const val PERIODIC_FORECAST_DL_NAME = "periodic_forecast_download"
-        const val SINGLE_FORECAST_DL_NAME = "single_forecast_download"
-        const val SINGLE_FORECAST_NO_DL_NAME = "single_forecast_refresh_no_dl"
+        const val SINGLE_WORK_NAME = "single_forecast_work"
+        const val WIDGET_WORK_NAME = "widget_forecast_work"
+        const val IS_EXPEDITED_KEY = "is_expedited"
 
         const val LANG_EN = "en"
         const val LANG_LV = "lv"
@@ -150,12 +151,7 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // TODO: there's some sort of duplicate splash screen issue - https://developer.android.com/develop/ui/views/launch/splash-screen/migrate
-        // TODO: I should fix up the labeling for screen readers - https://support.google.com/accessibility/android/answer/7158690#zippy=
-
         super.onCreate(savedInstanceState)
-
-        //showFullWarnings.value += intent.getIntExtra("opened_from_notification", -1)
 
         val currentLocale: Locale = Locale.getDefault()
         val language: String = currentLocale.language
@@ -197,23 +193,17 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                         AllForecasts(
                             this,
                             isLoading,
-                            doDisplaySettings,
                             selectedLang,
-                            showWidgetBackground,
                             selectedTempType,
                             doShowAurora,
                             resources,
                             doFixIconDayNight,
-                            useAltLayout,
                             useAnimatedIcons,
-                            enableExperimental,
                             displayInfo,
                             locationSearchMode,
                             customLocationName,
                             prefs,
-                            applicationContext,
-                            showFullHourly,
-                            showFullDaily
+                            applicationContext
                         )
                     } else {
                         PrivacyPolicy(
@@ -235,6 +225,14 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         val app = applicationContext as MyApplication
         app.workerCallback = this
 
+        // Generic way to prune ALL work associated with the app.
+        // This ensures no legacy workers (under any name) can collide with the new unified worker.
+        WorkManager.getInstance(applicationContext).cancelAllWork()
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
         val lastVersionCode = prefs.getLong(Preference.LAST_LONG_VERSION_CODE)
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
@@ -242,9 +240,11 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             if (lastVersionCode != currentVersionCode) {
                 val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .setConstraints(constraints)
+                    .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
                     .build()
                 WorkManager.getInstance(applicationContext).enqueueUniqueWork(
-                    SINGLE_FORECAST_DL_NAME,
+                    SINGLE_WORK_NAME,
                     ExistingWorkPolicy.REPLACE,
                     workRequest
                 )
@@ -254,7 +254,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             e.printStackTrace()
         }
 
-        // Fixing the back button / gesture
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 moveTaskToBack(true)
@@ -276,24 +275,44 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         } else {
             val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
                 .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .setConstraints(constraints)
+                .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
                 .build()
             WorkManager.getInstance(applicationContext)
-                .enqueueUniqueWork(SINGLE_FORECAST_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+                .enqueueUniqueWork(SINGLE_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+        }
+
+        val backgroundLocationRequest = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                Log.d("PERM", "Background location granted")
+            }
         }
 
         val permissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
-        ) { _ ->
+        ) { permissions ->
             val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
                 .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .setConstraints(constraints)
+                .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
                 .build()
             WorkManager
                 .getInstance(applicationContext)
                 .enqueueUniqueWork(
-                    SINGLE_FORECAST_DL_NAME,
+                    SINGLE_WORK_NAME,
                     ExistingWorkPolicy.REPLACE,
                     workRequest
                 )
+
+            // Check if foreground location was granted, if so, ask for background
+            val locationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true ||
+                    permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+
+            if (locationGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                backgroundLocationRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -339,16 +358,27 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         if (requiredPermissions.isNotEmpty()) {
             permissionRequest.launch(requiredPermissions.toTypedArray())
+        } else {
+            // Permissions already granted, check for background location
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                backgroundLocationRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
+        }
+        
+        // Android 13+ Check for Exact Alarm permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Log.w("ALARM", "App cannot schedule exact alarms")
+            }
         }
 
-        val periodicWorkRequest =
-            PeriodicWorkRequestBuilder<ForecastRefreshWorker>(1, TimeUnit.HOURS)
-                .build()
-        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
-            PERIODIC_FORECAST_DL_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            periodicWorkRequest
-        )
+        ForecastUpdateReceiver.scheduleNextUpdate(applicationContext)
     }
 
     override fun onWorkerResult(cityForecast: CityForecastData?) {

@@ -8,13 +8,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
+import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
-import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_NO_DL_NAME
+import kotlinx.serialization.json.Json
+import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
+import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_WORK_NAME
 
 
 class ForecastWidget : AppWidgetProvider() {
@@ -24,9 +29,12 @@ class ForecastWidget : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle
     ) {
-        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>().build()
+        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setInputData(Data.Builder().putBoolean(MainActivity.IS_EXPEDITED_KEY, true).build())
+            .build()
         WorkManager.getInstance(context)
-            .enqueueUniqueWork(SINGLE_FORECAST_NO_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+            .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest)
 
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
     }
@@ -36,92 +44,40 @@ class ForecastWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        // There may be multiple widgets active, so update all of them
-        for (appWidgetId in appWidgetIds) {
-            updateAppWidget(
-                context,
-                appWidgetManager,
-                appWidgetId,
-                null,
-                null,
-                null,
-                false,
-                false,
-                false,
-                null,
-                "",
-                false,
-                null,
-                false,
-                false,
-                false,
-                -1,
-                ""
-            )
-        }
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-
-        // Handle the broadcast from the Worker
-        if (intent.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE) {
-            val text = intent.getStringExtra("widget_text")
-            val locationText = intent.getStringExtra("widget_location")
-            val feelsLikeText = intent.getStringExtra("widget_feelslike")
-            val icon = intent.getIntExtra("icon_image", R.drawable.clear1)
-            val warningRed = intent.getBooleanExtra("warning_red", false)
-            val warningOrange = intent.getBooleanExtra("warning_orange", false)
-            val warningYellow = intent.getBooleanExtra("warning_yellow", false)
-            val rain = intent.getStringExtra("rain")
-            val uvIndex = intent.getStringExtra("uv_index")
-            val rainImage = intent.getIntExtra("rain_image", R.drawable.clear1)
-            val aurora = intent.getStringExtra("aurora")
-            val doShowAurora = intent.getBooleanExtra("do_show_aurora", false)
-            val doShowUV = intent.getBooleanExtra("do_show_uv", false)
-
-            val doShowWidgetBackground = intent.getBooleanExtra("do_show_widget_background", false)
-            val useAltLayout = intent.getBooleanExtra("use_alt_layout", false)
-
-            val appWidgetManager = AppWidgetManager.getInstance(context)
-            val widget = ComponentName(context, ForecastWidget::class.java)
-            val appWidgetIds = appWidgetManager.getAppWidgetIds(widget)
-
-            for (appWidgetId in appWidgetIds) {
-                updateAppWidget(
-                    context,
-                    appWidgetManager,
-                    appWidgetId,
-                    text,
-                    locationText,
-                    feelsLikeText,
-                    warningRed,
-                    warningOrange,
-                    warningYellow,
-                    icon,
-                    rain ?: "",
-                    doShowWidgetBackground,
-                    aurora,
-                    useAltLayout,
-                    doShowAurora,
-                    doShowUV,
-                    rainImage,
-                    uvIndex
-                )
+        // Instead of resetting to nulls, try to load the last known data
+        try {
+            val content = CityForecastDataDownloader.loadStringFromStorage(context, RESPONSE_FILE)
+            if (content.isNotEmpty()) {
+                val data = Json.decodeFromString<CityForecastData>(content)
+                val displayInfo = DisplayInfo(data)
+                DisplayInfo.updateWidget(context, displayInfo)
+            } else {
+                // If no data, trigger a refresh
+                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>()
+                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .setInputData(Data.Builder().putBoolean(MainActivity.IS_EXPEDITED_KEY, true).build())
+                    .build()
+                WorkManager.getInstance(context)
+                    .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest)
             }
+        } catch (e: Exception) {
+            Log.e("WIDGET", "Failed to update widget onUpdate: $e")
         }
     }
 
     override fun onEnabled(context: Context) {
-        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>().build()
+        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setInputData(Data.Builder().putBoolean(MainActivity.IS_EXPEDITED_KEY, true).build())
+            .build()
         WorkManager.getInstance(context)
-            .enqueueUniqueWork(SINGLE_FORECAST_NO_DL_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+            .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest)
     }
 
     override fun onDisabled(context: Context) {}
 }
 
-internal fun updateAppWidget(
+fun updateAppWidget(
     context: Context,
     appWidgetManager: AppWidgetManager,
     appWidgetId: Int,
@@ -156,9 +112,12 @@ internal fun updateAppWidget(
             if (doShowWidgetBackground) R.color.sky_blue else R.color.transparent
         )
     )
-    if (text != null) {
-        views.setTextViewText(R.id.appwidget_text, text)
-    }
+    
+    // Safety check: if text is null, the widget is in an uninitialized state
+    if (text == null) return
+
+    views.setTextViewText(R.id.appwidget_text, text)
+    
     if (locationText != null) {
         views.setTextViewText(R.id.appwidget_location, locationText)
         views.setTextViewText(R.id.appwidget_location_small, locationText)

@@ -3,10 +3,12 @@ package lv.kristapsbe.meteo_android
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import kotlinx.coroutines.delay
 
 
 class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters) :
@@ -34,6 +36,18 @@ class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters
     }
 
     override suspend fun doWork(): Result {
+        val isExpedited = inputData.getBoolean(MainActivity.IS_EXPEDITED_KEY, false)
+
+        if (isExpedited) {
+            try {
+                setForeground(getForegroundInfo())
+                // Prevent ACTION_STOP_FOREGROUND crash on Samsung
+                delay(2000)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         val app = applicationContext as MyApplication
         val callback = app.workerCallback
 

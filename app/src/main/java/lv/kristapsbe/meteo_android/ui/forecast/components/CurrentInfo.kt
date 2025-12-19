@@ -36,8 +36,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import lv.kristapsbe.meteo_android.AppPreferences
 import lv.kristapsbe.meteo_android.DisplayInfo
@@ -45,8 +47,9 @@ import lv.kristapsbe.meteo_android.ForecastRefreshWorker
 import lv.kristapsbe.meteo_android.HourlyForecast
 import lv.kristapsbe.meteo_android.LangStrings
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
+import lv.kristapsbe.meteo_android.MainActivity.Companion.IS_EXPEDITED_KEY
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
-import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_FORECAST_DL_NAME
+import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_WORK_NAME
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.Preference
 import lv.kristapsbe.meteo_android.R
@@ -203,10 +206,13 @@ fun CurrentInfo(
                                                 customLocationName.value
                                             )
                                             val workRequest =
-                                                OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                                                OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
+                                                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                                                    .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
+                                                    .build()
                                             WorkManager.getInstance(applicationContext)
                                                 .enqueueUniqueWork(
-                                                    SINGLE_FORECAST_DL_NAME,
+                                                    SINGLE_WORK_NAME,
                                                     ExistingWorkPolicy.REPLACE,
                                                     workRequest
                                                 )
@@ -235,10 +241,13 @@ fun CurrentInfo(
                                                 customLocationName.value
                                             )
                                             val workRequest =
-                                                OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
+                                                OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
+                                                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                                                    .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
+                                                    .build()
                                             WorkManager.getInstance(applicationContext)
                                                 .enqueueUniqueWork(
-                                                    SINGLE_FORECAST_DL_NAME,
+                                                    SINGLE_WORK_NAME,
                                                     ExistingWorkPolicy.REPLACE,
                                                     workRequest
                                                 )

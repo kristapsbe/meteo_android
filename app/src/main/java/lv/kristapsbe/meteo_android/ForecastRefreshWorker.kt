@@ -19,6 +19,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -105,10 +106,15 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
     }
 
     override suspend fun doWork(): Result {
-        try {
-            setForeground(getForegroundInfo())
-        } catch (e: Exception) {
-            e.printStackTrace()
+        val isExpedited = inputData.getBoolean(MainActivity.IS_EXPEDITED_KEY, false)
+        
+        if (isExpedited) {
+            try {
+                setForeground(getForegroundInfo())
+                delay(2000)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
         val app = applicationContext as MyApplication
@@ -143,6 +149,9 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
         callback?.onWorkerResult(cityForecast)
 
         if (cityForecast != null) {
+            // Update last successful update time
+            prefs.setLong(Preference.LAST_SUCCESSFUL_UPDATE_TIME, System.currentTimeMillis())
+            
             val currentLocale: Locale = Locale.getDefault()
             val language: String = currentLocale.language
 
