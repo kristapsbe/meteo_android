@@ -28,7 +28,7 @@ class ForecastRefreshWorkerNoDL(context: Context, workerParams: WorkerParameters
         val notification = NotificationCompat.Builder(applicationContext, id)
             .setContentTitle(title)
             .setContentText(text)
-            .setSmallIcon(R.drawable.baseline_warning_24)
+            .setSmallIcon(R.drawable.mcloudy)
             .setOngoing(true)
             .build()
 
