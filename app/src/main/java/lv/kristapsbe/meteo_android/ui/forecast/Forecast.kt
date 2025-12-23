@@ -67,7 +67,9 @@ fun AllForecasts(
                         val workRequest =
                             OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
                                 .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                                .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
+                                .setInputData(
+                                    Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build()
+                                )
                                 .build()
                         WorkManager.getInstance(mainActivity).enqueueUniqueWork(
                             SINGLE_WORK_NAME,

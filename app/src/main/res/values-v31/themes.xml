@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-    Having themes.xml for v31 variant because @android:dimen/system_app_widget_background_radius
-     and @android:dimen/system_app_widget_internal_padding requires API level 31
-    -->
+    <style name="Theme.Meteo_android" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/sky_blue</item>
+        <item name="android:windowBackground">@color/sky_blue</item>
+        <item name="android:colorBackground">@color/sky_blue</item>
+        <!-- Set to false to allow the OS to show the blue starting window immediately -->
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/NoAnimation</item>
+    </style>
+
     <style name="Theme.Meteo_android.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="appWidgetRadius">@android:dimen/system_app_widget_background_radius</item>
         <item name="appWidgetInnerRadius">@android:dimen/system_app_widget_inner_radius</item>

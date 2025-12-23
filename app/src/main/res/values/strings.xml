@@ -2,8 +2,64 @@
     <string name="app_name">Meteo Latvia</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
-    <string name="app_widget_description">This is an app widget description</string>
+    <string name="app_widget_description">Weather forecasting and severe weather warnings</string>
     <string name="weather_icon">weather icon</string>
     <string name="click_the_widget_to_refresh">open app to refresh</string>
     <string name="no_temp">N/A°</string>
+
+    <string name="rain_expected_today">today at</string>
+    <string name="rain_expected_tomorrow">tomorrow at</string>
+    <string name="feels_like">Feels like</string>
+    <string name="forecast_issued">forecast issued at</string>
+    <string name="forecast_downloaded">forecast downloaded at</string>
+    <string name="forecast_downloaded_no_skip">full forecast downloaded at</string>
+
+    <string name="settings_app_language">App language</string>
+    <string name="settings_widget_transparency">Show widget background color</string>
+    <string name="settings_force_always_show_details">Always force widget into detailed mode</string>
+    <string name="settings_temperature_unit">Temperature unit</string>
+    <string name="settings_display_aurora">Display aurora forecast</string>
+    <string name="settings_fix_icon_day_night">Match icons to sunrise and sunset</string>
+    <string name="settings_use_alt_layout">Use alternative widget layout</string>
+    <string name="settings_use_animated_icons">Use animated icons</string>
+    <string name="settings_enable_experimental_forecasts">Enable experimental forecasts</string>
+
+    <string name="notification_aurora_title">Aurora</string>
+    <string name="notification_aurora_description">Aurora probability has increased to</string>
+
+    <string name="privacy_i_have_read">I have read and agree to the </string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_continue">Continue</string>
+
+    <string name="disclosure">MeteoLatvia collects location data to enable the delivery of relevant weather forecast and severe weather warning information even when the app is closed or not in use.</string>
+    <string name="data_sources">Data sources</string>
+
+    <string-array name="days_short">
+        <item>Mo</item>
+        <item>Tu</item>
+        <item>We</item>
+        <item>Th</item>
+        <item>Fr</item>
+        <item>Sa</item>
+        <item>Su</item>
+    </string-array>
+
+    <string-array name="wind_directions">
+        <item>N</item>
+        <item>N/NE</item>
+        <item>NE</item>
+        <item>E/NE</item>
+        <item>E</item>
+        <item>E/SE</item>
+        <item>SE</item>
+        <item>S/SE</item>
+        <item>S</item>
+        <item>S/SW</item>
+        <item>SW</item>
+        <item>W/SW</item>
+        <item>W</item>
+        <item>W/NW</item>
+        <item>NW</item>
+        <item>N/NW</item>
+    </string-array>
 </resources>

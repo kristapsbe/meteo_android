@@ -1,0 +1,65 @@
+<resources>
+    <string name="app_name">Meteo Latvija</string>
+    <string name="appwidget_text">PIEMĒRS</string>
+    <string name="add_widget">Pievienot logrīku</string>
+    <string name="app_widget_description">Laikapstākļu prognozes un bīstamu laikapstākļu brīdinājumi</string>
+    <string name="weather_icon">laikapstākļu ikona</string>
+    <string name="click_the_widget_to_refresh">atvērt lietotni, lai atjauninātu</string>
+    <string name="no_temp">N/A°</string>
+
+    <string name="rain_expected_today">šodien plkst.</string>
+    <string name="rain_expected_tomorrow">rīt plkst.</string>
+    <string name="feels_like">Sajūta</string>
+    <string name="forecast_issued">prognoze atjaunināta</string>
+    <string name="forecast_downloaded">prognoze lejupielādēta</string>
+    <string name="forecast_downloaded_no_skip">pilna prognoze lejupielādēta</string>
+
+    <string name="settings_app_language">Lietotnes valoda</string>
+    <string name="settings_widget_transparency">Rādīt logrīka fona krāsu</string>
+    <string name="settings_force_always_show_details">Piespiest logrīku vienmēr rādīt detalizēto izkārtojumu</string>
+    <string name="settings_temperature_unit">Temperatūras mērvienība</string>
+    <string name="settings_display_aurora">Rādīt ziemeļblāzmas prognozi</string>
+    <string name="settings_fix_icon_day_night">Likt ikonām sakrist ar saullēktu un saulrietu</string>
+    <string name="settings_use_alt_layout">Lietot alternatīvo logrīka izkārtojumu</string>
+    <string name="settings_use_animated_icons">Lietot animētas ikonas</string>
+    <string name="settings_enable_experimental_forecasts">Iespējot eksperimentālās prognozes</string>
+
+    <string name="notification_aurora_title">Ziemeļblāzma</string>
+    <string name="notification_aurora_description">Ziemeļblāzmas varbūtība ir palielinājusies līdz</string>
+
+    <string name="privacy_i_have_read">Es esmu izlasījis un piekrītu </string>
+    <string name="privacy_policy">Privātuma politikai</string>
+    <string name="privacy_continue">Turpināt</string>
+
+    <string name="disclosure">Lietotne Meteo Latvija savāc atrašanās vietas datus, lai nodrošinātu atbilstošu laika prognožu un bīstamu laikapstākļu brīdinājumu piegādi, pat ja lietotne ir aizvērta vai netiek izmantota.</string>
+    <string name="data_sources">Datu avoti</string>
+
+    <string-array name="days_short">
+        <item>P.</item>
+        <item>O.</item>
+        <item>T.</item>
+        <item>C.</item>
+        <item>Pk.</item>
+        <item>S.</item>
+        <item>Sv.</item>
+    </string-array>
+
+    <string-array name="wind_directions">
+        <item>Z</item>
+        <item>Z/ZA</item>
+        <item>ZA</item>
+        <item>A/ZA</item>
+        <item>A</item>
+        <item>A/DA</item>
+        <item>DA</item>
+        <item>D/DA</item>
+        <item>D</item>
+        <item>D/DR</item>
+        <item>DR</item>
+        <item>R/DR</item>
+        <item>R</item>
+        <item>R/ZR</item>
+        <item>ZR</item>
+        <item>Z/ZR</item>
+    </string-array>
+</resources>

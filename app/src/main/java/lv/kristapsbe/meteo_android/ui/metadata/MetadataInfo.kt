@@ -15,6 +15,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -23,9 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import lv.kristapsbe.meteo_android.DisplayInfo
-import lv.kristapsbe.meteo_android.LangStrings
 import lv.kristapsbe.meteo_android.R
-import lv.kristapsbe.meteo_android.Translation
 
 
 @Composable
@@ -43,12 +42,7 @@ fun MetadataInfo(
             modifier = Modifier.fillMaxWidth(),
             fontSize = 8.sp,
             lineHeight = 10.sp,
-            text = "${
-                LangStrings.getTranslationString(
-                    selectedLang.value,
-                    Translation.FORECAST_ISSUED
-                )
-            } ${displayInfo.value.getLastUpdated()}",
+            text = "${stringResource(R.string.forecast_issued)} ${displayInfo.value.getLastUpdated()}",
             color = colorResource(id = R.color.text_color),
             textAlign = TextAlign.Right
         )
@@ -56,12 +50,7 @@ fun MetadataInfo(
             modifier = Modifier.fillMaxWidth(),
             fontSize = 8.sp,
             lineHeight = 10.sp,
-            text = "${
-                LangStrings.getTranslationString(
-                    selectedLang.value,
-                    Translation.FORECAST_DOWNLOADED
-                )
-            } ${displayInfo.value.getLastDownloaded()}",
+            text = "${stringResource(R.string.forecast_downloaded)} ${displayInfo.value.getLastDownloaded()}",
             color = colorResource(id = R.color.text_color),
             textAlign = TextAlign.Right
         )
@@ -69,12 +58,7 @@ fun MetadataInfo(
             modifier = Modifier.fillMaxWidth(),
             fontSize = 8.sp,
             lineHeight = 10.sp,
-            text = "${
-                LangStrings.getTranslationString(
-                    selectedLang.value,
-                    Translation.FORECAST_DOWNLOADED_NO_SKIP
-                )
-            } ${displayInfo.value.getLastDownloadedNoSkip()}",
+            text = "${stringResource(R.string.forecast_downloaded_no_skip)} ${displayInfo.value.getLastDownloadedNoSkip()}",
             color = colorResource(id = R.color.text_color),
             textAlign = TextAlign.Right
         )
@@ -88,12 +72,7 @@ fun MetadataInfo(
                         tag = "URL",
                         annotation = "https://meteo.kristapsbe.lv/attribution?lang=${selectedLang.value}"
                     )
-                    append(
-                        LangStrings.getTranslationString(
-                            selectedLang.value,
-                            Translation.DATA_SOURCES
-                        )
-                    )
+                    append(stringResource(R.string.data_sources))
                     pop()
                 }
             }
@@ -129,7 +108,7 @@ fun MetadataInfo(
             modifier = Modifier.fillMaxWidth(),
             fontSize = 8.sp,
             lineHeight = 10.sp,
-            text = LangStrings.getTranslationString(selectedLang.value, Translation.DISCLOSURE),
+            text = stringResource(R.string.disclosure),
             color = colorResource(id = R.color.text_color),
             textAlign = TextAlign.Right
         )

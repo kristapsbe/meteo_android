@@ -6,22 +6,18 @@ import android.content.Context
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.byUnicodePattern
+import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.toLocalDateTime
 import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateAnimatedIconMapping
 import lv.kristapsbe.meteo_android.IconMapping.Companion.alternateIconMapping
 import lv.kristapsbe.meteo_android.IconMapping.Companion.iconMapping
 import lv.kristapsbe.meteo_android.IconMapping.Companion.rainCodes
-import lv.kristapsbe.meteo_android.LangStrings.Companion.getDirectionString
-import lv.kristapsbe.meteo_android.LangStrings.Companion.getShortenedDayString
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.CELSIUS
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -81,8 +77,10 @@ class DailyForecast(
     val pictogramDay: WeatherPictogram,
     val pictogramNight: WeatherPictogram
 ) {
-    fun getDayOfWeek(lang: String): String {
-        return getShortenedDayString(lang, date.dayOfWeek.toString())
+    fun getDayOfWeek(context: Context): String {
+        val days = context.resources.getStringArray(R.array.days_short)
+        // kotlinx.datetime.DayOfWeek.isoDayNumber is 1 (Mon) to 7 (Sun)
+        return days.getOrNull(date.dayOfWeek.isoDayNumber - 1) ?: ""
     }
 }
 
@@ -102,8 +100,13 @@ class HourlyForecast(
         return date.dayOfWeek.toString()
     }
 
-    fun getDirection(lang: String): String {
-        return getDirectionString(lang, windDirection / 10)
+    fun getDirection(context: Context): String {
+        val directions = context.resources.getStringArray(R.array.wind_directions)
+        // windDirection is deg*10. So index is (deg / 22.5) rounded. 
+        // Our directions array has 16 entries (every 22.5 deg).
+        // 0=N, 1=NNE, 2=NE, etc.
+        val index = ((windDirection / 10.0) / 22.5).roundToInt() % 16
+        return directions.getOrNull(index) ?: ""
     }
 }
 
@@ -129,21 +132,23 @@ class DisplayInfo() {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val prefs = AppPreferences(context)
 
-            val currentLocale: Locale = Locale.getDefault()
-            val language: String = currentLocale.language
-
-            val lang = prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
             val selectedTemp = prefs.getString(Preference.TEMP_UNIT, CELSIUS)
             val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
-            val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
+            val doShowWidgetBackground =
+                prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
             val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
             val doFixIconDayNight = prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true)
             val useAnimatedIcons = prefs.getBoolean(Preference.USE_ANIMATED_ICONS, false)
 
             val today = displayInfo.getTodayForecast()
-            
+
             val widgetText = convertFromCtoDisplayTemp(today.currentTemp, selectedTemp)
-            val feelsLikeText = "${LangStrings.getTranslationString(lang, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(today.feelsLikeTemp, selectedTemp)}"
+            val feelsLikeText = "${context.getString(R.string.feels_like)} ${
+                convertFromCtoDisplayTemp(
+                    today.feelsLikeTemp,
+                    selectedTemp
+                )
+            }"
 
             val iconImage = if (doFixIconDayNight) {
                 val zoneId = ZoneId.systemDefault()
@@ -165,7 +170,7 @@ class DisplayInfo() {
                 locationText = displayInfo.city,
                 feelsLikeText = feelsLikeText,
                 weatherIconRes = iconImage,
-                rainText = displayInfo.getWhenRainExpected(lang),
+                rainText = displayInfo.getWhenRainExpected(context),
                 rainIconRes = displayInfo.getRainIconId(useAnimatedIcons),
                 auroraText = "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})",
                 uvIndexText = today.uvIndex.toString(),
@@ -248,12 +253,12 @@ class DisplayInfo() {
                     e.ids,
                     e.intensity[1],
                     hashMapOf(
-                        LANG_LV to e.type[0],
-                        LANG_EN to e.type[1]
+                        "lv" to e.type[0],
+                        "en" to e.type[1]
                     ),
                     hashMapOf(
-                        LANG_LV to e.description_lv,
-                        LANG_EN to e.description_en
+                        "lv" to e.description_lv,
+                        "en" to e.description_en
                     )
                 )
             }
@@ -322,26 +327,16 @@ class DisplayInfo() {
         return -1
     }
 
-    fun getWhenRainExpected(lang: String): String {
+    fun getWhenRainExpected(context: Context): String {
         val hForecasts = getHourlyForecasts()
         val hourlyRain =
             hForecasts.filter { it.rainAmount > 0 || rainCodes.contains(it.pictogram.code) }
         if (hourlyRain.isNotEmpty() && hourlyRain[0].date != hForecasts[0].date) {
             val dt = convertTimestampToLocalDateTime(System.currentTimeMillis())
-            return if (hourlyRain[0].date.day == dt.date.day) {
-                "${
-                    LangStrings.getTranslationString(
-                        lang,
-                        Translation.RAIN_EXPECTED_TODAY
-                    )
-                } ${hourlyRain[0].date.hour}:00"
+            return if (hourlyRain[0].date.dayOfMonth == dt.dayOfMonth) {
+                "${context.getString(R.string.rain_expected_today)} ${hourlyRain[0].date.hour}:00"
             } else {
-                "${
-                    LangStrings.getTranslationString(
-                        lang,
-                        Translation.RAIN_EXPECTED_TOMORROW
-                    )
-                } ${hourlyRain[0].date.hour}:00"
+                "${context.getString(R.string.rain_expected_tomorrow)} ${hourlyRain[0].date.hour}:00"
             }
         }
         return ""

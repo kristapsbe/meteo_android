@@ -6,14 +6,16 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -21,6 +23,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
+import androidx.core.os.LocaleListCompat
 import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
@@ -48,7 +51,7 @@ class MyApplication : Application() {
     var workerCallback: WorkerCallback? = null
 }
 
-class MainActivity : ComponentActivity(), WorkerCallback {
+class MainActivity : AppCompatActivity(), WorkerCallback {
     companion object {
         const val WEATHER_WARNINGS_CHANNEL_ID = "WEATHER_WARNINGS"
         const val WEATHER_WARNINGS_CHANNEL_NAME = "Severe weather warnings"
@@ -152,16 +155,28 @@ class MainActivity : ComponentActivity(), WorkerCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val currentLocale: Locale = Locale.getDefault()
-        val language: String = currentLocale.language
+        // Disable Activity transitions globally for this Activity
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+        } else {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
+        }
 
         prefs = AppPreferences(applicationContext)
-        selectedLang = mutableStateOf(
-            prefs.getString(
-                Preference.LANG,
-                if (language == LANG_LV) LANG_LV else LANG_EN
-            )
+        val currentLocale: Locale = Locale.getDefault()
+        val language: String = currentLocale.language
+        val savedLang = prefs.getString(
+            Preference.LANG,
+            if (language == LANG_LV) LANG_LV else LANG_EN
         )
+
+        // Initial locale setup
+        val appLocales = LocaleListCompat.forLanguageTags(savedLang)
+        AppCompatDelegate.setApplicationLocales(appLocales)
+
+        selectedLang = mutableStateOf(savedLang)
         selectedTempType = mutableStateOf(prefs.getString(Preference.TEMP_UNIT, CELSIUS))
         showWidgetBackground =
             mutableStateOf(prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true))
@@ -220,14 +235,24 @@ class MainActivity : ComponentActivity(), WorkerCallback {
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // System notified us of a config change (like locale).
+        // Update the widget immediately so it reflects the new locale or layout direction.
+        DisplayInfo.updateWidget(applicationContext, displayInfo.value)
+
+        val savedLang = prefs.getString(Preference.LANG, LANG_EN)
+        if (selectedLang.value != savedLang) {
+            selectedLang.value = savedLang
+        }
+    }
+
     private fun setup() {
         val app = applicationContext as MyApplication
         app.workerCallback = this
 
         // Generic way to prune ALL work associated with the app.
         // This ensures no legacy workers (under any name) can collide with the new unified worker.
-        //
-        // TODO: remove in a few versions (added in 1.0.10)
         WorkManager.getInstance(applicationContext).cancelAllWork()
 
         val constraints = Constraints.Builder()

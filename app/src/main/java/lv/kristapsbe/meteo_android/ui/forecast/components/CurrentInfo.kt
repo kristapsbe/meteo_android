@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -45,7 +46,6 @@ import lv.kristapsbe.meteo_android.AppPreferences
 import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.ForecastRefreshWorker
 import lv.kristapsbe.meteo_android.HourlyForecast
-import lv.kristapsbe.meteo_android.LangStrings
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.IS_EXPEDITED_KEY
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
@@ -55,7 +55,6 @@ import lv.kristapsbe.meteo_android.Preference
 import lv.kristapsbe.meteo_android.R
 import lv.kristapsbe.meteo_android.SunRiseSunSet
 import lv.kristapsbe.meteo_android.SunriseSunsetUtils.Companion.calculate
-import lv.kristapsbe.meteo_android.Translation
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -208,7 +207,11 @@ fun CurrentInfo(
                                             val workRequest =
                                                 OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
                                                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                                                    .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
+                                                    .setInputData(
+                                                        Data.Builder()
+                                                            .putBoolean(IS_EXPEDITED_KEY, true)
+                                                            .build()
+                                                    )
                                                     .build()
                                             WorkManager.getInstance(applicationContext)
                                                 .enqueueUniqueWork(
@@ -243,7 +246,11 @@ fun CurrentInfo(
                                             val workRequest =
                                                 OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
                                                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                                                    .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
+                                                    .setInputData(
+                                                        Data.Builder()
+                                                            .putBoolean(IS_EXPEDITED_KEY, true)
+                                                            .build()
+                                                    )
                                                     .build()
                                             WorkManager.getInstance(applicationContext)
                                                 .enqueueUniqueWork(
@@ -262,12 +269,7 @@ fun CurrentInfo(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "${
-                        LangStrings.getTranslationString(
-                            selectedLang.value,
-                            Translation.FEELS_LIKE
-                        )
-                    } ${
+                    text = "${stringResource(R.string.feels_like)} ${
                         convertFromCtoDisplayTemp(
                             hForecast.feelsLikeTemp,
                             selectedTempType.value

@@ -85,7 +85,7 @@ fun DailyInfo(
                                 .padding(0.dp, 15.dp, 0.dp, 0.dp),
                         ) {
                             Text(
-                                text = d.getDayOfWeek(mainActivity.selectedLang.value),
+                                text = d.getDayOfWeek(mainActivity),
                                 fontSize = 27.sp,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Left,

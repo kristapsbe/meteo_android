@@ -1,6 +1,8 @@
 package lv.kristapsbe.meteo_android.ui.settings
 
+import android.app.Activity
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,11 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.os.LocaleListCompat
 import lv.kristapsbe.meteo_android.AppPreferences
 import lv.kristapsbe.meteo_android.DisplayInfo
-import lv.kristapsbe.meteo_android.LangStrings
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.CELSIUS
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
@@ -30,7 +33,6 @@ import lv.kristapsbe.meteo_android.MainActivity.Companion.nextLang
 import lv.kristapsbe.meteo_android.MainActivity.Companion.nextTemp
 import lv.kristapsbe.meteo_android.Preference
 import lv.kristapsbe.meteo_android.R
-import lv.kristapsbe.meteo_android.Translation
 
 
 @Composable
@@ -63,7 +65,7 @@ fun Settings(
         }
         if (mainActivity.doDisplaySettings.value) {
             SettingsEntryString(
-                Translation.SETTINGS_APP_LANGUAGE,
+                R.string.settings_app_language,
                 Preference.LANG,
                 mainActivity.selectedLang,
                 nextLang,
@@ -73,7 +75,7 @@ fun Settings(
                 applicationContext
             )
             SettingsEntryBoolean(
-                Translation.SETTINGS_WIDGET_TRANSPARENCY,
+                R.string.settings_widget_transparency,
                 Preference.DO_SHOW_WIDGET_BACKGROUND,
                 mainActivity.showWidgetBackground,
                 prefs,
@@ -81,7 +83,7 @@ fun Settings(
                 applicationContext
             )
             SettingsEntryString(
-                Translation.SETTINGS_TEMPERATURE_UNIT,
+                R.string.settings_temperature_unit,
                 Preference.TEMP_UNIT,
                 mainActivity.selectedTempType,
                 nextTemp,
@@ -91,7 +93,7 @@ fun Settings(
                 applicationContext
             )
             SettingsEntryBoolean(
-                Translation.SETTINGS_DISPLAY_AURORA,
+                R.string.settings_display_aurora,
                 Preference.DO_SHOW_AURORA,
                 mainActivity.doShowAurora,
                 prefs,
@@ -99,7 +101,7 @@ fun Settings(
                 applicationContext
             )
             SettingsEntryBoolean(
-                Translation.SETTINGS_FIX_ICON_DAY_NIGHT,
+                R.string.settings_fix_icon_day_night,
                 Preference.DO_FIX_ICON_DAY_NIGHT,
                 mainActivity.doFixIconDayNight,
                 prefs,
@@ -107,7 +109,7 @@ fun Settings(
                 applicationContext
             )
             SettingsEntryBoolean(
-                Translation.SETTINGS_USE_ALT_LAYOUT,
+                R.string.settings_use_alt_layout,
                 Preference.USE_ALT_LAYOUT,
                 mainActivity.useAltLayout,
                 prefs,
@@ -115,7 +117,7 @@ fun Settings(
                 applicationContext
             )
             SettingsEntryBoolean(
-                Translation.SETTINGS_USE_ANIMATED_ICONS,
+                R.string.settings_use_animated_icons,
                 Preference.USE_ANIMATED_ICONS,
                 mainActivity.useAnimatedIcons,
                 prefs,
@@ -123,7 +125,7 @@ fun Settings(
                 applicationContext
             )
             SettingsEntryBoolean(
-                Translation.SETTINGS_ENABLE_EXPERIMENTAL_FORECASTS,
+                R.string.settings_enable_experimental_forecasts,
                 Preference.ENABLE_EXPERIMENTAL_FORECASTS,
                 mainActivity.enableExperimental,
                 prefs,
@@ -144,7 +146,7 @@ fun Settings(
 
 @Composable
 fun SettingsEntryBoolean(
-    translation: Translation,
+    stringRes: Int,
     preference: Preference,
     mutableState: MutableState<Boolean>,
     prefs: AppPreferences,
@@ -162,10 +164,7 @@ fun SettingsEntryBoolean(
                 .fillMaxWidth(0.85f)
         ) {
             Text(
-                text = LangStrings.getTranslationString(
-                    mainActivity.selectedLang.value,
-                    translation
-                ),
+                text = stringResource(stringRes),
                 textAlign = TextAlign.Start,
                 color = colorResource(id = R.color.text_color),
             )
@@ -197,7 +196,7 @@ fun SettingsEntryBoolean(
 
 @Composable
 fun SettingsEntryString(
-    translation: Translation,
+    stringRes: Int,
     preference: Preference,
     mutableState: MutableState<String>,
     nextEntry: HashMap<String, String>,
@@ -217,10 +216,7 @@ fun SettingsEntryString(
                 .fillMaxWidth(0.85f)
         ) {
             Text(
-                text = LangStrings.getTranslationString(
-                    mainActivity.selectedLang.value,
-                    translation
-                ),
+                text = stringResource(stringRes),
                 textAlign = TextAlign.Start,
                 color = colorResource(id = R.color.text_color),
             )
@@ -232,8 +228,18 @@ fun SettingsEntryString(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) {
-                    mutableState.value = nextEntry[mutableState.value] ?: defaultVal
-                    prefs.setString(preference, mutableState.value)
+                    val newValue = nextEntry[mutableState.value] ?: defaultVal
+                    mutableState.value = newValue
+                    prefs.setString(preference, newValue)
+
+                    if (preference == Preference.LANG) {
+                        // Override activity transitions to stop the black flash during recreation
+                        (mainActivity as? Activity)?.overridePendingTransition(0, 0)
+
+                        val appLocales = LocaleListCompat.forLanguageTags(newValue)
+                        AppCompatDelegate.setApplicationLocales(appLocales)
+                    }
+
                     DisplayInfo.updateWidget(
                         applicationContext,
                         mainActivity.displayInfo.value

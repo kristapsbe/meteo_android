@@ -251,7 +251,7 @@ fun HourlyInfo(
                                 "${h.rainAmount} mm",
                                 (if (h.stormProb != -999) "${h.stormProb}%" else ""),
                                 "${h.windSpeed} m/s",
-                                h.getDirection(mainActivity.selectedLang.value),
+                                h.getDirection(mainActivity),
                                 (if (h.uvIndex != -999) h.uvIndex.toString() else "")
                             )) {
                                 Text(

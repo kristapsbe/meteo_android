@@ -50,7 +50,11 @@ class ForecastWidget : AppWidgetProvider() {
         }
     }
 
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
         val prefs = AppPreferences(context)
         val lastSuccess = prefs.getLong(Preference.LAST_SUCCESSFUL_UPDATE_TIME, 0L)
         val currentTime = System.currentTimeMillis()
@@ -93,11 +97,15 @@ fun updateAppWidget(
     val views = RemoteViews(context.packageName, R.layout.forecast_widget).apply {
         // Click behavior
         val intent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent =
+            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         setOnClickPendingIntent(R.id.widget, pendingIntent)
 
         // Background
-        val bgColor = ContextCompat.getColor(context, if (state.showBackground) R.color.sky_blue else R.color.transparent)
+        val bgColor = ContextCompat.getColor(
+            context,
+            if (state.showBackground) R.color.sky_blue else R.color.transparent
+        )
         setInt(R.id.widget, "setBackgroundColor", bgColor)
 
         // Main info
@@ -127,15 +135,36 @@ fun updateAppWidget(
 
         // UV section
         setVisibility(R.id.appwidget_uv_wrap, state.showUV && !state.useAltLayout)
-        setImageViewResource(R.id.uv_alt, if (state.showUV && state.useAltLayout) R.drawable.uv else 0)
+        setImageViewResource(
+            R.id.uv_alt,
+            if (state.showUV && state.useAltLayout) R.drawable.uv else 0
+        )
         if (state.showUV) {
             setTextViewText(R.id.appwidget_uv, state.uvIndexText)
         }
 
         // Warnings
-        setWarningIcons(state.hasRedWarning, R.drawable.baseline_warning_24_red, R.id.red_warning, R.id.red_warning_small, R.id.red_warning_small_alt)
-        setWarningIcons(state.hasOrangeWarning, R.drawable.baseline_warning_orange_24, R.id.orange_warning, R.id.orange_warning_small, R.id.orange_warning_small_alt)
-        setWarningIcons(state.hasYellowWarning, R.drawable.baseline_warning_yellow_24, R.id.yellow_warning, R.id.yellow_warning_small, R.id.yellow_warning_small_alt)
+        setWarningIcons(
+            state.hasRedWarning,
+            R.drawable.baseline_warning_24_red,
+            R.id.red_warning,
+            R.id.red_warning_small,
+            R.id.red_warning_small_alt
+        )
+        setWarningIcons(
+            state.hasOrangeWarning,
+            R.drawable.baseline_warning_orange_24,
+            R.id.orange_warning,
+            R.id.orange_warning_small,
+            R.id.orange_warning_small_alt
+        )
+        setWarningIcons(
+            state.hasYellowWarning,
+            R.drawable.baseline_warning_yellow_24,
+            R.id.yellow_warning,
+            R.id.yellow_warning_small,
+            R.id.yellow_warning_small_alt
+        )
 
         // Responsive Layout sizes
         val minHeightDp = appWidgetManager.getAppWidgetOptions(appWidgetId)

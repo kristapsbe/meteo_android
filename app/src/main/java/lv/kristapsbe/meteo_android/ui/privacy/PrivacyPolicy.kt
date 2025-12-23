@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -33,9 +34,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import lv.kristapsbe.meteo_android.LangStrings
 import lv.kristapsbe.meteo_android.R
-import lv.kristapsbe.meteo_android.Translation
 
 
 @Composable
@@ -86,7 +85,6 @@ fun PrivacyPolicy(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    // TODO: move translations to class
                     val annotatedText = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
@@ -96,12 +94,7 @@ fun PrivacyPolicy(
                                 color = LocalContentColor.current
                             )
                         ) {
-                            append(
-                                LangStrings.getTranslationString(
-                                    selectedLang,
-                                    Translation.PRIVACY_I_HAVE_READ
-                                )
-                            )
+                            append(stringResource(R.string.privacy_i_have_read))
                         }
 
                         withStyle(
@@ -116,12 +109,7 @@ fun PrivacyPolicy(
                                 tag = "URL",
                                 annotation = "https://meteo.kristapsbe.lv/privacy-policy?lang=${selectedLang}"
                             )
-                            append(
-                                LangStrings.getTranslationString(
-                                    selectedLang,
-                                    Translation.PRIVACY_POLICY
-                                )
-                            )
+                            append(stringResource(R.string.privacy_policy))
                             pop()
                         }
                     }
@@ -174,10 +162,7 @@ fun PrivacyPolicy(
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = LangStrings.getTranslationString(
-                            selectedLang,
-                            Translation.DISCLOSURE
-                        ),
+                        text = stringResource(R.string.disclosure),
                         fontSize = 14.sp,
                         fontFamily = FontFamily.Default,
                         fontWeight = FontWeight.Normal,
@@ -194,10 +179,8 @@ fun PrivacyPolicy(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)  // Set button background color
                 ) {
                     Text(
-                        LangStrings.getTranslationString(
-                            selectedLang,
-                            Translation.PRIVACY_CONTINUE
-                        ), color = Color.White
+                        stringResource(R.string.privacy_continue),
+                        color = Color.White
                     )  // Set text and its color
                 }
             }

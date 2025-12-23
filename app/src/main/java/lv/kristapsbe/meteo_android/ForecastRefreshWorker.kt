@@ -161,16 +161,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
                     showNotification(
                         MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
                         auroraNotifId,
-                        LangStrings.getTranslationString(
-                            selectedLang,
-                            Translation.NOTIFICATION_AURORA_TITLE
-                        ),
-                        "${
-                            LangStrings.getTranslationString(
-                                selectedLang,
-                                Translation.NOTIFICATION_AURORA_DESCRIPTION
-                            )
-                        } ${displayInfo.aurora.prob}%.",
+                        applicationContext.getString(R.string.notification_aurora_title),
+                        "${applicationContext.getString(R.string.notification_aurora_description)} ${displayInfo.aurora.prob}%.",
                         R.drawable.baseline_star_border_24,
                         R.drawable.baseline_star_border_green_24
                     )
