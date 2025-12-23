@@ -3,23 +3,20 @@ package lv.kristapsbe.meteo_android
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
-import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_WORK_NAME
+import java.util.concurrent.TimeUnit
 
 
 class ForecastWidget : AppWidgetProvider() {
@@ -29,14 +26,12 @@ class ForecastWidget : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle
     ) {
-        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>()
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .setInputData(Data.Builder().putBoolean(MainActivity.IS_EXPEDITED_KEY, true).build())
-            .build()
-        WorkManager.getInstance(context)
-            .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-
-        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+        // Just refresh the UI from cache immediately
+        val content = CityForecastDataDownloader.loadStringFromStorage(context, RESPONSE_FILE)
+        if (content.isNotEmpty()) {
+            val data = Json.decodeFromString<CityForecastData>(content)
+            DisplayInfo.updateWidget(context, DisplayInfo(data))
+        }
     }
 
     override fun onUpdate(
@@ -44,34 +39,37 @@ class ForecastWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        // Instead of resetting to nulls, try to load the last known data
-        try {
-            val content = CityForecastDataDownloader.loadStringFromStorage(context, RESPONSE_FILE)
-            if (content.isNotEmpty()) {
-                val data = Json.decodeFromString<CityForecastData>(content)
-                val displayInfo = DisplayInfo(data)
-                DisplayInfo.updateWidget(context, displayInfo)
-            } else {
-                // If no data, trigger a refresh
-                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>()
-                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(Data.Builder().putBoolean(MainActivity.IS_EXPEDITED_KEY, true).build())
-                    .build()
-                WorkManager.getInstance(context)
-                    .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest)
-            }
-        } catch (e: Exception) {
-            Log.e("WIDGET", "Failed to update widget onUpdate: $e")
+        val prefs = AppPreferences(context)
+        val lastSuccess = prefs.getLong(Preference.LAST_SUCCESSFUL_UPDATE_TIME, 0L)
+        val currentTime = System.currentTimeMillis()
+
+        // 1. Refresh UI from cache immediately
+        val content = CityForecastDataDownloader.loadStringFromStorage(context, RESPONSE_FILE)
+        if (content.isNotEmpty()) {
+            val data = Json.decodeFromString<CityForecastData>(content)
+            DisplayInfo.updateWidget(context, DisplayInfo(data))
+        }
+
+        // 2. Only trigger network if it's stale (e.g., 30 mins) AND we aren't in a loop
+        val isStale = (currentTime - lastSuccess) > TimeUnit.MINUTES.toMillis(30)
+        val isRecentlyAttempted = (currentTime - lastSuccess) < TimeUnit.MINUTES.toMillis(1)
+
+        if (isStale && !isRecentlyAttempted) {
+            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
+                .build() // Use regular work to avoid foreground service crashes
+            WorkManager.getInstance(context)
+                .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, workRequest)
         }
     }
 
     override fun onEnabled(context: Context) {
-        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorkerNoDL>()
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .setInputData(Data.Builder().putBoolean(MainActivity.IS_EXPEDITED_KEY, true).build())
+        // Trigger a standard refresh. Regular work is more reliable for widgets
+        // and avoids ForegroundServiceStartNotAllowedException on Android 12+.
+        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
             .build()
+
         WorkManager.getInstance(context)
-            .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+            .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, workRequest)
     }
 
     override fun onDisabled(context: Context) {}
@@ -112,12 +110,12 @@ fun updateAppWidget(
             if (doShowWidgetBackground) R.color.sky_blue else R.color.transparent
         )
     )
-    
+
     // Safety check: if text is null, the widget is in an uninitialized state
     if (text == null) return
 
     views.setTextViewText(R.id.appwidget_text, text)
-    
+
     if (locationText != null) {
         views.setTextViewText(R.id.appwidget_location, locationText)
         views.setTextViewText(R.id.appwidget_location_small, locationText)

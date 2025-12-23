@@ -2,26 +2,19 @@ package lv.kristapsbe.meteo_android
 
 import android.Manifest
 import android.app.Activity.MODE_PRIVATE
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.ServiceInfo
 import android.graphics.drawable.Icon
-import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
-import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
@@ -75,48 +68,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
         }
     }
 
-    override suspend fun getForegroundInfo(): ForegroundInfo {
-        val id = "DOWNLOAD_CHANNEL"
-        val title = "Meteo"
-        val text = "Atjaunina prognozes datus"
-
-        val name = "Datu lejupielāde"
-        val importance = NotificationManager.IMPORTANCE_LOW
-        val channel = NotificationChannel(id, name, importance)
-        val notificationManager: NotificationManager =
-            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-
-        val notification = NotificationCompat.Builder(applicationContext, id)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setSmallIcon(R.drawable.mcloudy)
-            .setOngoing(true)
-            .build()
-
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ForegroundInfo(
-                NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-            )
-        } else {
-            ForegroundInfo(NOTIFICATION_ID, notification)
-        }
-    }
-
     override suspend fun doWork(): Result {
-        val isExpedited = inputData.getBoolean(MainActivity.IS_EXPEDITED_KEY, false)
-        
-        if (isExpedited) {
-            try {
-                setForeground(getForegroundInfo())
-                delay(2000)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
         val app = applicationContext as MyApplication
         val callback = app.workerCallback
 
@@ -151,7 +103,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
         if (cityForecast != null) {
             // Update last successful update time
             prefs.setLong(Preference.LAST_SUCCESSFUL_UPDATE_TIME, System.currentTimeMillis())
-            
+
             val currentLocale: Locale = Locale.getDefault()
             val language: String = currentLocale.language
 

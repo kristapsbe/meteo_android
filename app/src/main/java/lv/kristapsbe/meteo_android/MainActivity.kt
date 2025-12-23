@@ -369,16 +369,6 @@ class MainActivity : ComponentActivity(), WorkerCallback {
                 backgroundLocationRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             }
         }
-        
-        // Android 13+ Check for Exact Alarm permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Log.w("ALARM", "App cannot schedule exact alarms")
-            }
-        }
-
-        ForecastUpdateReceiver.scheduleNextUpdate(applicationContext)
     }
 
     override fun onWorkerResult(cityForecast: CityForecastData?) {
