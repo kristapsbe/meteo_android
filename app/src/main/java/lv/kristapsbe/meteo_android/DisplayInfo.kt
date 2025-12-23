@@ -15,8 +15,6 @@ import lv.kristapsbe.meteo_android.LangStrings.Companion.getDirectionString
 import lv.kristapsbe.meteo_android.LangStrings.Companion.getShortenedDayString
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.CELSIUS
-import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LAT
-import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
@@ -151,8 +149,8 @@ class DisplayInfo() {
                 val zoneId = ZoneId.systemDefault()
                 val sunTimes: SunRiseSunSet = calculate(
                     today.date,
-                    prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble(),
-                    prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble(),
+                    displayInfo.lat,
+                    displayInfo.lon,
                     ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
                 )
                 if (useAnimatedIcons) today.pictogram.getAlternatePictogram(today.date, sunTimes)

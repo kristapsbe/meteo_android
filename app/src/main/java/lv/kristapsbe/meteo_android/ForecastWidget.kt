@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
@@ -67,6 +68,8 @@ class ForecastWidget : AppWidgetProvider() {
             val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, workRequest)
+        } else {
+            Log.w("WIDGET", "Widget update skipped")
         }
     }
 
