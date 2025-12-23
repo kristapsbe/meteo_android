@@ -134,59 +134,58 @@ class DisplayInfo() {
             val currentLocale: Locale = Locale.getDefault()
             val language: String = currentLocale.language
 
-            val lang =
-                prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
+            val lang = prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
             val selectedTemp = prefs.getString(Preference.TEMP_UNIT, CELSIUS)
             val useAltLayout = prefs.getBoolean(Preference.USE_ALT_LAYOUT, false)
-            val doShowWidgetBackground =
-                prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
+            val doShowWidgetBackground = prefs.getBoolean(Preference.DO_SHOW_WIDGET_BACKGROUND, true)
             val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
             val doFixIconDayNight = prefs.getBoolean(Preference.DO_FIX_ICON_DAY_NIGHT, true)
             val useAnimatedIcons = prefs.getBoolean(Preference.USE_ANIMATED_ICONS, false)
+
+            val today = displayInfo.getTodayForecast()
+            
+            val widgetText = convertFromCtoDisplayTemp(today.currentTemp, selectedTemp)
+            val feelsLikeText = "${LangStrings.getTranslationString(lang, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(today.feelsLikeTemp, selectedTemp)}"
+
+            val iconImage = if (doFixIconDayNight) {
+                val zoneId = ZoneId.systemDefault()
+                val sunTimes: SunRiseSunSet = calculate(
+                    today.date,
+                    prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble(),
+                    prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble(),
+                    ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
+                )
+                if (useAnimatedIcons) today.pictogram.getAlternatePictogram(today.date, sunTimes)
+                else today.pictogram.getPictogram(today.date, sunTimes)
+            } else {
+                if (useAnimatedIcons) today.pictogram.getAlternatePictogram()
+                else today.pictogram.getPictogram()
+            }
+
+            val state = WidgetForecastState(
+                tempText = widgetText,
+                locationText = displayInfo.city,
+                feelsLikeText = feelsLikeText,
+                weatherIconRes = iconImage,
+                rainText = displayInfo.getWhenRainExpected(lang),
+                rainIconRes = displayInfo.getRainIconId(useAnimatedIcons),
+                auroraText = "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})",
+                uvIndexText = today.uvIndex.toString(),
+                hasRedWarning = displayInfo.warnings.any { it.intensity == "Red" },
+                hasOrangeWarning = displayInfo.warnings.any { it.intensity == "Orange" },
+                hasYellowWarning = displayInfo.warnings.any { it.intensity == "Yellow" },
+                showAurora = (doShowAurora && (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD)),
+                showUV = (today.uvIndex > 0),
+                showBackground = doShowWidgetBackground,
+                useAltLayout = useAltLayout
+            )
 
             // Retrieve the widget IDs
             val widget = ComponentName(context, ForecastWidget::class.java)
             val widgetIds = appWidgetManager.getAppWidgetIds(widget)
 
-            val widgetText = convertFromCtoDisplayTemp(displayInfo.getTodayForecast().currentTemp, selectedTemp)
-            val feelsLikeText = "${LangStrings.getTranslationString(lang, Translation.FEELS_LIKE)} ${convertFromCtoDisplayTemp(displayInfo.getTodayForecast().feelsLikeTemp, selectedTemp)}"
-
-            val iconImage = if (doFixIconDayNight) {
-                val zoneId = ZoneId.systemDefault()
-                val sunTimes: SunRiseSunSet = calculate(
-                    displayInfo.getTodayForecast().date,
-                    prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble(),
-                    prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble(),
-                    ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
-                )
-                if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram(displayInfo.getTodayForecast().date, sunTimes)
-                else displayInfo.getTodayForecast().pictogram.getPictogram(displayInfo.getTodayForecast().date, sunTimes)
-            } else {
-                if (useAnimatedIcons) displayInfo.getTodayForecast().pictogram.getAlternatePictogram()
-                else displayInfo.getTodayForecast().pictogram.getPictogram()
-            }
-
             for (appWidgetId in widgetIds) {
-                updateAppWidget(
-                    context,
-                    appWidgetManager,
-                    appWidgetId,
-                    widgetText,
-                    displayInfo.city,
-                    feelsLikeText,
-                    displayInfo.warnings.any { it.intensity == "Red" },
-                    displayInfo.warnings.any { it.intensity == "Orange" },
-                    displayInfo.warnings.any { it.intensity == "Yellow" },
-                    iconImage,
-                    displayInfo.getWhenRainExpected(lang),
-                    doShowWidgetBackground,
-                    "${displayInfo.aurora.prob}% (${displayInfo.aurora.time})",
-                    useAltLayout,
-                    (doShowAurora && (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD)),
-                    (displayInfo.getTodayForecast().uvIndex > 0),
-                    displayInfo.getRainIconId(useAnimatedIcons),
-                    displayInfo.getTodayForecast().uvIndex.toString()
-                )
+                updateAppWidget(context, appWidgetManager, appWidgetId, state)
             }
         }
     }

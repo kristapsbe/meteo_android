@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
 import android.widget.RemoteViews
@@ -18,6 +17,23 @@ import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_WORK_NAME
 import java.util.concurrent.TimeUnit
 
+data class WidgetForecastState(
+    val tempText: String?,
+    val locationText: String?,
+    val feelsLikeText: String?,
+    val weatherIconRes: Int?,
+    val rainText: String,
+    val rainIconRes: Int,
+    val auroraText: String?,
+    val uvIndexText: String?,
+    val hasRedWarning: Boolean,
+    val hasOrangeWarning: Boolean,
+    val hasYellowWarning: Boolean,
+    val showAurora: Boolean,
+    val showUV: Boolean,
+    val showBackground: Boolean,
+    val useAltLayout: Boolean
+)
 
 class ForecastWidget : AppWidgetProvider() {
     override fun onAppWidgetOptionsChanged(
@@ -26,7 +42,6 @@ class ForecastWidget : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle
     ) {
-        // Just refresh the UI from cache immediately
         val content = CityForecastDataDownloader.loadStringFromStorage(context, RESPONSE_FILE)
         if (content.isNotEmpty()) {
             val data = Json.decodeFromString<CityForecastData>(content)
@@ -34,40 +49,29 @@ class ForecastWidget : AppWidgetProvider() {
         }
     }
 
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
+    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         val prefs = AppPreferences(context)
         val lastSuccess = prefs.getLong(Preference.LAST_SUCCESSFUL_UPDATE_TIME, 0L)
         val currentTime = System.currentTimeMillis()
 
-        // 1. Refresh UI from cache immediately
         val content = CityForecastDataDownloader.loadStringFromStorage(context, RESPONSE_FILE)
         if (content.isNotEmpty()) {
             val data = Json.decodeFromString<CityForecastData>(content)
             DisplayInfo.updateWidget(context, DisplayInfo(data))
         }
 
-        // 2. Only trigger network if it's stale (e.g., 30 mins) AND we aren't in a loop
-        val isStale = (currentTime - lastSuccess) > TimeUnit.MINUTES.toMillis(30)
+        val isStale = (currentTime - lastSuccess) > TimeUnit.MINUTES.toMillis(20)
         val isRecentlyAttempted = (currentTime - lastSuccess) < TimeUnit.MINUTES.toMillis(1)
 
         if (isStale && !isRecentlyAttempted) {
-            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
-                .build() // Use regular work to avoid foreground service crashes
+            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, workRequest)
         }
     }
 
     override fun onEnabled(context: Context) {
-        // Trigger a standard refresh. Regular work is more reliable for widgets
-        // and avoids ForegroundServiceStartNotAllowedException on Android 12+.
-        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
-            .build()
-
+        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
         WorkManager.getInstance(context)
             .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, workRequest)
     }
@@ -79,151 +83,82 @@ fun updateAppWidget(
     context: Context,
     appWidgetManager: AppWidgetManager,
     appWidgetId: Int,
-    text: String?,
-    locationText: String?,
-    feelsLikeText: String?,
-    warningRed: Boolean,
-    warningOrange: Boolean,
-    warningYellow: Boolean,
-    icon: Int?,
-    rain: String,
-    doShowWidgetBackground: Boolean,
-    aurora: String?,
-    useAltLayout: Boolean,
-    doShowAurora: Boolean,
-    doShowUV: Boolean,
-    rainImage: Int,
-    uvIndex: String?
+    state: WidgetForecastState
 ) {
-    // Create an Intent to launch the MainActivity when clicked
-    val intent = Intent(context, MainActivity::class.java)
-    val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+    if (state.tempText == null) return
 
-    val views = RemoteViews(context.packageName, R.layout.forecast_widget)
-    views.setOnClickPendingIntent(R.id.widget, pendingIntent)
+    val views = RemoteViews(context.packageName, R.layout.forecast_widget).apply {
+        // Click behavior
+        val intent = Intent(context, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        setOnClickPendingIntent(R.id.widget, pendingIntent)
 
-    views.setInt(
-        R.id.widget,
-        "setBackgroundColor",
-        ContextCompat.getColor(
-            context,
-            if (doShowWidgetBackground) R.color.sky_blue else R.color.transparent
-        )
-    )
+        // Background
+        val bgColor = ContextCompat.getColor(context, if (state.showBackground) R.color.sky_blue else R.color.transparent)
+        setInt(R.id.widget, "setBackgroundColor", bgColor)
 
-    // Safety check: if text is null, the widget is in an uninitialized state
-    if (text == null) return
-
-    views.setTextViewText(R.id.appwidget_text, text)
-
-    if (locationText != null) {
-        views.setTextViewText(R.id.appwidget_location, locationText)
-        views.setTextViewText(R.id.appwidget_location_small, locationText)
-    }
-    if (feelsLikeText != null) {
-        views.setTextViewText(R.id.appwidget_feelslike, feelsLikeText)
-    }
-
-    if (rain == "") {
-        views.setViewVisibility(R.id.appwidget_rain_wrap, View.GONE)
-    } else {
-        views.setTextViewText(R.id.appwidget_rain, rain)
-        views.setImageViewResource(R.id.appwidget_rain_icon, rainImage)
-        views.setViewVisibility(R.id.appwidget_rain_wrap, View.VISIBLE)
-    }
-
-    if (doShowAurora) {
-        views.setTextViewText(R.id.appwidget_aurora, aurora)
-        views.setViewVisibility(R.id.appwidget_aurora_wrap, View.VISIBLE)
-    } else {
-        views.setViewVisibility(R.id.appwidget_aurora_wrap, View.GONE)
-    }
-
-    if (doShowUV) {
-        views.setTextViewText(R.id.appwidget_uv, uvIndex)
-        if (useAltLayout) {
-            views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
-            views.setImageViewResource(R.id.uv_alt, R.drawable.uv)
-        } else {
-            views.setViewVisibility(R.id.appwidget_uv_wrap, View.VISIBLE)
-            views.setImageViewResource(R.id.uv_alt, 0)
+        // Main info
+        setTextViewText(R.id.appwidget_text, state.tempText)
+        state.locationText?.let {
+            setTextViewText(R.id.appwidget_location, it)
+            setTextViewText(R.id.appwidget_location_small, it)
         }
-    } else {
-        views.setViewVisibility(R.id.appwidget_uv_wrap, View.GONE)
-        views.setImageViewResource(R.id.uv_alt, 0)
-    }
+        state.feelsLikeText?.let { setTextViewText(R.id.appwidget_feelslike, it) }
 
-    if (icon != null) {
-        views.setImageViewResource(R.id.icon_image, icon)
-    }
-    if (warningRed) {
-        views.setImageViewResource(R.id.red_warning, R.drawable.baseline_warning_24_red)
-        views.setImageViewResource(R.id.red_warning_small, R.drawable.baseline_warning_24_red)
-        views.setImageViewResource(R.id.red_warning_small_alt, R.drawable.baseline_warning_24_red)
-    } else {
-        views.setImageViewResource(R.id.red_warning, 0)
-        views.setImageViewResource(R.id.red_warning_small, 0)
-        views.setImageViewResource(R.id.red_warning_small_alt, 0)
-    }
-    if (warningOrange) {
-        views.setImageViewResource(R.id.orange_warning, R.drawable.baseline_warning_orange_24)
-        views.setImageViewResource(R.id.orange_warning_small, R.drawable.baseline_warning_orange_24)
-        views.setImageViewResource(
-            R.id.orange_warning_small_alt,
-            R.drawable.baseline_warning_orange_24
-        )
-    } else {
-        views.setImageViewResource(R.id.orange_warning, 0)
-        views.setImageViewResource(R.id.orange_warning_small, 0)
-        views.setImageViewResource(R.id.orange_warning_small_alt, 0)
-    }
-    if (warningYellow) {
-        views.setImageViewResource(R.id.yellow_warning, R.drawable.baseline_warning_yellow_24)
-        views.setImageViewResource(R.id.yellow_warning_small, R.drawable.baseline_warning_yellow_24)
-        views.setImageViewResource(
-            R.id.yellow_warning_small_alt,
-            R.drawable.baseline_warning_yellow_24
-        )
-    } else {
-        views.setImageViewResource(R.id.yellow_warning, 0)
-        views.setImageViewResource(R.id.yellow_warning_small, 0)
-        views.setImageViewResource(R.id.yellow_warning_small_alt, 0)
-    }
+        // Weather Icon
+        state.weatherIconRes?.let { setImageViewResource(R.id.icon_image, it) }
 
-    val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-    val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-    val displayMetrics = Resources.getSystem().displayMetrics
-    val density = displayMetrics.density
-    val minHeightDp = (minHeight / density).toInt()
-
-    if (minHeightDp > 45) {
-        views.setViewVisibility(R.id.top_widget, View.VISIBLE)
-        views.setViewVisibility(R.id.bottom_widget, View.VISIBLE)
-
-        if (useAltLayout) {
-            views.setViewVisibility(R.id.main_warnings_small_alt, View.VISIBLE)
-            views.setViewVisibility(R.id.main_warnings, View.GONE)
-        } else {
-            views.setViewVisibility(R.id.main_warnings_small_alt, View.GONE)
-            views.setViewVisibility(R.id.main_warnings, View.VISIBLE)
+        // Rain section
+        val hasRain = state.rainText.isNotEmpty()
+        setVisibility(R.id.appwidget_rain_wrap, hasRain)
+        if (hasRain) {
+            setTextViewText(R.id.appwidget_rain, state.rainText)
+            setImageViewResource(R.id.appwidget_rain_icon, state.rainIconRes)
         }
 
-        views.setViewVisibility(R.id.appwidget_location_small, View.GONE)
-        views.setViewVisibility(R.id.main_warnings_small, View.GONE)
-    } else {
-        views.setViewVisibility(R.id.top_widget, View.GONE)
-        views.setViewVisibility(R.id.bottom_widget, View.GONE)
-
-        if (useAltLayout) {
-            views.setViewVisibility(R.id.main_warnings_small_alt, View.VISIBLE)
-            views.setViewVisibility(R.id.main_warnings_small, View.GONE)
-        } else {
-            views.setViewVisibility(R.id.main_warnings_small_alt, View.GONE)
-            views.setViewVisibility(R.id.main_warnings_small, View.VISIBLE)
+        // Aurora section
+        setVisibility(R.id.appwidget_aurora_wrap, state.showAurora)
+        if (state.showAurora) {
+            setTextViewText(R.id.appwidget_aurora, state.auroraText)
         }
 
-        views.setViewVisibility(R.id.appwidget_location_small, View.VISIBLE)
+        // UV section
+        setVisibility(R.id.appwidget_uv_wrap, state.showUV && !state.useAltLayout)
+        setImageViewResource(R.id.uv_alt, if (state.showUV && state.useAltLayout) R.drawable.uv else 0)
+        if (state.showUV) {
+            setTextViewText(R.id.appwidget_uv, state.uvIndexText)
+        }
+
+        // Warnings
+        setWarningIcons(state.hasRedWarning, R.drawable.baseline_warning_24_red, R.id.red_warning, R.id.red_warning_small, R.id.red_warning_small_alt)
+        setWarningIcons(state.hasOrangeWarning, R.drawable.baseline_warning_orange_24, R.id.orange_warning, R.id.orange_warning_small, R.id.orange_warning_small_alt)
+        setWarningIcons(state.hasYellowWarning, R.drawable.baseline_warning_yellow_24, R.id.yellow_warning, R.id.yellow_warning_small, R.id.yellow_warning_small_alt)
+
+        // Responsive Layout sizes
+        val minHeightDp = appWidgetManager.getAppWidgetOptions(appWidgetId)
+            .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) / context.resources.displayMetrics.density
+
+        val isLarge = minHeightDp > 45
+        setVisibility(R.id.top_widget, isLarge)
+        setVisibility(R.id.bottom_widget, isLarge)
+        setVisibility(R.id.appwidget_location_small, !isLarge)
+
+        val showAltWarn = state.useAltLayout
+        val showMainWarn = !state.useAltLayout
+
+        setVisibility(R.id.main_warnings, isLarge && showMainWarn)
+        setVisibility(R.id.main_warnings_small, !isLarge && showMainWarn)
+        setVisibility(R.id.main_warnings_small_alt, showAltWarn)
     }
-    // Instruct the widget manager to update the widget
+
     appWidgetManager.updateAppWidget(appWidgetId, views)
+}
+
+/** Extension helpers for cleaner RemoteViews logic **/
+private fun RemoteViews.setVisibility(id: Int, isVisible: Boolean) {
+    setViewVisibility(id, if (isVisible) View.VISIBLE else View.GONE)
+}
+
+private fun RemoteViews.setWarningIcons(active: Boolean, resId: Int, vararg ids: Int) {
+    ids.forEach { setImageViewResource(it, if (active) resId else 0) }
 }
