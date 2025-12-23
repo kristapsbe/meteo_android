@@ -69,7 +69,7 @@ class ForecastWidget : AppWidgetProvider() {
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, workRequest)
         } else {
-            Log.w("WIDGET", "Widget update skipped")
+            Log.i("WIDGET", "Widget update skipped")
         }
     }
 
