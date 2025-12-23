@@ -238,7 +238,7 @@ class IconMapping {
             ),
             306 to Pair(
                 WeatherResources(
-                    R.drawable.tshower,
+                    R.drawable.tshower1,
                     R.drawable.thunderstorms_day_rain,
                     R.raw.thunderstorms_day_rain,
                     true
@@ -252,13 +252,13 @@ class IconMapping {
             ),
             307 to Pair(
                 WeatherResources(
-                    R.drawable.tshower,
+                    R.drawable.tsnow,
                     R.drawable.thunderstorms_extreme_snow,
                     R.raw.thunderstorms_extreme_snow,
                     true
                 ),
                 WeatherResources(
-                    R.drawable.tshower,
+                    R.drawable.tsnow,
                     R.drawable.thunderstorms_extreme_snow,
                     R.raw.thunderstorms_extreme_snow,
                     true
@@ -266,13 +266,13 @@ class IconMapping {
             ),
             308 to Pair(
                 WeatherResources(
-                    R.drawable.tshower,
+                    R.drawable.tsnow,
                     R.drawable.thunderstorms_overcast_snow,
                     R.raw.thunderstorms_overcast_snow,
                     true
                 ),
                 WeatherResources(
-                    R.drawable.tshower,
+                    R.drawable.tsnow,
                     R.drawable.thunderstorms_overcast_snow,
                     R.raw.thunderstorms_overcast_snow,
                     true
@@ -280,13 +280,13 @@ class IconMapping {
             ),
             309 to Pair(
                 WeatherResources(
-                    R.drawable.tshower1,
+                    R.drawable.tsnow1,
                     R.drawable.thunderstorms_day_snow,
                     R.raw.thunderstorms_day_snow,
                     true
                 ),
                 WeatherResources(
-                    R.drawable.tshower0,
+                    R.drawable.tsnow0,
                     R.drawable.thunderstorms_night_snow,
                     R.raw.thunderstorms_night_snow,
                     true
@@ -478,32 +478,42 @@ class IconMapping {
                 WeatherResources(
                     R.drawable.tstorm,
                     R.drawable.thunderstorms_extreme,
-                    R.raw.thunderstorms_extreme
+                    R.raw.thunderstorms_extreme,
+                    true
                 ),
                 WeatherResources(
                     R.drawable.tstorm,
                     R.drawable.thunderstorms_extreme,
-                    R.raw.thunderstorms_extreme
+                    R.raw.thunderstorms_extreme,
+                    true
                 )
             ),
             324 to Pair(
                 WeatherResources(
                     R.drawable.tstorm,
                     R.drawable.thunderstorms,
-                    R.raw.thunderstorms
+                    R.raw.thunderstorms,
+                    true
                 ),
-                WeatherResources(R.drawable.tstorm, R.drawable.thunderstorms, R.raw.thunderstorms)
+                WeatherResources(
+                    R.drawable.tstorm,
+                    R.drawable.thunderstorms,
+                    R.raw.thunderstorms,
+                    true
+                )
             ),
             325 to Pair(
                 WeatherResources(
                     R.drawable.tstorm1,
                     R.drawable.thunderstorms_day,
-                    R.raw.thunderstorms_day
+                    R.raw.thunderstorms_day,
+                    true
                 ),
                 WeatherResources(
                     R.drawable.tstorm0,
                     R.drawable.thunderstorms_night,
-                    R.raw.thunderstorms_night
+                    R.raw.thunderstorms_night,
+                    true
                 )
             ),
 
@@ -887,28 +897,28 @@ class IconMapping {
             608 to Pair(
                 WeatherResources(
                     R.drawable.snow1,
-                    R.drawable.overcast_snow,
-                    R.raw.overcast_snow,
+                    R.drawable.overcast_day_snow,
+                    R.raw.overcast_day_snow,
                     true
                 ),
                 WeatherResources(
-                    R.drawable.snow,
-                    R.drawable.overcast_snow,
-                    R.raw.overcast_snow,
+                    R.drawable.snow0,
+                    R.drawable.overcast_night_snow,
+                    R.raw.overcast_night_snow,
                     true
                 )
             ),
             609 to Pair(
                 WeatherResources(
                     R.drawable.snow,
-                    R.drawable.partly_cloudy_day_snow,
-                    R.raw.partly_cloudy_day_snow,
+                    R.drawable.overcast_snow,
+                    R.raw.overcast_snow,
                     true
                 ),
                 WeatherResources(
-                    R.drawable.snow0,
-                    R.drawable.partly_cloudy_night_snow,
-                    R.raw.partly_cloudy_night_snow,
+                    R.drawable.snow,
+                    R.drawable.overcast_snow,
+                    R.raw.overcast_snow,
                     true
                 )
             ),
