@@ -1,7 +1,6 @@
 package lv.kristapsbe.meteo_android
 
 import android.Manifest
-import android.app.AlarmManager
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -227,6 +226,8 @@ class MainActivity : ComponentActivity(), WorkerCallback {
 
         // Generic way to prune ALL work associated with the app.
         // This ensures no legacy workers (under any name) can collide with the new unified worker.
+        //
+        // TODO: remove in a few versions (added in 1.0.10)
         WorkManager.getInstance(applicationContext).cancelAllWork()
 
         val constraints = Constraints.Builder()
@@ -315,28 +316,26 @@ class MainActivity : ComponentActivity(), WorkerCallback {
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val weatherWarningsChannel = NotificationChannel(
-                WEATHER_WARNINGS_CHANNEL_ID,
-                WEATHER_WARNINGS_CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = WEATHER_WARNINGS_CHANNEL_DESCRIPTION
-            }
-
-            val auroraNotificationChannel = NotificationChannel(
-                AURORA_NOTIFICATION_CHANNEL_ID,
-                AURORA_NOTIFICATION_CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = AURORA_NOTIFICATION_CHANNEL_DESCRIPTION
-            }
-
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(weatherWarningsChannel)
-            notificationManager.createNotificationChannel(auroraNotificationChannel)
+        val weatherWarningsChannel = NotificationChannel(
+            WEATHER_WARNINGS_CHANNEL_ID,
+            WEATHER_WARNINGS_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = WEATHER_WARNINGS_CHANNEL_DESCRIPTION
         }
+
+        val auroraNotificationChannel = NotificationChannel(
+            AURORA_NOTIFICATION_CHANNEL_ID,
+            AURORA_NOTIFICATION_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = AURORA_NOTIFICATION_CHANNEL_DESCRIPTION
+        }
+
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(weatherWarningsChannel)
+        notificationManager.createNotificationChannel(auroraNotificationChannel)
 
         val requiredPermissions = mutableListOf<String>()
         if (ActivityCompat.checkSelfPermission(
