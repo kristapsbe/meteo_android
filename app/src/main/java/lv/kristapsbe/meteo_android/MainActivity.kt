@@ -138,6 +138,28 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
     private var isPrivacyPolicyChecked = mutableStateOf(false)
     private var isLocationDisclosureAccepted = mutableStateOf(false)
 
+    private val backgroundLocationLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Log.d("PERM", "Background location granted")
+        }
+    }
+
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        triggerRefresh()
+
+        // Check if foreground location was granted, if so, ask for background
+        val locationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+
+        if (locationGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+    }
+
     fun privacyPolicyToggle() {
         isPrivacyPolicyChecked.value = !isPrivacyPolicyChecked.value
     }
@@ -259,6 +281,14 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
         val app = applicationContext as MyApplication
         app.workerCallback = this
 
+        setupWorkManager()
+        setupBackPressHandler()
+        loadInitialData()
+        setupNotificationChannels()
+        checkAndRequestPermissions()
+    }
+
+    private fun setupWorkManager() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
@@ -278,29 +308,40 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
             val currentVersionCode = packageInfo.longVersionCode
             if (lastVersionCode != currentVersionCode) {
-                val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
-                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setConstraints(constraints)
-                    .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
-                    .build()
-                WorkManager.getInstance(applicationContext).enqueueUniqueWork(
-                    SINGLE_WORK_NAME,
-                    ExistingWorkPolicy.REPLACE,
-                    workRequest
-                )
+                triggerRefresh()
                 prefs.setLong(Preference.LAST_LONG_VERSION_CODE, currentVersionCode)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
         }
+    }
 
+    private fun triggerRefresh() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setConstraints(constraints)
+            .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
+            .build()
+        WorkManager.getInstance(applicationContext).enqueueUniqueWork(
+            SINGLE_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
+    }
+
+    private fun setupBackPressHandler() {
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 moveTaskToBack(true)
             }
         }
         onBackPressedDispatcher.addCallback(this, callback)
+    }
 
+    private fun loadInitialData() {
         val content = loadStringFromStorage(applicationContext, RESPONSE_FILE)
         if (content != "") {
             try {
@@ -313,48 +354,11 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
                 Log.e("ERROR", "Failed to load data from storage: $e")
             }
         } else {
-            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .setConstraints(constraints)
-                .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
-                .build()
-            WorkManager.getInstance(applicationContext)
-                .enqueueUniqueWork(SINGLE_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest)
+            triggerRefresh()
         }
+    }
 
-        val backgroundLocationRequest = registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-            if (isGranted) {
-                Log.d("PERM", "Background location granted")
-            }
-        }
-
-        val permissionRequest = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .setConstraints(constraints)
-                .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
-                .build()
-            WorkManager
-                .getInstance(applicationContext)
-                .enqueueUniqueWork(
-                    SINGLE_WORK_NAME,
-                    ExistingWorkPolicy.REPLACE,
-                    workRequest
-                )
-
-            // Check if foreground location was granted, if so, ask for background
-            val locationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true ||
-                    permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
-
-            if (locationGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                backgroundLocationRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-            }
-        }
-
+    private fun setupNotificationChannels() {
         val weatherWarningsChannel = NotificationChannel(
             WEATHER_WARNINGS_CHANNEL_ID,
             WEATHER_WARNINGS_CHANNEL_NAME,
@@ -375,7 +379,9 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(weatherWarningsChannel)
         notificationManager.createNotificationChannel(auroraNotificationChannel)
+    }
 
+    private fun checkAndRequestPermissions() {
         val requiredPermissions = mutableListOf<String>()
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -395,7 +401,7 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
         }
 
         if (requiredPermissions.isNotEmpty()) {
-            permissionRequest.launch(requiredPermissions.toTypedArray())
+            permissionLauncher.launch(requiredPermissions.toTypedArray())
         } else {
             // Permissions already granted, check for background location
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
@@ -404,7 +410,7 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                backgroundLocationRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             }
         }
     }
