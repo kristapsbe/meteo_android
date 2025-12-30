@@ -21,10 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.launch
-import lv.kristapsbe.meteo_android.IconMapping
+import lv.kristapsbe.meteo_android.util.IconMapping
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.R
-import lv.kristapsbe.meteo_android.ui.utils.ObserveLifecycle
+import lv.kristapsbe.meteo_android.ui.util.ObserveLifecycle
 
 @Composable
 fun WarningInfo(

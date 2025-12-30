@@ -1,4 +1,4 @@
-package lv.kristapsbe.meteo_android
+package lv.kristapsbe.meteo_android.util
 
 import kotlinx.datetime.LocalDateTime
 import kotlin.math.PI

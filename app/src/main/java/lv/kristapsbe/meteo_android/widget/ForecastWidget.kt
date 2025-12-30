@@ -1,4 +1,4 @@
-package lv.kristapsbe.meteo_android
+package lv.kristapsbe.meteo_android.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -14,8 +14,16 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.serialization.json.Json
-import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
+import lv.kristapsbe.meteo_android.DisplayInfo
+import lv.kristapsbe.meteo_android.MainActivity
+import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_WORK_NAME
+import lv.kristapsbe.meteo_android.R
+import lv.kristapsbe.meteo_android.data.AppPreferences
+import lv.kristapsbe.meteo_android.data.CityForecastData
+import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader
+import lv.kristapsbe.meteo_android.data.Preference
+import lv.kristapsbe.meteo_android.worker.ForecastRefreshWorker
 import java.util.concurrent.TimeUnit
 
 data class WidgetForecastState(
@@ -46,7 +54,7 @@ class ForecastWidget : AppWidgetProvider() {
         val content = CityForecastDataDownloader.loadStringFromStorage(context, RESPONSE_FILE)
         if (content.isNotEmpty()) {
             val data = Json.decodeFromString<CityForecastData>(content)
-            DisplayInfo.updateWidget(context, DisplayInfo(data))
+            DisplayInfo.Companion.updateWidget(context, DisplayInfo(data))
         }
     }
 
@@ -62,7 +70,7 @@ class ForecastWidget : AppWidgetProvider() {
         val content = CityForecastDataDownloader.loadStringFromStorage(context, RESPONSE_FILE)
         if (content.isNotEmpty()) {
             val data = Json.decodeFromString<CityForecastData>(content)
-            DisplayInfo.updateWidget(context, DisplayInfo(data))
+            DisplayInfo.Companion.updateWidget(context, DisplayInfo(data))
         }
 
         val isStale = (currentTime - lastSuccess) > TimeUnit.MINUTES.toMillis(20)

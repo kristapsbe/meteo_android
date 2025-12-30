@@ -1,4 +1,6 @@
-package lv.kristapsbe.meteo_android
+package lv.kristapsbe.meteo_android.util
+
+import lv.kristapsbe.meteo_android.R
 
 /**
  * Holds all resource IDs for a specific weather condition variant (Day or Night)

@@ -25,9 +25,9 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
-import lv.kristapsbe.meteo_android.AppPreferences
+import lv.kristapsbe.meteo_android.data.AppPreferences
 import lv.kristapsbe.meteo_android.DisplayInfo
-import lv.kristapsbe.meteo_android.ForecastRefreshWorker
+import lv.kristapsbe.meteo_android.worker.ForecastRefreshWorker
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.IS_EXPEDITED_KEY
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_WORK_NAME

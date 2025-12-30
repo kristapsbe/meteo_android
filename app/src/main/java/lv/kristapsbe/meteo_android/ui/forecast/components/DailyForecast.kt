@@ -26,7 +26,7 @@ import kotlinx.datetime.LocalDateTime
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.R
-import lv.kristapsbe.meteo_android.ui.utils.ObserveLifecycle
+import lv.kristapsbe.meteo_android.ui.util.ObserveLifecycle
 
 
 @Composable

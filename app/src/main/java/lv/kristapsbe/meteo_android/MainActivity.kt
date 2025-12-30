@@ -35,11 +35,15 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
-import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.RESPONSE_FILE
-import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.data.AppPreferences
+import lv.kristapsbe.meteo_android.data.CityForecastData
+import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader.Companion.RESPONSE_FILE
+import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader.Companion.loadStringFromStorage
+import lv.kristapsbe.meteo_android.data.Preference
 import lv.kristapsbe.meteo_android.ui.forecast.AllForecasts
 import lv.kristapsbe.meteo_android.ui.privacy.PrivacyPolicy
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
+import lv.kristapsbe.meteo_android.worker.ForecastRefreshWorker
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.ln

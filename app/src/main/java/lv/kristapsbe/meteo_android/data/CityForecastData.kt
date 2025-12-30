@@ -1,4 +1,4 @@
-package lv.kristapsbe.meteo_android
+package lv.kristapsbe.meteo_android.data
 
 import android.app.Activity.MODE_PRIVATE
 import android.content.Context

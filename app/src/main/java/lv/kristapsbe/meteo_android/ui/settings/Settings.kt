@@ -24,14 +24,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
-import lv.kristapsbe.meteo_android.AppPreferences
+import lv.kristapsbe.meteo_android.data.AppPreferences
 import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.CELSIUS
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.nextLang
 import lv.kristapsbe.meteo_android.MainActivity.Companion.nextTemp
-import lv.kristapsbe.meteo_android.Preference
+import lv.kristapsbe.meteo_android.data.Preference
 import lv.kristapsbe.meteo_android.R
 
 

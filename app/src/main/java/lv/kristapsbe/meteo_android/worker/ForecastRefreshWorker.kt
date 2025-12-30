@@ -1,7 +1,6 @@
-package lv.kristapsbe.meteo_android
+package lv.kristapsbe.meteo_android.worker
 
 import android.Manifest
-import android.app.Activity.MODE_PRIVATE
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -16,15 +15,17 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
-import lv.kristapsbe.meteo_android.CityForecastDataDownloader.Companion.loadStringFromStorage
-import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
-import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LAT
-import lv.kristapsbe.meteo_android.MainActivity.Companion.DEFAULT_LON
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
-import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_LV
+import lv.kristapsbe.meteo_android.DisplayInfo
+import lv.kristapsbe.meteo_android.util.IconMapping
+import lv.kristapsbe.meteo_android.MainActivity
+import lv.kristapsbe.meteo_android.MyApplication
+import lv.kristapsbe.meteo_android.R
+import lv.kristapsbe.meteo_android.data.AppPreferences
+import lv.kristapsbe.meteo_android.data.CityForecastData
+import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader
+import lv.kristapsbe.meteo_android.data.Preference
 import java.util.Locale
 import kotlin.coroutines.resume
-
 
 class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -62,8 +63,8 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
         } else {
             val prefs = AppPreferences(context)
             return setOf(
-                prefs.getFloat(Preference.LAST_LAT, DEFAULT_LAT).toDouble(),
-                prefs.getFloat(Preference.LAST_LON, DEFAULT_LON).toDouble()
+                prefs.getFloat(Preference.LAST_LAT, MainActivity.Companion.DEFAULT_LAT).toDouble(),
+                prefs.getFloat(Preference.LAST_LON, MainActivity.Companion.DEFAULT_LON).toDouble()
             )
         }
     }
@@ -79,7 +80,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
         val enableExperimental = prefs.getBoolean(Preference.ENABLE_EXPERIMENTAL_FORECASTS)
         val cityForecast: CityForecastData?
         if (customLocationName != "") {
-            cityForecast = CityForecastDataDownloader.downloadDataCityName(
+            cityForecast = CityForecastDataDownloader.Companion.downloadDataCityName(
                 app,
                 locationName = customLocationName,
                 isAnimated = isAnimated,
@@ -87,7 +88,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
             )
         } else {
             val location = getLastLocation(app)
-            cityForecast = CityForecastDataDownloader.downloadDataLatLon(
+            cityForecast = CityForecastDataDownloader.Companion.downloadDataLatLon(
                 app,
                 lat = location.elementAt(0),
                 lon = location.elementAt(1),
@@ -108,20 +109,20 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
             val language: String = currentLocale.language
 
             val selectedLang =
-                prefs.getString(Preference.LANG, if (language == LANG_LV) LANG_LV else LANG_EN)
+                prefs.getString(Preference.LANG, if (language == MainActivity.Companion.LANG_LV) MainActivity.Companion.LANG_LV else MainActivity.Companion.LANG_EN)
 
             val displayInfo = DisplayInfo(cityForecast)
-            DisplayInfo.updateWidget(
+            DisplayInfo.Companion.updateWidget(
                 applicationContext,
                 displayInfo
             )
             var warnings: HashSet<Int> = hashSetOf()
-            val content = loadStringFromStorage(
+            val content = CityForecastDataDownloader.Companion.loadStringFromStorage(
                 applicationContext,
-                MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE
+                MainActivity.Companion.WEATHER_WARNINGS_NOTIFIED_FILE
             )
             if (content != "") {
-                warnings = Json.decodeFromString<HashSet<Int>>(content)
+                warnings = Json.Default.decodeFromString<HashSet<Int>>(content)
             }
 
             // TODO: the file's just going to keep growing - I need to clear it out somehow
@@ -129,21 +130,21 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
                 if (!w.ids.all { it in warnings }) {
                     warnings.addAll(w.ids)
                     showNotification(
-                        MainActivity.WEATHER_WARNINGS_CHANNEL_ID,
+                        MainActivity.Companion.WEATHER_WARNINGS_CHANNEL_ID,
                         w.ids[0],
                         w.type[selectedLang] ?: "",
                         w.getFullDescription(selectedLang),
                         R.drawable.baseline_warning_24,
-                        IconMapping.warningIconMapping[w.intensity]
+                        IconMapping.Companion.warningIconMapping[w.intensity]
                             ?: R.drawable.baseline_warning_yellow_24
                     )
                 }
             }
             applicationContext.openFileOutput(
-                MainActivity.WEATHER_WARNINGS_NOTIFIED_FILE,
-                MODE_PRIVATE
+                MainActivity.Companion.WEATHER_WARNINGS_NOTIFIED_FILE,
+                Context.MODE_PRIVATE
             ).use { fos ->
-                fos.write(Json.encodeToString(warnings).toByteArray())
+                fos.write(Json.Default.encodeToString(warnings).toByteArray())
             }
 
             val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
@@ -151,15 +152,15 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
                 val hasAuroraNotificationBeenDisplayed =
                     prefs.getBoolean(Preference.HAS_AURORA_NOTIFIED)
                 if (hasAuroraNotificationBeenDisplayed) {
-                    if (displayInfo.aurora.prob < AURORA_NOTIFICATION_THRESHOLD) {
+                    if (displayInfo.aurora.prob < MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD) {
                         prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, false)
                     }
-                } else if (displayInfo.aurora.prob >= AURORA_NOTIFICATION_THRESHOLD) {
+                } else if (displayInfo.aurora.prob >= MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD) {
                     prefs.setBoolean(Preference.HAS_AURORA_NOTIFIED, true)
                     // TODO: do I actually need to set a new id?
                     val auroraNotifId = prefs.getInt(Preference.AURORA_NOTIFICATION_ID)
                     showNotification(
-                        MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
+                        MainActivity.Companion.AURORA_NOTIFICATION_CHANNEL_ID,
                         auroraNotifId,
                         applicationContext.getString(R.string.notification_aurora_title),
                         "${applicationContext.getString(R.string.notification_aurora_description)} ${displayInfo.aurora.prob}%.",

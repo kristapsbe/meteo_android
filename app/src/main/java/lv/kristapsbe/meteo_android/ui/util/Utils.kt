@@ -1,4 +1,4 @@
-package lv.kristapsbe.meteo_android.ui.utils
+package lv.kristapsbe.meteo_android.ui.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
