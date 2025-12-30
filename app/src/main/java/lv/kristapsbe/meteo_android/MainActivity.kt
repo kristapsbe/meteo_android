@@ -26,10 +26,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.os.LocaleListCompat
 import androidx.work.Constraints
 import androidx.work.Data
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
@@ -39,6 +41,7 @@ import lv.kristapsbe.meteo_android.ui.forecast.AllForecasts
 import lv.kristapsbe.meteo_android.ui.privacy.PrivacyPolicy
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import kotlin.math.ln
 import kotlin.math.roundToInt
 
@@ -68,6 +71,7 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
         const val WEATHER_WARNINGS_NOTIFIED_FILE = "warnings_notified.json"
 
         const val SINGLE_WORK_NAME = "single_forecast_work"
+        const val PERIODIC_WORK_NAME = "periodic_forecast_work"
         const val WIDGET_WORK_NAME = "widget_forecast_work"
         const val IS_EXPEDITED_KEY = "is_expedited"
 
@@ -251,13 +255,19 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
         val app = applicationContext as MyApplication
         app.workerCallback = this
 
-        // Generic way to prune ALL work associated with the app.
-        // This ensures no legacy workers (under any name) can collide with the new unified worker.
-        WorkManager.getInstance(applicationContext).cancelAllWork()
-
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
+
+        // Schedule periodic refresh for weather warnings and background updates
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(1, TimeUnit.HOURS)
+            .setConstraints(constraints)
+            .build()
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            PERIODIC_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
+        )
 
         val lastVersionCode = prefs.getLong(Preference.LAST_LONG_VERSION_CODE)
         try {

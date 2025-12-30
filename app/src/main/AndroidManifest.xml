@@ -37,15 +37,6 @@
                 android:resource="@xml/forecast_widget_info" />
         </receiver>
 
-        <receiver
-            android:name="lv.kristapsbe.meteo_android.ForecastUpdateReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="LV.KRISTAPSBE.METEO.UPDATE" />
-            </intent-filter>
-        </receiver>
-
         <activity
             android:name="lv.kristapsbe.meteo_android.MainActivity"
             android:exported="true"

@@ -183,13 +183,6 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
         largeIcon: Int
     ) {
         val intent = Intent(applicationContext, MainActivity::class.java)
-        //if (notifChannel == MainActivity.WEATHER_WARNINGS_CHANNEL_ID) {
-        //    intent.putExtra(
-        //        "opened_from_notification",
-        //        id
-        //    )
-        //}
-
         val pendingIntent = PendingIntent.getActivity(
             applicationContext,
             0,
@@ -217,9 +210,5 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
             }
             notify(id, builder.build())
         }
-    }
-
-    companion object {
-        private const val NOTIFICATION_ID = 1001
     }
 }
