@@ -16,12 +16,12 @@ import androidx.work.WorkManager
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.MainActivity
-import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import lv.kristapsbe.meteo_android.MainActivity.Companion.WIDGET_WORK_NAME
 import lv.kristapsbe.meteo_android.R
 import lv.kristapsbe.meteo_android.data.AppPreferences
 import lv.kristapsbe.meteo_android.data.CityForecastData
 import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader
+import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import lv.kristapsbe.meteo_android.data.Preference
 import lv.kristapsbe.meteo_android.worker.ForecastRefreshWorker
 import java.util.concurrent.TimeUnit

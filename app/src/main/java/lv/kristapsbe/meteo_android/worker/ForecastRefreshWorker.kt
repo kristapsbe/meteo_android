@@ -16,7 +16,6 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.DisplayInfo
-import lv.kristapsbe.meteo_android.util.IconMapping
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MyApplication
 import lv.kristapsbe.meteo_android.R
@@ -24,6 +23,7 @@ import lv.kristapsbe.meteo_android.data.AppPreferences
 import lv.kristapsbe.meteo_android.data.CityForecastData
 import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader
 import lv.kristapsbe.meteo_android.data.Preference
+import lv.kristapsbe.meteo_android.util.IconMapping
 import java.util.Locale
 import kotlin.coroutines.resume
 
@@ -109,7 +109,10 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
             val language: String = currentLocale.language
 
             val selectedLang =
-                prefs.getString(Preference.LANG, if (language == MainActivity.Companion.LANG_LV) MainActivity.Companion.LANG_LV else MainActivity.Companion.LANG_EN)
+                prefs.getString(
+                    Preference.LANG,
+                    if (language == MainActivity.Companion.LANG_LV) MainActivity.Companion.LANG_LV else MainActivity.Companion.LANG_EN
+                )
 
             val displayInfo = DisplayInfo(cityForecast)
             DisplayInfo.Companion.updateWidget(

@@ -39,9 +39,9 @@ import lv.kristapsbe.meteo_android.HourlyForecast
 import lv.kristapsbe.meteo_android.MainActivity
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
 import lv.kristapsbe.meteo_android.R
+import lv.kristapsbe.meteo_android.ui.util.ObserveLifecycle
 import lv.kristapsbe.meteo_android.util.SunRiseSunSet
 import lv.kristapsbe.meteo_android.util.SunriseSunsetUtils.Companion.calculate
-import lv.kristapsbe.meteo_android.ui.util.ObserveLifecycle
 import java.time.ZoneId
 import java.time.ZonedDateTime
 

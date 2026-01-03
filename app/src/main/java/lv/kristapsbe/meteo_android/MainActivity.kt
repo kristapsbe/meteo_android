@@ -294,9 +294,10 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
             .build()
 
         // Schedule periodic refresh for weather warnings and background updates
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<ForecastRefreshWorker>(1, TimeUnit.HOURS)
-            .setConstraints(constraints)
-            .build()
+        val periodicWorkRequest =
+            PeriodicWorkRequestBuilder<ForecastRefreshWorker>(1, TimeUnit.HOURS)
+                .setConstraints(constraints)
+                .build()
         WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
             PERIODIC_WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,

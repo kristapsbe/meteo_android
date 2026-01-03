@@ -42,19 +42,19 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
-import lv.kristapsbe.meteo_android.data.AppPreferences
 import lv.kristapsbe.meteo_android.DisplayInfo
-import lv.kristapsbe.meteo_android.worker.ForecastRefreshWorker
 import lv.kristapsbe.meteo_android.HourlyForecast
 import lv.kristapsbe.meteo_android.MainActivity.Companion.AURORA_NOTIFICATION_THRESHOLD
 import lv.kristapsbe.meteo_android.MainActivity.Companion.IS_EXPEDITED_KEY
 import lv.kristapsbe.meteo_android.MainActivity.Companion.LANG_EN
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_WORK_NAME
 import lv.kristapsbe.meteo_android.MainActivity.Companion.convertFromCtoDisplayTemp
-import lv.kristapsbe.meteo_android.data.Preference
 import lv.kristapsbe.meteo_android.R
+import lv.kristapsbe.meteo_android.data.AppPreferences
+import lv.kristapsbe.meteo_android.data.Preference
 import lv.kristapsbe.meteo_android.util.SunRiseSunSet
 import lv.kristapsbe.meteo_android.util.SunriseSunsetUtils.Companion.calculate
+import lv.kristapsbe.meteo_android.worker.ForecastRefreshWorker
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
