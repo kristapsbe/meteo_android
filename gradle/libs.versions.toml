@@ -1,5 +1,5 @@
 [versions]
-agp = "9.1.1"
+agp = "9.2.0"
 kotlin = "2.3.20"
 coreKtx = "1.18.0"
 junit = "4.13.2"
@@ -9,12 +9,12 @@ kotlinxDatetime = "0.7.1"
 kotlinxSerializationJson = "1.11.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
-composeBom = "2026.03.01"
+composeBom = "2026.04.01"
 lifecycleRuntimeKtxVersion = "2.10.0"
 lottieCompose = "6.7.1"
 playServicesLocation = "21.3.0"
 workRuntimeKtx = "2.11.2"
-runtime = "1.10.6"
+runtime = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
