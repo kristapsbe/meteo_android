@@ -9,14 +9,14 @@ plugins {
 
 android {
     namespace = "lv.kristapsbe.meteo_android"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "lv.kristapsbe.meteo_android"
         minSdk = 28
-        targetSdk = 36
-        versionCode = 164
-        versionName = "1.0.16"
+        targetSdk = 37
+        versionCode = 165
+        versionName = "1.0.17"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -27,6 +27,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
