@@ -23,6 +23,7 @@ enum class Preference {
     AURORA_NOTIFICATION_ID,
     LAST_LONG_VERSION_CODE,
     LAST_SUCCESSFUL_UPDATE_TIME,
+    PERIODIC_WORK_VERSION_CODE,
 }
 
 class AppPreferences(context: Context) {

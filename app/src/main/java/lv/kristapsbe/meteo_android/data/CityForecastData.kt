@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.net.HttpURLConnection
 import java.net.URL
 
 
@@ -40,6 +41,9 @@ data class CityForecastData(
     val last_downloaded_no_skip: String
 )
 
+/** [isFresh] is false when [forecast] came from the on-disk cache because the download failed. */
+data class DownloadResult(val forecast: CityForecastData?, val isFresh: Boolean)
+
 
 class CityForecastDataDownloader {
     companion object {
@@ -48,17 +52,33 @@ class CityForecastDataDownloader {
         //private const val BASE_URL = "http://10.0.2.2:8000/api/v1/forecast/cities"
         private const val BASE_URL = "https://meteo.kristapsbe.lv/api/v1/forecast/cities"
 
+        private const val CONNECT_TIMEOUT_MS = 15_000
+        private const val READ_TIMEOUT_MS = 30_000
+
+        private fun readUrl(urlString: String): String {
+            val connection = URL(urlString).openConnection() as HttpURLConnection
+            connection.connectTimeout = CONNECT_TIMEOUT_MS
+            connection.readTimeout = READ_TIMEOUT_MS
+            try {
+                return connection.inputStream.bufferedReader().use { it.readText() }
+            } finally {
+                connection.disconnect()
+            }
+        }
+
         private fun downloadData(
             ctx: Context,
             urlString: String,
             doDL: Boolean
-        ): CityForecastData? {
+        ): DownloadResult {
             var cityForecast: CityForecastData? = null
+            var isFresh = false
             if (doDL) {
                 try {
-                    val response = URL(urlString).readText()
+                    val response = readUrl(urlString)
                     cityForecast = Json.decodeFromString<CityForecastData>(response)
                     if (cityForecast.city != "") {
+                        isFresh = true
                         ctx.openFileOutput(RESPONSE_FILE, MODE_PRIVATE).use { fos ->
                             fos.write(response.toByteArray())
                         }
@@ -76,7 +96,7 @@ class CityForecastDataDownloader {
                     Log.e("ERROR", "Failed to load forecast data from storage: $e")
                 }
             }
-            return cityForecast
+            return DownloadResult(cityForecast, isFresh)
         }
 
         fun downloadDataLatLon(
@@ -86,7 +106,7 @@ class CityForecastDataDownloader {
             doDL: Boolean = true,
             isAnimated: Boolean = false,
             enableExperimental: Boolean = false
-        ): CityForecastData? {
+        ): DownloadResult {
             return downloadData(
                 ctx,
                 "$BASE_URL?lat=$lat&lon=$lon&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true&is_animated=$isAnimated&enable_experimental=$enableExperimental",
@@ -100,7 +120,7 @@ class CityForecastDataDownloader {
             doDL: Boolean = true,
             isAnimated: Boolean = false,
             enableExperimental: Boolean = false
-        ): CityForecastData? {
+        ): DownloadResult {
             return downloadData(
                 ctx,
                 "$BASE_URL/name?city_name=$locationName&add_last_no_skip=true&use_simple_warnings=true&add_city_coords=true&is_animated=$isAnimated&enable_experimental=$enableExperimental",

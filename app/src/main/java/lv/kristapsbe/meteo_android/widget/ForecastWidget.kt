@@ -11,7 +11,7 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import kotlinx.serialization.json.Json
 import lv.kristapsbe.meteo_android.DisplayInfo
@@ -23,7 +23,7 @@ import lv.kristapsbe.meteo_android.data.CityForecastData
 import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader
 import lv.kristapsbe.meteo_android.data.CityForecastDataDownloader.Companion.RESPONSE_FILE
 import lv.kristapsbe.meteo_android.data.Preference
-import lv.kristapsbe.meteo_android.worker.ForecastRefreshWorker
+import lv.kristapsbe.meteo_android.worker.ForecastWorkScheduler
 import java.util.concurrent.TimeUnit
 
 data class WidgetForecastState(
@@ -45,6 +45,9 @@ data class WidgetForecastState(
 )
 
 class ForecastWidget : AppWidgetProvider() {
+    private fun refreshRequest(): OneTimeWorkRequest =
+        ForecastWorkScheduler.refreshRequest(expedited = false, requireNetwork = true)
+
     override fun onAppWidgetOptionsChanged(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -77,18 +80,16 @@ class ForecastWidget : AppWidgetProvider() {
         val isRecentlyAttempted = (currentTime - lastSuccess) < TimeUnit.MINUTES.toMillis(1)
 
         if (isStale && !isRecentlyAttempted) {
-            val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
             WorkManager.getInstance(context)
-                .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, workRequest)
+                .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, refreshRequest())
         } else {
             Log.i("WIDGET", "Widget update skipped")
         }
     }
 
     override fun onEnabled(context: Context) {
-        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>().build()
         WorkManager.getInstance(context)
-            .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, workRequest)
+            .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, refreshRequest())
     }
 
     override fun onDisabled(context: Context) {}

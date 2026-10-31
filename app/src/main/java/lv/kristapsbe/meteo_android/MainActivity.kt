@@ -24,14 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.os.LocaleListCompat
-import androidx.work.Constraints
-import androidx.work.Data
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
@@ -43,9 +36,8 @@ import lv.kristapsbe.meteo_android.data.Preference
 import lv.kristapsbe.meteo_android.ui.forecast.AllForecasts
 import lv.kristapsbe.meteo_android.ui.privacy.PrivacyPolicy
 import lv.kristapsbe.meteo_android.ui.theme.Meteo_androidTheme
-import lv.kristapsbe.meteo_android.worker.ForecastRefreshWorker
+import lv.kristapsbe.meteo_android.worker.ForecastWorkScheduler
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 import kotlin.math.ln
 import kotlin.math.roundToInt
 
@@ -56,6 +48,45 @@ interface WorkerCallback {
 
 class MyApplication : Application() {
     var workerCallback: WorkerCallback? = null
+
+    override fun onCreate() {
+        super.onCreate()
+
+        createNotificationChannels()
+
+        // Done here rather than in MainActivity since people who rely on notifications may never
+        // open the app after an update - any job or widget update starting the process is enough.
+        val prefs = AppPreferences(this)
+        if (
+            prefs.getBoolean(Preference.PRIVACY_POLICY_ACCEPTED) &&
+            prefs.getBoolean(Preference.LOCATION_DISCLOSURE_ACCEPTED)
+        ) {
+            ForecastWorkScheduler.ensurePeriodicWork(this)
+        }
+    }
+
+    private fun createNotificationChannels() {
+        val weatherWarningsChannel = NotificationChannel(
+            MainActivity.WEATHER_WARNINGS_CHANNEL_ID,
+            MainActivity.WEATHER_WARNINGS_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = MainActivity.WEATHER_WARNINGS_CHANNEL_DESCRIPTION
+        }
+
+        val auroraNotificationChannel = NotificationChannel(
+            MainActivity.AURORA_NOTIFICATION_CHANNEL_ID,
+            MainActivity.AURORA_NOTIFICATION_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = MainActivity.AURORA_NOTIFICATION_CHANNEL_DESCRIPTION
+        }
+
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(weatherWarningsChannel)
+        notificationManager.createNotificationChannel(auroraNotificationChannel)
+    }
 }
 
 class MainActivity : AppCompatActivity(), WorkerCallback {
@@ -77,7 +108,6 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
         const val SINGLE_WORK_NAME = "single_forecast_work"
         const val PERIODIC_WORK_NAME = "periodic_forecast_work"
         const val WIDGET_WORK_NAME = "widget_forecast_work"
-        const val IS_EXPEDITED_KEY = "is_expedited"
 
         const val LANG_EN = "en"
         const val LANG_LV = "lv"
@@ -284,25 +314,12 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
         setupWorkManager()
         setupBackPressHandler()
         loadInitialData()
-        setupNotificationChannels()
         checkAndRequestPermissions()
     }
 
     private fun setupWorkManager() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
         // Schedule periodic refresh for weather warnings and background updates
-        val periodicWorkRequest =
-            PeriodicWorkRequestBuilder<ForecastRefreshWorker>(1, TimeUnit.HOURS)
-                .setConstraints(constraints)
-                .build()
-        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
-            PERIODIC_WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            periodicWorkRequest
-        )
+        ForecastWorkScheduler.ensurePeriodicWork(applicationContext)
 
         val lastVersionCode = prefs.getLong(Preference.LAST_LONG_VERSION_CODE)
         try {
@@ -318,18 +335,10 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
     }
 
     private fun triggerRefresh() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-        val workRequest = OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .setConstraints(constraints)
-            .setInputData(Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build())
-            .build()
         WorkManager.getInstance(applicationContext).enqueueUniqueWork(
             SINGLE_WORK_NAME,
             ExistingWorkPolicy.REPLACE,
-            workRequest
+            ForecastWorkScheduler.refreshRequest(requireNetwork = true)
         )
     }
 
@@ -357,29 +366,6 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
         } else {
             triggerRefresh()
         }
-    }
-
-    private fun setupNotificationChannels() {
-        val weatherWarningsChannel = NotificationChannel(
-            WEATHER_WARNINGS_CHANNEL_ID,
-            WEATHER_WARNINGS_CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            description = WEATHER_WARNINGS_CHANNEL_DESCRIPTION
-        }
-
-        val auroraNotificationChannel = NotificationChannel(
-            AURORA_NOTIFICATION_CHANNEL_ID,
-            AURORA_NOTIFICATION_CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            description = AURORA_NOTIFICATION_CHANNEL_DESCRIPTION
-        }
-
-        val notificationManager: NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(weatherWarningsChannel)
-        notificationManager.createNotificationChannel(auroraNotificationChannel)
     }
 
     private fun checkAndRequestPermissions() {

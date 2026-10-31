@@ -20,14 +20,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import lv.kristapsbe.meteo_android.DisplayInfo
 import lv.kristapsbe.meteo_android.MainActivity
-import lv.kristapsbe.meteo_android.MainActivity.Companion.IS_EXPEDITED_KEY
 import lv.kristapsbe.meteo_android.MainActivity.Companion.SINGLE_WORK_NAME
 import lv.kristapsbe.meteo_android.R
 import lv.kristapsbe.meteo_android.data.AppPreferences
@@ -37,7 +33,7 @@ import lv.kristapsbe.meteo_android.ui.forecast.components.HourlyInfo
 import lv.kristapsbe.meteo_android.ui.forecast.components.WarningInfo
 import lv.kristapsbe.meteo_android.ui.metadata.MetadataInfo
 import lv.kristapsbe.meteo_android.ui.settings.Settings
-import lv.kristapsbe.meteo_android.worker.ForecastRefreshWorker
+import lv.kristapsbe.meteo_android.worker.ForecastWorkScheduler
 
 
 @Composable
@@ -64,17 +60,10 @@ fun AllForecasts(
                     mainActivity.wasLastScrollNegative = true
                     if (!isLoading.value) {
                         isLoading.value = true
-                        val workRequest =
-                            OneTimeWorkRequestBuilder<ForecastRefreshWorker>()
-                                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                                .setInputData(
-                                    Data.Builder().putBoolean(IS_EXPEDITED_KEY, true).build()
-                                )
-                                .build()
                         WorkManager.getInstance(mainActivity).enqueueUniqueWork(
                             SINGLE_WORK_NAME,
                             ExistingWorkPolicy.REPLACE,
-                            workRequest
+                            ForecastWorkScheduler.refreshRequest()
                         )
                     }
                 }
