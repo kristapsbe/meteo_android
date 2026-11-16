@@ -51,8 +51,6 @@ import lv.kristapsbe.meteo_android.data.Preference
 import lv.kristapsbe.meteo_android.util.SunRiseSunSet
 import lv.kristapsbe.meteo_android.util.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.worker.ForecastWorkScheduler
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 
 @Composable
@@ -77,12 +75,10 @@ fun CurrentInfo(
         }
     }
 
-    val zoneId = ZoneId.systemDefault()
     val sunTimes: SunRiseSunSet = calculate(
         displayInfo.value.getTodayForecast().date,
         displayInfo.value.lat,
-        displayInfo.value.lon,
-        ZonedDateTime.now(zoneId).offset.totalSeconds / 3600 // TODO: lock timezone (?)
+        displayInfo.value.lon
     )
 
     Column {

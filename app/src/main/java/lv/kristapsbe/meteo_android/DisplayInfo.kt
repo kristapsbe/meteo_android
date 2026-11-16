@@ -23,8 +23,6 @@ import lv.kristapsbe.meteo_android.util.SunriseSunsetUtils.Companion.calculate
 import lv.kristapsbe.meteo_android.widget.ForecastWidget
 import lv.kristapsbe.meteo_android.widget.WidgetForecastState
 import lv.kristapsbe.meteo_android.widget.updateAppWidget
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -158,12 +156,10 @@ class DisplayInfo() {
             }"
 
             val iconImage = if (doFixIconDayNight) {
-                val zoneId = ZoneId.systemDefault()
                 val sunTimes: SunRiseSunSet = calculate(
                     today.date,
                     displayInfo.lat,
-                    displayInfo.lon,
-                    ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
+                    displayInfo.lon
                 )
                 if (useAnimatedIcons) today.pictogram.getAlternatePictogram(today.date, sunTimes)
                 else today.pictogram.getPictogram(today.date, sunTimes)

@@ -1,12 +1,15 @@
 package lv.kristapsbe.meteo_android.util
 
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.number
+import java.time.ZoneId
 import kotlin.math.PI
 import kotlin.math.acos
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.tan
 
@@ -30,7 +33,7 @@ class SunriseSunsetUtils {
 
         private fun calculateJulianDay(t: LocalDateTime): Double {
             var year = t.year
-            var month = t.month.ordinal
+            var month = t.month.number // 1..12 (Month.ordinal is 0-based)
             if (month <= 2) {
                 year -= 1
                 month += 12
@@ -143,24 +146,35 @@ class SunriseSunsetUtils {
             julianDay: Double,
             lat: Double,
             lon: Double,
-            tz: Int
+            offsetMinutes: Double
         ): Double {
             val timeUTC = calcSunriseSetUTC(rise, julianDay, lat, lon)
             val newTimeUTC = calcSunriseSetUTC(rise, julianDay + timeUTC / 1440.0, lat, lon)
 
-            return newTimeUTC + (tz * 60.0)
+            return newTimeUTC + offsetMinutes
         }
 
-        fun calculate(t: LocalDateTime, lat: Double, lon: Double, tz: Int): SunRiseSunSet {
+        fun calculate(
+            t: LocalDateTime,
+            lat: Double,
+            lon: Double,
+            zoneId: ZoneId = ZoneId.systemDefault()
+        ): SunRiseSunSet {
+            // Use the UTC offset in effect on the requested date (not today's), so days on the
+            // other side of a DST change are shifted correctly.
+            val offsetMinutes = zoneId.rules.getOffset(
+                java.time.LocalDateTime.of(t.year, t.month.number, t.day, 12, 0)
+            ).totalSeconds / 60.0
+
             val julianDay = calculateJulianDay(t)
-            val rise = calcSunriseSet(true, julianDay, lat, lon, tz)
-            val set = calcSunriseSet(false, julianDay, lat, lon, tz)
+            val rise = calcSunriseSet(true, julianDay, lat, lon, offsetMinutes).roundToInt()
+            val set = calcSunriseSet(false, julianDay, lat, lon, offsetMinutes).roundToInt()
 
             return SunRiseSunSet(
-                floor(rise / 60).toInt(),
-                rise.mod(60.0).toInt().toString().padStart(2, '0'),
-                floor(set / 60).toInt(),
-                set.mod(60.0).toInt().toString().padStart(2, '0'),
+                rise.floorDiv(60),
+                rise.mod(60).toString().padStart(2, '0'),
+                set.floorDiv(60),
+                set.mod(60).toString().padStart(2, '0'),
             )
         }
     }

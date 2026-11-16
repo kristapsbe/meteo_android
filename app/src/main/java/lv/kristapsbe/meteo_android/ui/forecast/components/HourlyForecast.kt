@@ -42,8 +42,6 @@ import lv.kristapsbe.meteo_android.R
 import lv.kristapsbe.meteo_android.ui.util.ObserveLifecycle
 import lv.kristapsbe.meteo_android.util.SunRiseSunSet
 import lv.kristapsbe.meteo_android.util.SunriseSunsetUtils.Companion.calculate
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 
 @Composable
@@ -117,14 +115,11 @@ fun HourlyInfo(
                     .horizontalScroll(scrollState)
             ) {
                 var prevHDay: String? = null
-                val zoneId = ZoneId.systemDefault()
-                val tz = ZonedDateTime.now(zoneId).offset.totalSeconds / 3600
 
                 var sunTimes: SunRiseSunSet = calculate(
                     mainActivity.displayInfo.value.getTodayForecast().date,
                     mainActivity.displayInfo.value.lat,
-                    mainActivity.displayInfo.value.lon,
-                    tz // TODO: lock timezone (?)
+                    mainActivity.displayInfo.value.lon
                 )
                 var prevH: Int? = null
 
@@ -143,8 +138,7 @@ fun HourlyInfo(
                         sunTimes = calculate(
                             h.date,
                             mainActivity.displayInfo.value.lat,
-                            mainActivity.displayInfo.value.lon,
-                            tz // TODO: lock timezone (?)
+                            mainActivity.displayInfo.value.lon
                         )
                     }
                     prevHDay = h.getDayOfWeek()
