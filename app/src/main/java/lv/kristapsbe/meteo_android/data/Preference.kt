@@ -24,6 +24,7 @@ enum class Preference {
     LAST_LONG_VERSION_CODE,
     LAST_SUCCESSFUL_UPDATE_TIME,
     PERIODIC_WORK_VERSION_CODE,
+    LAST_WIDGET_REFRESH_ATTEMPT_TIME,
 }
 
 class AppPreferences(context: Context) {

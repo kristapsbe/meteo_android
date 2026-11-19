@@ -138,6 +138,7 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
             )
 
         val warnings = loadNotifiedWarnings()
+        var warningsChanged = false
 
         // TODO: the file's just going to keep growing - I need to clear it out somehow
         for (w in displayInfo.warnings) {
@@ -151,12 +152,15 @@ class ForecastRefreshWorker(context: Context, workerParams: WorkerParameters) :
                     IconMapping.Companion.warningIconMapping[w.intensity]
                         ?: R.drawable.baseline_warning_yellow_24
                 )
-                if (wasPosted) {
-                    warnings.addAll(w.ids)
+                if (wasPosted && warnings.addAll(w.ids)) {
+                    warningsChanged = true
                 }
             }
         }
-        saveNotifiedWarnings(warnings)
+        // Skip the hourly rewrite when nothing new was notified
+        if (warningsChanged) {
+            saveNotifiedWarnings(warnings)
+        }
 
         val doShowAurora = prefs.getBoolean(Preference.DO_SHOW_AURORA, true)
         if (doShowAurora) {

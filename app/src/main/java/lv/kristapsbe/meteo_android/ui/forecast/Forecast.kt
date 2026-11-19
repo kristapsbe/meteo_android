@@ -56,7 +56,14 @@ fun AllForecasts(
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (available.y > 0 && !mainActivity.wasLastScrollNegative) {
+                // Pre-scroll sees the whole drag before the column consumes it, so without the
+                // top-of-page check every scroll back up would trigger a download.
+                if (
+                    available.y > 0 &&
+                    scrollState.value == 0 &&
+                    source == NestedScrollSource.UserInput &&
+                    !mainActivity.wasLastScrollNegative
+                ) {
                     mainActivity.wasLastScrollNegative = true
                     if (!isLoading.value) {
                         isLoading.value = true

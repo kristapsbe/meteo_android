@@ -405,7 +405,8 @@ class MainActivity : AppCompatActivity(), WorkerCallback {
     override fun onWorkerResult(cityForecast: CityForecastData?) {
         if (cityForecast != null) {
             displayInfo.value = DisplayInfo(cityForecast)
-            isLoading.value = false
         }
+        // Reset even on failure, otherwise pull-to-refresh stays disabled for the session
+        isLoading.value = false
     }
 }

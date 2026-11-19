@@ -32,7 +32,6 @@ import androidx.lifecycle.Lifecycle
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import kotlinx.coroutines.launch
 import lv.kristapsbe.meteo_android.HourlyForecast
@@ -305,14 +304,12 @@ fun ShowIcon(
 ) {
     if (useAnimatedIcons.value) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(lottieIcon))
-        val progress by animateLottieCompositionAsState(
-            composition,
-            iterations = LottieConstants.IterateForever
-        )
+        // This overload reads the progress while drawing, so each frame redraws the icon
+        // instead of recomposing it
         LottieAnimation(
             composition = composition,
-            progress = progress,
-            modifier = modifier
+            modifier = modifier,
+            iterations = LottieConstants.IterateForever
         )
     } else {
         Image(

@@ -76,10 +76,15 @@ class ForecastWidget : AppWidgetProvider() {
             DisplayInfo.Companion.updateWidget(context, DisplayInfo(data))
         }
 
-        val isStale = (currentTime - lastSuccess) > TimeUnit.MINUTES.toMillis(20)
-        val isRecentlyAttempted = (currentTime - lastSuccess) < TimeUnit.MINUTES.toMillis(1)
+        // The periodic job refreshes hourly, so the widget only downloads when that has fallen behind
+        val lastAttempt = prefs.getLong(Preference.LAST_WIDGET_REFRESH_ATTEMPT_TIME, 0L)
+        val isStale = (currentTime - lastSuccess) > TimeUnit.HOURS.toMillis(2)
+        // A range check, so a clock moved backwards can't block refreshes until it catches up
+        val isRecentlyAttempted =
+            (currentTime - lastAttempt) in 0 until TimeUnit.HOURS.toMillis(1)
 
         if (isStale && !isRecentlyAttempted) {
+            prefs.setLong(Preference.LAST_WIDGET_REFRESH_ATTEMPT_TIME, currentTime)
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(WIDGET_WORK_NAME, ExistingWorkPolicy.KEEP, refreshRequest())
         } else {
